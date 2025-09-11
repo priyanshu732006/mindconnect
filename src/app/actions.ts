@@ -65,9 +65,9 @@ export async function sendSmsAction(to: string, body: string) {
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const from = process.env.TWILIO_PHONE_NUMBER;
 
-    if (!accountSid || !authToken || !from) {
-        console.error('Twilio credentials are not configured in .env file');
-        return { success: false, error: 'Twilio is not configured.' };
+    if (!accountSid || !authToken || !from || !accountSid.startsWith('AC')) {
+        console.error('Twilio credentials are not configured correctly in .env file.');
+        return { success: false, error: 'Twilio is not configured. Please check your environment variables.' };
     }
 
     const client = twilio(accountSid, authToken);
