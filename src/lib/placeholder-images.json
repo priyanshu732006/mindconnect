@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "meditation-video",
+      "description": "Expert-led video on mindfulness techniques.",
+      "imageUrl": "https://picsum.photos/seed/101/600/400",
+      "imageHint": "woman meditating"
+    },
+    {
+      "id": "headphones-audio",
+      "description": "Guided meditation audio for relaxation.",
+      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageHint": "headphones audio"
+    },
+    {
+      "id": "open-book-guide",
+      "description": "A comprehensive guide to mental wellness.",
+      "imageUrl": "https://picsum.photos/seed/103/600/400",
+      "imageHint": "book library"
+    },
+    {
+      "id": "brain-path-cbt",
+      "description": "Introduction to Cognitive Behavioral Therapy (CBT).",
+      "imageUrl": "https://picsum.photos/seed/104/600/400",
+      "imageHint": "brain maze"
+    },
+    {
+      "id": "calm-water-anxiety",
+      "description": "Strategies for managing anxiety.",
+      "imageUrl": "https://picsum.photos/seed/105/600/400",
+      "imageHint": "calm lake"
+    },
+    {
+      "id": "sunrise-hope-depression",
+      "description": "Coping with depression and finding hope.",
+      "imageUrl": "https://picsum.photos/seed/106/600/400",
+      "imageHint": "sunrise mountains"
+    }
+  ]
 }
