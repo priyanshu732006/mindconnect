@@ -3,7 +3,7 @@
 
 import { analyzeWellbeing } from '@/app/actions';
 import type { Message, WellbeingData } from '@/lib/types';
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 type AppContextType = {
   messages: Message[];
@@ -41,6 +41,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsAnalyzing(false);
     }
   };
+
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'assistant') {
+      analyzeConversation();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
 
   const value = {
     messages,

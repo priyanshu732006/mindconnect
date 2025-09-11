@@ -20,16 +20,13 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import Link from 'next/link';
+import { Skeleton } from '../ui/skeleton';
 
 export function WellbeingScore() {
-  const { wellbeingData, messages, analyzeConversation, isAnalyzing } =
+  const { wellbeingData, messages, isAnalyzing } =
     useApp();
 
-  const handleAnalysis = () => {
-    analyzeConversation();
-  };
-
-  if (!wellbeingData && messages.length === 0) {
+  if (messages.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center text-center p-8">
         <CardHeader>
@@ -66,13 +63,18 @@ export function WellbeingScore() {
         <CardTitle>Your Well-being Score</CardTitle>
         <CardDescription>
           {wellbeingData
-            ? 'Based on your recent conversation.'
-            : 'Analyze your conversation to see your score.'}
+            ? 'Based on your recent conversation, updated in real-time.'
+            : 'Start a conversation to see your score.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="h-64 w-full">
-          {wellbeingData ? (
+          {isAnalyzing && !wellbeingData ? (
+             <div className="flex h-full flex-col items-center justify-center text-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="mt-4 text-muted-foreground">Analyzing your conversation...</p>
+             </div>
+          ) : (
             <ResponsiveContainer width="100%" height="100%">
               <RadialBarChart
                 innerRadius="80%"
@@ -103,7 +105,8 @@ export function WellbeingScore() {
                     dominantBaseline="middle"
                     className="fill-foreground text-5xl font-bold"
                   >
-                    {score}
+                    {isAnalyzing && <Loader2 className="inline-block h-12 w-12 animate-spin" />}
+                    {!isAnalyzing && score}
                   </text>
                   <text
                     x="50%"
@@ -117,41 +120,26 @@ export function WellbeingScore() {
                 </g>
               </RadialBarChart>
             </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center text-center">
-              <p className="text-muted-foreground mb-4">
-                You have an unanalyzed conversation.
-              </p>
-              <Button
-                onClick={handleAnalysis}
-                disabled={isAnalyzing || messages.length === 0}
-              >
-                {isAnalyzing && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Analyze Conversation
-              </Button>
-            </div>
           )}
         </div>
         {wellbeingData && (
           <div className="mt-4 text-center">
             <h4 className="font-semibold">Summary</h4>
-            <p className="text-sm text-muted-foreground">
-              {wellbeingData.summary}
-            </p>
+             {isAnalyzing && !wellbeingData?.summary ? (
+                <div className="space-y-2 mt-2">
+                    <Skeleton className="h-4 w-3/4 mx-auto" />
+                    <Skeleton className="h-4 w-1/2 mx-auto" />
+                </div>
+             ) : (
+                <p className="text-sm text-muted-foreground">
+                {wellbeingData.summary}
+                </p>
+             )}
           </div>
         )}
       </CardContent>
-      <CardFooter className="justify-center">
-        <Button
-          onClick={handleAnalysis}
-          disabled={isAnalyzing || messages.length === 0}
-          variant="outline"
-        >
-          {isAnalyzing && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Re-analyze Conversation
-        </Button>
+       <CardFooter className="justify-center text-xs text-muted-foreground">
+          <p>Your score updates automatically after each AI response.</p>
       </CardFooter>
     </Card>
   );
