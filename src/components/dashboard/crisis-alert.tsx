@@ -2,19 +2,29 @@
 'use client';
 import { useApp } from '@/context/app-provider';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Phone } from 'lucide-react';
 import { Button } from '../ui/button';
 import { getWellbeingCategory } from '@/lib/utils';
 import Link from 'next/link';
+import { useToast } from '@/hooks/use-toast';
 
 export function CrisisAlert() {
-  const { wellbeingData } = useApp();
+  const { wellbeingData, trustedContacts } = useApp();
+  const { toast } = useToast();
 
   if (!wellbeingData) return null;
 
   const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
 
   if (name !== 'Crisis') return null;
+
+  const handleAlert = () => {
+    const contactNames = trustedContacts.map(c => c.name).join(', ');
+    toast({
+        title: 'Alerts Sent',
+        description: `Your trusted contacts (${contactNames}) and the on-campus counselor have been notified.`
+    })
+  }
 
   return (
     <Alert variant="destructive" className="bg-destructive/10">
@@ -29,7 +39,10 @@ export function CrisisAlert() {
           <Button asChild variant="destructive">
             <Link href="/student/booking">Book with a Counselor</Link>
           </Button>
-          <Button variant="outline">Contact Trusted Contacts</Button>
+          <Button variant="outline" onClick={handleAlert}>
+            <Phone className="mr-2 h-4 w-4" />
+            Contact Trusted Contacts
+          </Button>
         </div>
       </AlertDescription>
     </Alert>
