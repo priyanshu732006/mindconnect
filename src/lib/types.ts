@@ -15,4 +15,5 @@ export type TrustedContact = {
     name: string;
     relation: string;
     avatar: string;
+    phone: string;
 };

@@ -6,8 +6,8 @@ import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 
 const initialContacts: TrustedContact[] = [
-    { id: '1', name: 'Jane Doe', relation: 'Mother', avatar: 'https://picsum.photos/seed/contact1/100/100' },
-    { id: '2', name: 'John Smith', relation: 'Friend', avatar: 'https://picsum.photos/seed/contact2/100/100' },
+    { id: '1', name: 'Jane Doe', relation: 'Mother', avatar: 'https://picsum.photos/seed/contact1/100/100', phone: '123-456-7890' },
+    { id: '2', name: 'John Smith', relation: 'Friend', avatar: 'https://picsum.photos/seed/contact2/100/100', phone: '098-765-4321' },
 ];
 
 

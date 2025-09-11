@@ -29,6 +29,7 @@ import { useEffect } from 'react';
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   relation: z.string().min(1, 'Relation is required'),
+  phone: z.string().min(1, 'Phone number is required'),
 });
 
 type AddEditContactDialogProps = {
@@ -48,6 +49,7 @@ export function AddEditContactDialog({
     defaultValues: {
       name: '',
       relation: '',
+      phone: '',
     },
   });
 
@@ -55,7 +57,7 @@ export function AddEditContactDialog({
     if (contact) {
       form.reset(contact);
     } else {
-      form.reset({ name: '', relation: '' });
+      form.reset({ name: '', relation: '', phone: '' });
     }
   }, [contact, form, isOpen]);
 
@@ -74,7 +76,7 @@ export function AddEditContactDialog({
         <DialogHeader>
           <DialogTitle>{contact ? 'Edit' : 'Add'} Trusted Contact</DialogTitle>
           <DialogDescription>
-            Enter the details of the person you trust.
+            Enter the details of the person you trust. This person will be contacted in a crisis.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -86,7 +88,7 @@ export function AddEditContactDialog({
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Jane Doe" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,7 +101,20 @@ export function AddEditContactDialog({
                 <FormItem>
                   <FormLabel>Relation</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input placeholder="Mother" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="123-456-7890" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
