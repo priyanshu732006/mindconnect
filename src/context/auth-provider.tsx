@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { onAuthStateChanged, User, Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { onAuthStateChanged, User, Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { Loader2 } from 'lucide-react';
 
@@ -10,7 +10,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   login: typeof signInWithEmailAndPassword;
-  register: typeof createUserWithEmailAndPassword;
+  register: (email: string, password: string, fullName: string) => Promise<void>;
   logout: typeof signOut;
 };
 
@@ -28,12 +28,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, []);
+
+  const register = async (email: string, password: string, fullName: string) => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    if (userCredential.user) {
+      await updateProfile(userCredential.user, {
+        displayName: fullName,
+      });
+    }
+    // Re-trigger onAuthStateChanged to get updated user info
+    setUser({...userCredential.user, displayName: fullName });
+  };
   
   const value = { 
     user, 
     loading,
     login: (email, password) => signInWithEmailAndPassword(auth, email, password),
-    register: (email, password) => createUserWithEmailAndPassword(auth, email, password),
+    register,
     logout: () => signOut(auth),
   };
 

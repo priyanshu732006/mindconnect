@@ -41,7 +41,7 @@ export default function RegisterPage() {
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
       try {
-        await register(values.email, values.password);
+        await register(values.email, values.password, values.fullName);
         toast({
             title: "Registration Successful",
             description: "You can now log in with your new account.",
