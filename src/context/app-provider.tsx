@@ -37,7 +37,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>(initialContacts);
   const { toast } = useToast();
-  const [lastNotifiedScore, setLastNotifiedScore] = useState<number | null>(null);
   const { user } = useAuth();
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
@@ -127,14 +126,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [user, toast]);
 
   useEffect(() => {
-    if (wellbeingData && wellbeingData.wellbeingScore !== lastNotifiedScore) {
+    if (wellbeingData) {
       const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
       if (name === 'Crisis') {
-        setLastNotifiedScore(wellbeingData.wellbeingScore);
         triggerCrisisAlerts(trustedContacts);
       }
     }
-  }, [wellbeingData, lastNotifiedScore, triggerCrisisAlerts, trustedContacts]);
+  }, [wellbeingData, triggerCrisisAlerts, trustedContacts]);
 
 
   const value = {
