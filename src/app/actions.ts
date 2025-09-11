@@ -60,7 +60,7 @@ export async function analyzeFacialExpressionAction(photoDataUri: string): Promi
     }
 }
 
-export async function sendSmsAction(to: string, body: string) {
+export async function sendSmsAction(to: string, body: string): Promise<{ success: boolean; error?: string }> {
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const from = process.env.TWILIO_PHONE_NUMBER;
@@ -75,8 +75,9 @@ export async function sendSmsAction(to: string, body: string) {
     try {
         await client.messages.create({ body, from, to });
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Failed to send SMS via Twilio:', error);
-        return { success: false, error: 'Failed to send SMS.' };
+        const errorMessage = error.message || 'An unknown error occurred while sending SMS.';
+        return { success: false, error: `Failed to send SMS: ${errorMessage}` };
     }
 }

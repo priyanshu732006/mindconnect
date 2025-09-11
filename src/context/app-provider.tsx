@@ -102,7 +102,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     const results = await Promise.all(contactPromises);
     const successfulContacts = currentContacts.filter((_, index) => results[index].success);
-    const failedContacts = currentContacts.filter((_, index) => !results[index].success);
+    const failedContacts = currentContacts.map((contact, index) => ({ ...contact, result: results[index] })).filter(c => !c.result.success);
 
 
     if (successfulContacts.length > 0) {
@@ -116,10 +116,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
 
     if (failedContacts.length > 0) {
+        const failedContactNames = failedContacts.map(c => c.name).join(', ');
+        const firstError = failedContacts[0].result.error;
         toast({
             variant: 'destructive',
-            title: 'SMS Failed',
-            description: `Could not send SMS to some contacts. Please ensure Twilio is configured correctly.`,
+            title: 'SMS Failed for Some Contacts',
+            description: `Could not send SMS to ${failedContactNames}. Reason: ${firstError}`,
             duration: 10000,
         });
     }
