@@ -26,10 +26,14 @@ import { useApp } from '@/context/app-provider';
 import { TrustedContact } from '@/lib/types';
 import { useEffect } from 'react';
 
+const phoneRegex = new RegExp(
+  /^(\+91)?[6-9]\d{9}$/
+);
+
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   relation: z.string().min(1, 'Relation is required'),
-  phone: z.string().min(1, 'Phone number is required'),
+  phone: z.string().regex(phoneRegex, 'Please enter a valid Indian phone number (e.g., +91XXXXXXXXXX)'),
 });
 
 type AddEditContactDialogProps = {
@@ -114,7 +118,7 @@ export function AddEditContactDialog({
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="123-456-7890" {...field} />
+                    <Input placeholder="+91XXXXXXXXXX" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

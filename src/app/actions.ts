@@ -70,6 +70,14 @@ export async function sendSmsAction(to: string, body: string): Promise<{ success
         return { success: false, error: 'Twilio is not configured. Please check your environment variables.' };
     }
 
+    const phoneRegex = new RegExp(
+      /^(\+91)?[6-9]\d{9}$/
+    );
+
+    if(!phoneRegex.test(to)){
+       return { success: false, error: `The phone number ${to} is not a valid Indian phone number` };
+    }
+
     const client = twilio(accountSid, authToken);
 
     try {
