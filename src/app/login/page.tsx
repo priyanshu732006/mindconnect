@@ -4,17 +4,18 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import Logo from "@/components/logo";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { login } from "@/app/actions";
 import { useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/context/auth-provider";
+import { useRouter } from "next/navigation";
+import { FirebaseError } from "firebase/app";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
@@ -24,6 +25,8 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const { login, user } = useAuth();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -35,16 +38,37 @@ export default function LoginPage() {
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
-      const result = await login(values);
-      if (result?.error) {
+      try {
+        await login(values.email, values.password);
+      } catch (error) {
+        let description = "An unexpected error occurred. Please try again.";
+        if (error instanceof FirebaseError) {
+            switch(error.code) {
+                case 'auth/user-not-found':
+                case 'auth/wrong-password':
+                    description = "Invalid email or password."
+                    break;
+                case 'auth/invalid-credential':
+                    description = "Invalid email or password."
+                    break;
+                default:
+                    description = "An error occurred during login. Please try again."
+            }
+        }
         toast({
           variant: "destructive",
           title: "Login Failed",
-          description: result.error,
+          description: description,
         });
       }
     });
   };
+
+  useEffect(() => {
+    if (user) {
+      router.push('/student/dashboard');
+    }
+  }, [user, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">

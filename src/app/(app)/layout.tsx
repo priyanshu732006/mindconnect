@@ -35,6 +35,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/context/auth-provider';
+import { useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/student/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -47,6 +49,13 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  }
 
   return (
     <SidebarProvider>
@@ -83,16 +92,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src="https://picsum.photos/seed/student/100/100"
+                    src={user?.photoURL ?? "https://picsum.photos/seed/student/100/100"}
                     alt="User"
                     data-ai-hint="student avatar"
                   />
-                  <AvatarFallback>U</AvatarFallback>
+                  <AvatarFallback>{user?.email?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
                 </Avatar>
                 <div className="text-left group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-medium">Alex Doe</p>
-                  <p className="text-xs text-muted-foreground">
-                    alex.doe@university.edu
+                  <p className="text-sm font-medium">{user?.displayName ?? 'Student'}</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {user?.email}
                   </p>
                 </div>
               </Button>
@@ -103,7 +112,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

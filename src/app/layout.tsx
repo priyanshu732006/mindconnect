@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from '@/context/app-provider';
+import { AuthProvider } from '@/context/auth-provider';
 
 export const metadata: Metadata = {
   title: 'Student Wellness Hub',
@@ -25,10 +26,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-background text-foreground">
-        <AppProvider>
-          {children}
-          <Toaster />
-        </AppProvider>
+        <AuthProvider>
+          <AppProvider>
+            {children}
+            <Toaster />
+          </AppProvider>
+        </AuthProvider>
       </body>
     </html>
   );

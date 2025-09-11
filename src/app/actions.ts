@@ -9,34 +9,6 @@ import type { Message, WellbeingData } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
 
 
-const loginSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(1, "Password is required."),
-});
-
-export async function login(values: z.infer<typeof loginSchema>) {
-    // This is a mock authentication. In a real app, you'd validate credentials against a database.
-    console.log('Logging in with:', values.email);
-
-    // Simulate successful login
-    redirect('/student/dashboard');
-}
-
-const registerSchema = z.object({
-    fullName: z.string().min(1, "Full name is required."),
-    email: z.string().email("Please enter a valid email address."),
-    password: z.string().min(8, "Password must be at least 8 characters long."),
-});
-
-export async function register(values: z.infer<typeof registerSchema>) {
-    // This is a mock registration. In a real app, you'd save the user to a database.
-    console.log('Registering new user:', values.fullName, values.email);
-
-    // Simulate successful registration
-    return { success: true };
-}
-
-
 export async function getAIResponse(
   history: Message[],
   newMessage: string
