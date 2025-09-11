@@ -1,9 +1,27 @@
+
 'use server';
 
+import { redirect } from 'next/navigation';
+import { z } from 'zod';
 import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt';
 import { wellbeingScoreFromConversation } from '@/ai/flows/wellbeing-score-from-conversation';
 import type { Message, WellbeingData } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
+
+
+const loginSchema = z.object({
+    email: z.string().email(),
+    password: z.string(),
+});
+
+export async function login(values: z.infer<typeof loginSchema>) {
+    // This is a mock authentication. In a real app, you'd validate credentials against a database.
+    console.log('Logging in with:', values.email);
+
+    // Simulate successful login
+    redirect('/student/dashboard');
+}
+
 
 export async function getAIResponse(
   history: Message[],
