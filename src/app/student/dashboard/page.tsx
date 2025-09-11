@@ -1,3 +1,4 @@
+
 import { WellbeingScore } from '@/components/dashboard/wellbeing-score';
 import { CrisisAlert } from '@/components/dashboard/crisis-alert';
 import { TrustedContacts } from '@/components/dashboard/trusted-contacts';

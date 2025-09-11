@@ -1,3 +1,4 @@
+
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -19,7 +20,7 @@ const Logo = ({ className, iconOnly = false }: { className?: string; iconOnly?: 
         <path d="M2 17l10 5 10-5" />
         <path d="M2 12l10 5 10-5" />
       </svg>
-      {!iconOnly && <span className="text-xl font-bold text-foreground">Zenith</span>}
+      {!iconOnly && <span className="text-xl font-bold text-foreground">Student Wellness Hub</span>}
     </div>
   );
 };

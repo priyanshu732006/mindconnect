@@ -1,3 +1,4 @@
+
 'use client';
 import { useApp } from '@/context/app-provider';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -26,7 +27,7 @@ export function CrisisAlert() {
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button asChild variant="destructive">
-            <Link href="/booking">Book with a Counselor</Link>
+            <Link href="/student/booking">Book with a Counselor</Link>
           </Button>
           <Button variant="outline">Contact Trusted Contacts</Button>
         </div>

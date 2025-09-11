@@ -1,24 +1,25 @@
+
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight, Bot, BookHeart, CalendarCheck } from 'lucide-react';
 
 const links = [
   {
-    href: '/chat',
+    href: '/student/chat',
     title: 'AI Companion',
     description: 'Talk through your thoughts anytime.',
     icon: Bot,
     color: 'bg-blue-100 text-blue-700',
   },
   {
-    href: '/resources',
+    href: '/student/resources',
     title: 'Resource Hub',
     description: 'Articles, videos, and exercises.',
     icon: BookHeart,
     color: 'bg-green-100 text-green-700',
   },
   {
-    href: '/booking',
+    href: '/student/booking',
     title: 'Book an Appointment',
     description: 'Schedule a session with a counselor.',
     icon: CalendarCheck,

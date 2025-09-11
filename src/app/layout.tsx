@@ -1,10 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from '@/context/app-provider';
 
 export const metadata: Metadata = {
-  title: 'Zenith Student Wellness',
+  title: 'Student Wellness Hub',
   description: 'Your partner in mental well-being.',
 };
 
@@ -23,7 +24,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased bg-background text-foreground">
         <AppProvider>
           {children}
           <Toaster />

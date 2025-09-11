@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useApp } from '@/context/app-provider';
@@ -48,7 +49,7 @@ export function WellbeingScore() {
         </CardContent>
         <CardFooter>
           <Button asChild>
-            <Link href="/chat">Chat Now</Link>
+            <Link href="/student/chat">Chat Now</Link>
           </Button>
         </CardFooter>
       </Card>
