@@ -90,37 +90,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
   
-  const triggerCrisisAlerts = useCallback(async () => {
+  const triggerCrisisAlerts = useCallback(async (currentContacts: TrustedContact[]) => {
     const studentName = user?.displayName || 'A student';
     const messageBody = `Crisis Alert: ${studentName} may be in distress. Please check in with them. This is an automated message from the Student Wellness Hub.`;
 
-    const contactPromises = trustedContacts.map(contact => 
+    const contactPromises = currentContacts.map(contact => 
         sendSmsAction(contact.phone, messageBody)
     );
 
     // In a real app, you would also notify the on-campus counselor.
     // For now, we just notify trusted contacts.
 
-    await Promise.all(contactPromises);
+    const results = await Promise.all(contactPromises);
+    const successfulContacts = currentContacts.filter((_, index) => results[index].success);
+    const failedContacts = currentContacts.filter((_, index) => !results[index].success);
 
-    const contactNames = trustedContacts.map(c => c.name).join(', ');
-    toast({
-        variant: 'destructive',
-        title: 'Crisis Alert Triggered',
-        description: `An SMS alert has been sent to your trusted contacts: ${contactNames}.`,
-        duration: 10000,
-    });
-  }, [trustedContacts, user, toast]);
+
+    if (successfulContacts.length > 0) {
+        const contactNames = successfulContacts.map(c => c.name).join(', ');
+        toast({
+            variant: 'destructive',
+            title: 'Crisis Alert Triggered',
+            description: `An SMS alert has been sent to your trusted contacts: ${contactNames}.`,
+            duration: 10000,
+        });
+    }
+
+    if (failedContacts.length > 0) {
+        toast({
+            variant: 'destructive',
+            title: 'SMS Failed',
+            description: `Could not send SMS to some contacts. Please ensure Twilio is configured correctly.`,
+            duration: 10000,
+        });
+    }
+  }, [user, toast]);
 
   useEffect(() => {
     if (wellbeingData && wellbeingData.wellbeingScore !== lastNotifiedScore) {
       const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
       if (name === 'Crisis') {
         setLastNotifiedScore(wellbeingData.wellbeingScore);
-        triggerCrisisAlerts();
+        triggerCrisisAlerts(trustedContacts);
       }
     }
-  }, [wellbeingData, lastNotifiedScore, triggerCrisisAlerts]);
+  }, [wellbeingData, lastNotifiedScore, triggerCrisisAlerts, trustedContacts]);
 
 
   const value = {
