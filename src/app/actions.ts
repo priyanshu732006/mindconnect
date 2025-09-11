@@ -11,7 +11,7 @@ import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial
 
 const loginSchema = z.object({
     email: z.string().email(),
-    password: z.string(),
+    password: z.string().min(1, "Password is required."),
 });
 
 export async function login(values: z.infer<typeof loginSchema>) {
@@ -20,6 +20,20 @@ export async function login(values: z.infer<typeof loginSchema>) {
 
     // Simulate successful login
     redirect('/student/dashboard');
+}
+
+const registerSchema = z.object({
+    fullName: z.string().min(1, "Full name is required."),
+    email: z.string().email("Please enter a valid email address."),
+    password: z.string().min(8, "Password must be at least 8 characters long."),
+});
+
+export async function register(values: z.infer<typeof registerSchema>) {
+    // This is a mock registration. In a real app, you'd save the user to a database.
+    console.log('Registering new user:', values.fullName, values.email);
+
+    // Simulate successful registration
+    return { success: true };
 }
 
 
