@@ -1,11 +1,12 @@
 
 'use client';
 
-import { analyzeWellbeing } from '@/app/actions';
+import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
 import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
+import { useAuth } from './auth-provider';
 
 const initialContacts: TrustedContact[] = [
     { id: '1', name: 'Jane Doe', relation: 'Mother', avatar: 'https://picsum.photos/seed/contact1/100/100', phone: '123-456-7890' },
@@ -37,6 +38,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>(initialContacts);
   const { toast } = useToast();
   const [lastNotifiedScore, setLastNotifiedScore] = useState<number | null>(null);
+  const { user } = useAuth();
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
@@ -88,20 +90,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
   
+  const triggerCrisisAlerts = useCallback(async () => {
+    const studentName = user?.displayName || 'A student';
+    const messageBody = `Crisis Alert: ${studentName} may be in distress. Please check in with them. This is an automated message from the Student Wellness Hub.`;
+
+    const contactPromises = trustedContacts.map(contact => 
+        sendSmsAction(contact.phone, messageBody)
+    );
+
+    // In a real app, you would also notify the on-campus counselor.
+    // For now, we just notify trusted contacts.
+
+    await Promise.all(contactPromises);
+
+    const contactNames = trustedContacts.map(c => c.name).join(', ');
+    toast({
+        variant: 'destructive',
+        title: 'Crisis Alert Triggered',
+        description: `An SMS alert has been sent to your trusted contacts: ${contactNames}.`,
+        duration: 10000,
+    });
+  }, [trustedContacts, user, toast]);
+
   useEffect(() => {
     if (wellbeingData && wellbeingData.wellbeingScore !== lastNotifiedScore) {
       const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
       if (name === 'Crisis') {
-        const contactNames = trustedContacts.map(c => c.name).join(', ');
-        toast({
-            variant: 'destructive',
-            title: 'Crisis Alert Triggered',
-            description: `A notification has been automatically sent to your trusted contacts (${contactNames}) and the on-campus counselor.`
-        });
         setLastNotifiedScore(wellbeingData.wellbeingScore);
+        triggerCrisisAlerts();
       }
     }
-  }, [wellbeingData, trustedContacts, toast, lastNotifiedScore]);
+  }, [wellbeingData, lastNotifiedScore, triggerCrisisAlerts]);
+
 
   const value = {
     messages,

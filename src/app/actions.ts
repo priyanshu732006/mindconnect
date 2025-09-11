@@ -5,8 +5,9 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt';
 import { wellbeingScoreFromConversation } from '@/ai/flows/wellbeing-score-from-conversation';
-import type { Message, WellbeingData } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
+import twilio from 'twilio';
 
 
 export async function getAIResponse(
@@ -56,5 +57,26 @@ export async function analyzeFacialExpressionAction(photoDataUri: string): Promi
     } catch (error) {
         console.error('Error analyzing facial expression:', error);
         return null;
+    }
+}
+
+export async function sendSmsAction(to: string, body: string) {
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const from = process.env.TWILIO_PHONE_NUMBER;
+
+    if (!accountSid || !authToken || !from) {
+        console.error('Twilio credentials are not configured in .env file');
+        return { success: false, error: 'Twilio is not configured.' };
+    }
+
+    const client = twilio(accountSid, authToken);
+
+    try {
+        await client.messages.create({ body, from, to });
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to send SMS via Twilio:', error);
+        return { success: false, error: 'Failed to send SMS.' };
     }
 }
