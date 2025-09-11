@@ -6,11 +6,9 @@ import { AlertTriangle, Phone } from 'lucide-react';
 import { Button } from '../ui/button';
 import { getWellbeingCategory } from '@/lib/utils';
 import Link from 'next/link';
-import { useToast } from '@/hooks/use-toast';
 
 export function CrisisAlert() {
-  const { wellbeingData, trustedContacts } = useApp();
-  const { toast } = useToast();
+  const { wellbeingData } = useApp();
 
   if (!wellbeingData) return null;
 
@@ -18,30 +16,23 @@ export function CrisisAlert() {
 
   if (name !== 'Crisis') return null;
 
-  const handleAlert = () => {
-    const contactNames = trustedContacts.map(c => c.name).join(', ');
-    toast({
-        title: 'Alerts Sent',
-        description: `Your trusted contacts (${contactNames}) and the on-campus counselor have been notified.`
-    })
-  }
-
   return (
     <Alert variant="destructive" className="bg-destructive/10">
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle>Crisis Alert: Immediate Attention Recommended</AlertTitle>
       <AlertDescription>
         <p className="mb-4">
-          Your well-being score indicates you may be in distress. It's important
-          to reach out for support. Please consider one of the options below.
+          Your well-being score indicates you may be in distress. An alert has been automatically sent to your trusted contacts and the on-campus counselor. Please also consider booking an immediate session.
         </p>
         <div className="flex flex-col sm:flex-row gap-2">
           <Button asChild variant="destructive">
             <Link href="/student/booking">Book with a Counselor</Link>
           </Button>
-          <Button variant="outline" onClick={handleAlert}>
-            <Phone className="mr-2 h-4 w-4" />
-            Contact Trusted Contacts
+           <Button variant="outline" asChild>
+            <a href="tel:988">
+              <Phone className="mr-2 h-4 w-4" />
+              Call Lifeline (988)
+            </a>
           </Button>
         </div>
       </AlertDescription>

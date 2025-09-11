@@ -4,6 +4,8 @@
 import { analyzeWellbeing } from '@/app/actions';
 import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { getWellbeingCategory } from '@/lib/utils';
 
 const initialContacts: TrustedContact[] = [
     { id: '1', name: 'Jane Doe', relation: 'Mother', avatar: 'https://picsum.photos/seed/contact1/100/100', phone: '123-456-7890' },
@@ -33,6 +35,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>(initialContacts);
+  const { toast } = useToast();
+  const [lastNotifiedScore, setLastNotifiedScore] = useState<number | null>(null);
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
@@ -83,6 +87,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages]);
+  
+  useEffect(() => {
+    if (wellbeingData && wellbeingData.wellbeingScore !== lastNotifiedScore) {
+      const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
+      if (name === 'Crisis') {
+        const contactNames = trustedContacts.map(c => c.name).join(', ');
+        toast({
+            variant: 'destructive',
+            title: 'Crisis Alert Triggered',
+            description: `A notification has been automatically sent to your trusted contacts (${contactNames}) and the on-campus counselor.`
+        });
+        setLastNotifiedScore(wellbeingData.wellbeingScore);
+      }
+    }
+  }, [wellbeingData, trustedContacts, toast, lastNotifiedScore]);
 
   const value = {
     messages,
