@@ -8,12 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
 
-const initialContacts: TrustedContact[] = [
-    { id: '1', name: 'Jane Doe', relation: 'Mother', avatar: 'https://picsum.photos/seed/contact1/100/100', phone: '123-456-7890' },
-    { id: '2', name: 'John Smith', relation: 'Friend', avatar: 'https://picsum.photos/seed/contact2/100/100', phone: '098-765-4321' },
-];
-
-
 type AppContextType = {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
@@ -35,7 +29,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     null
   );
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>(initialContacts);
+  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
   const { toast } = useToast();
   const { user } = useAuth();
 
