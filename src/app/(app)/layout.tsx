@@ -20,6 +20,7 @@ import {
   CalendarCheck,
   Users,
   LogOut,
+  Smile,
 } from 'lucide-react';
 import Logo from '@/components/logo';
 import Link from 'next/link';
@@ -37,6 +38,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/chat', icon: Bot, label: 'AI Companion' },
+  { href: '/facial-analysis', icon: Smile, label: 'Facial Analysis' },
   { href: '/resources', icon: BookHeart, label: 'Resources' },
   { href: '/booking', icon: CalendarCheck, label: 'Booking' },
   { href: '/support', icon: Users, label: 'Peer Support' },

@@ -3,6 +3,7 @@
 import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt';
 import { wellbeingScoreFromConversation } from '@/ai/flows/wellbeing-score-from-conversation';
 import type { Message, WellbeingData } from '@/lib/types';
+import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
 
 export async function getAIResponse(
   history: Message[],
@@ -42,4 +43,14 @@ export async function analyzeWellbeing(
     console.error('Error analyzing wellbeing:', error);
     return null;
   }
+}
+
+export async function analyzeFacialExpressionAction(photoDataUri: string): Promise<FacialAnalysisOutput | null> {
+    try {
+        const result = await analyzeFacialExpression({ photoDataUri });
+        return result;
+    } catch (error) {
+        console.error('Error analyzing facial expression:', error);
+        return null;
+    }
 }
