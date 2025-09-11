@@ -1,3 +1,4 @@
+
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
