@@ -27,13 +27,13 @@ import { TrustedContact } from '@/lib/types';
 import { useEffect } from 'react';
 
 const phoneRegex = new RegExp(
-  /^(\+91)?[6-9]\d{9}$/
+  /^\+91[6-9]\d{9}$/
 );
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   relation: z.string().min(1, 'Relation is required'),
-  phone: z.string().regex(phoneRegex, 'Please enter a valid Indian phone number (e.g., +91XXXXXXXXXX)'),
+  phone: z.string().regex(phoneRegex, 'Please enter a valid Indian phone number starting with +91.'),
 });
 
 type AddEditContactDialogProps = {
