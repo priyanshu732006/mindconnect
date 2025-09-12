@@ -16,22 +16,18 @@ export default function AppRootPage() {
     const router = useRouter();
 
     useEffect(() => {
-        // Wait until loading is completely finished.
         if (loading) {
             return;
         }
 
-        // If loading is done and there's no user, they need to log in.
         if (!user) {
             router.push('/landing');
             return;
         }
 
-        // If a user is logged in and has a role, redirect to their dashboard.
         if (role) {
             router.push(`/${role}/dashboard`);
         }
-        // If a user is logged in but has no role, this page will render the role selection UI.
         
     }, [user, role, loading, router]);
     
@@ -41,7 +37,6 @@ export default function AppRootPage() {
         router.push(`/${selectedRole}/dashboard`);
     }
 
-    // Show a loader while authentication is in progress or if a redirect is imminent.
     if (loading || (user && role)) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -50,7 +45,6 @@ export default function AppRootPage() {
         )
     }
     
-    // If user is authenticated but has no role, show the role selection UI.
     if (user && !role) {
          return (
             <div className="flex min-h-screen items-center justify-center p-4">
@@ -60,7 +54,7 @@ export default function AppRootPage() {
                         <CardTitle>Select Your Dashboard</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <p className="text-muted-foreground">Choose which dashboard you want to proceed to.</p>
+                        <p className="text-muted-foreground">Choose which dashboard you want to proceed to. You will only have to do this once.</p>
                         <div className="flex flex-col gap-3">
                             <Button onClick={() => handleRoleSelect(UserRole.student)} size="lg">Student Dashboard <ArrowRight className="ml-2" /></Button>
                             <Button onClick={() => handleRoleSelect(UserRole.counsellor)} size="lg" variant="outline">Counsellor Dashboard <ArrowRight className="ml-2" /></Button>
@@ -73,7 +67,6 @@ export default function AppRootPage() {
         );
     }
 
-    // This is a fallback state, primarily for the brief moment before the first redirect.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
