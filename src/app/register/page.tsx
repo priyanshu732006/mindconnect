@@ -68,6 +68,16 @@ export default function RegisterPage() {
       email: "",
       password: "",
       role: UserRole.student,
+      // @ts-expect-error
+      collegeName: "",
+      course: "",
+      year: "",
+      personalEmail: "",
+      emergencyContactName: "",
+      emergencyContactRelation: "",
+      emergencyContactPhone: "",
+      sleepHours: "",
+      screenTimeHours: "",
     },
   });
 
