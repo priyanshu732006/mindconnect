@@ -35,10 +35,12 @@ export default function LandingPage() {
         if (user && role) {
             router.push(`/${role}/dashboard`);
         }
-        // If they are logged in but have no role, they will see the role selection UI.
+        // If they are logged in but have no role, they will be shown the role selection UI.
+        
     }, [user, role, loading, router]);
 
 
+    // Show a loader while authentication is in progress or redirects are happening.
     if (loading || (user && role)) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -47,7 +49,7 @@ export default function LandingPage() {
         )
     }
     
-    // If the user is logged in but has no role, show the role selection.
+    // If the user is logged in but has no role, show the role selection UI.
     if(user && !role){
          return (
             <div className="flex min-h-screen items-center justify-center p-4">
@@ -70,7 +72,7 @@ export default function LandingPage() {
         );
     }
 
-    // This state is temporary while redirects are happening.
+    // This is the fallback state, usually when the user is logged out and about to be redirected.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />

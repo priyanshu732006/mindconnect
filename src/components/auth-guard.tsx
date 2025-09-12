@@ -8,15 +8,15 @@ import { UserRole } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { useApp } from '@/context/app-provider';
 
-export default function AuthGuard({ children, role }: { children: React.ReactNode, role: UserRole }) {
+export default function AuthGuard({ children, role: requiredRole }: { children: React.ReactNode, role: UserRole }) {
   const { user, loading, role: userRole } = useAuth();
   const { setNavItemsByRole } = useApp();
   const router = useRouter();
 
   useEffect(() => {
     // This ensures the nav items are set correctly for the current section of the app.
-    setNavItemsByRole(role);
-  }, [role, setNavItemsByRole]);
+    setNavItemsByRole(requiredRole);
+  }, [requiredRole, setNavItemsByRole]);
 
   useEffect(() => {
     if (loading) {
@@ -28,16 +28,21 @@ export default function AuthGuard({ children, role }: { children: React.ReactNod
       return;
     }
 
-    if (userRole && userRole !== role) {
-      // If a role is set but doesn't match the page's required role, go to the landing page.
-      // The landing page will then redirect them to their correct dashboard.
+    if (!userRole) {
+      // If user is logged in but has no role, send them to landing to choose.
       router.push('/landing');
+      return;
+    }
+
+    if (userRole !== requiredRole) {
+      // If the role is set but doesn't match, send them to their correct dashboard.
+      router.push(`/${userRole}/dashboard`);
     }
     
-  }, [user, userRole, loading, role, router]);
+  }, [user, userRole, loading, requiredRole, router]);
 
-  // While loading, or if the user is not logged in, or if the roles don't match yet, show a spinner.
-  if (loading || !user || userRole !== role) {
+  // While loading, or if conditions for rendering haven't been met, show a spinner.
+  if (loading || !user || !userRole || userRole !== requiredRole) {
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />

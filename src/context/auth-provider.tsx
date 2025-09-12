@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
       if (user) {
         setUser(user);
         const sessionRole = sessionStorage.getItem('userRole') as UserRole;
@@ -44,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setRole(userRole);
                     sessionStorage.setItem('userRole', userRole);
                 } else {
-                    setRole(null); // No role found
+                    setRole(null); // No role found, user must select one
                 }
             } catch (error) {
                 console.error("Failed to fetch user role:", error);
@@ -84,35 +85,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleLogin = async (email:string, password:string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    if (user) {
-        setLoading(true);
-        const db = getDatabase();
-        const userRoleRef = ref(db, `userRoles/${user.uid}`);
-        const snapshot = await get(userRoleRef);
-        if(snapshot.exists()) {
-            const userRole = snapshot.val().role;
-            setRole(userRole);
-            sessionStorage.setItem('userRole', userRole);
-        } else {
-            // Default to student if no role is found (for older accounts)
-            setRole(UserRole.student);
-            sessionStorage.setItem('userRole', UserRole.student);
-        }
-        setLoading(false);
-    }
+    // onAuthStateChanged will handle the rest
     return userCredential;
   }
   
   const handleLogout = async () => {
     await signOut(auth);
-    setRole(null);
-    sessionStorage.removeItem('userRole');
+    // onAuthStateChanged will handle the rest
   }
 
   const handleSetRole = (newRole: UserRole) => {
-      setRole(newRole);
-      sessionStorage.setItem('userRole', newRole);
+      if(user) {
+        setRole(newRole);
+        sessionStorage.setItem('userRole', newRole);
+      }
   }
 
   const value = { 
