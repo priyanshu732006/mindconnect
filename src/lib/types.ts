@@ -39,6 +39,8 @@ export enum UserRole {
     'peer-buddy' = 'peer-buddy'
 }
 
+export type CounsellorType = 'on-campus' | 'external';
+
 export type NavItem = {
     href: string;
     icon: LucideIcon;

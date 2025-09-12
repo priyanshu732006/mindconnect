@@ -5,7 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { onAuthStateChanged, User, Auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client-app';
 import { Loader2 } from 'lucide-react';
-import { UserRole } from '@/lib/types';
+import { CounsellorType, UserRole } from '@/lib/types';
 import { set, get, ref, getDatabase } from 'firebase/database';
 
 
@@ -13,9 +13,10 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   role: UserRole | null;
+  counsellorType: CounsellorType | null;
   setRole: (role: UserRole) => void;
   login: typeof signInWithEmailAndPassword;
-  register: (email: string, password: string, fullName: string, role: UserRole) => Promise<void>;
+  register: (email: string, password: string, fullName: string, role: UserRole, counsellorType?: CounsellorType) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -25,33 +26,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [counsellorType, setCounsellorType] = useState<CounsellorType | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setLoading(true);
       if (user) {
         setUser(user);
-        // Try getting role from session storage first for faster loads on navigation
         const sessionRole = sessionStorage.getItem('userRole') as UserRole;
+        const sessionCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType;
+
         if (sessionRole) {
             setRole(sessionRole);
+            if (sessionCounsellorType) {
+                setCounsellorType(sessionCounsellorType);
+            }
             setLoading(false);
         } else {
-            // If not in session, fetch from DB
             const db = getDatabase();
             const userRoleRef = ref(db, `userRoles/${user.uid}`);
             try {
                 const snapshot = await get(userRoleRef);
                 if(snapshot.exists()) {
-                    const userRole = snapshot.val().role;
+                    const userData = snapshot.val();
+                    const userRole = userData.role;
                     setRole(userRole);
                     sessionStorage.setItem('userRole', userRole);
+
+                    if (userData.counsellorType) {
+                        setCounsellorType(userData.counsellorType);
+                        sessionStorage.setItem('counsellorType', userData.counsellorType);
+                    }
                 } else {
-                    setRole(null); // No role found, user must select one
+                    setRole(null);
+                    setCounsellorType(null);
                 }
             } catch (error) {
                 console.error("Failed to fetch user role:", error);
                 setRole(null);
+                setCounsellorType(null);
             } finally {
                 setLoading(false);
             }
@@ -59,7 +72,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
         setRole(null);
+        setCounsellorType(null);
         sessionStorage.removeItem('userRole');
+        sessionStorage.removeItem('counsellorType');
         setLoading(false);
       }
     });
@@ -67,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const register = async (email: string, password: string, fullName: string, role: UserRole) => {
+  const register = async (email: string, password: string, fullName: string, role: UserRole, counsellorType?: CounsellorType) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     if (user) {
@@ -75,25 +90,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         displayName: fullName,
       });
 
-      // Save role to Realtime Database
       const db = getDatabase();
       const userRoleRef = ref(db, `userRoles/${user.uid}`);
-      await set(userRoleRef, { role });
+      const userData: { role: UserRole, counsellorType?: CounsellorType } = { role };
+      if (role === UserRole.counsellor && counsellorType) {
+        userData.counsellorType = counsellorType;
+      }
+      await set(userRoleRef, userData);
 
-      // Re-trigger onAuthStateChanged to get updated user info
       setUser({...user, displayName: fullName });
     }
   };
 
   const handleLogin = async (email:string, password:string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged will handle the rest
     return userCredential;
   }
   
   const handleLogout = async () => {
     await signOut(auth);
-    // onAuthStateChanged will handle the rest
   }
 
   const handleSetRole = (newRole: UserRole) => {
@@ -107,13 +122,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user, 
     loading,
     role,
+    counsellorType,
     setRole: handleSetRole,
     login: handleLogin,
     register,
     logout: handleLogout,
   };
   
-  // Do not render children until loading is complete
   if (loading) {
     return (
         <div className="flex h-screen items-center justify-center">

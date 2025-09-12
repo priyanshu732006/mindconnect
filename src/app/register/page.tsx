@@ -18,6 +18,7 @@ import { useAuth } from "@/context/auth-provider";
 import { FirebaseError } from "firebase/app";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserRole } from "@/lib/types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 
 const registerSchema = z.object({
@@ -25,6 +26,15 @@ const registerSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.nativeEnum(UserRole),
+    counsellorType: z.enum(['on-campus', 'external']).optional(),
+}).refine(data => {
+    if (data.role === UserRole.counsellor) {
+        return !!data.counsellorType;
+    }
+    return true;
+}, {
+    message: "Please select counsellor type",
+    path: ["counsellorType"],
 });
 
 export default function RegisterPage() {
@@ -43,10 +53,12 @@ export default function RegisterPage() {
     },
   });
 
+  const watchedRole = form.watch("role");
+
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
       try {
-        await register(values.email, values.password, values.fullName, values.role);
+        await register(values.email, values.password, values.fullName, values.role, values.counsellorType);
         toast({
             title: "Registration Successful",
             description: "You can now log in with your new account.",
@@ -156,6 +168,44 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                     />
+
+                    {watchedRole === UserRole.counsellor && (
+                         <FormField
+                            control={form.control}
+                            name="counsellorType"
+                            render={({ field }) => (
+                                <FormItem className="space-y-3">
+                                <FormLabel>Counsellor Type</FormLabel>
+                                <FormControl>
+                                    <RadioGroup
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    className="flex flex-col space-y-1"
+                                    >
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="on-campus" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        On-Campus Counsellor
+                                        </FormLabel>
+                                    </FormItem>
+                                    <FormItem className="flex items-center space-x-3 space-y-0">
+                                        <FormControl>
+                                        <RadioGroupItem value="external" />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                        External Counsellor
+                                        </FormLabel>
+                                    </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
                     <Button type="submit" className="w-full" disabled={isPending}>
