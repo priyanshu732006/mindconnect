@@ -19,6 +19,7 @@ import { FirebaseError } from "firebase/app";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserRole } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
 
 
 const baseSchema = z.object({
@@ -34,6 +35,11 @@ const studentSchema = baseSchema.extend({
     course: z.string().min(1, "Course is required."),
     year: z.string().min(1, "Year of study is required."),
     personalEmail: z.string().email("Please enter a valid personal email.").optional().or(z.literal('')),
+    emergencyContactName: z.string().min(1, "Emergency contact name is required."),
+    emergencyContactRelation: z.string().min(1, "Emergency contact relation is required."),
+    emergencyContactPhone: z.string().min(1, "Emergency contact phone is required."),
+    sleepHours: z.string().optional(),
+    screenTimeHours: z.string().optional(),
 });
 
 const counsellorSchema = baseSchema.extend({
@@ -77,6 +83,15 @@ export default function RegisterPage() {
             course: values.course,
             year: values.year,
             personalEmail: values.personalEmail,
+            emergencyContacts: [{
+              name: values.emergencyContactName,
+              relation: values.emergencyContactRelation,
+              phone: values.emergencyContactPhone,
+            }],
+            lifestyle: {
+              sleepHours: values.sleepHours,
+              screenTimeHours: values.screenTimeHours,
+            }
           };
         } else if (values.role === UserRole.counsellor) {
           counsellorType = values.counsellorType;
@@ -124,7 +139,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-md my-8">
         <CardHeader className="text-center">
           <Logo className="justify-center mb-2" />
           <CardTitle>Create an Account</CardTitle>
@@ -185,8 +200,24 @@ export default function RegisterPage() {
                         )}
                     />
 
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
                     {watchedRole === UserRole.student && (
                         <>
+                            <Separator className="my-6" />
+                            <p className="text-sm font-medium text-muted-foreground">Student Details</p>
                              <FormField
                                 control={form.control}
                                 name="personalEmail"
@@ -239,22 +270,67 @@ export default function RegisterPage() {
                                     </FormItem>
                                 )}
                             />
+                             <Separator className="my-6" />
+                             <p className="text-sm font-medium text-muted-foreground">Primary Emergency Contact</p>
+                            <FormField
+                                control={form.control}
+                                name="emergencyContactName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Contact's Full Name</FormLabel>
+                                        <FormControl><Input placeholder="Jane Doe" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="emergencyContactRelation"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Relation to You</FormLabel>
+                                        <FormControl><Input placeholder="e.g., Mother, Friend" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="emergencyContactPhone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Contact's Phone Number</FormLabel>
+                                        <FormControl><Input placeholder="+91XXXXXXXXXX" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Separator className="my-6" />
+                             <p className="text-sm font-medium text-muted-foreground">Optional Lifestyle Info</p>
+                             <FormField
+                                control={form.control}
+                                name="sleepHours"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Avg. Hours of Sleep per Night</FormLabel>
+                                        <FormControl><Input type="number" placeholder="e.g., 7" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="screenTimeHours"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Avg. Daily Screen Time (hours)</FormLabel>
+                                        <FormControl><Input type="number" placeholder="e.g., 5" {...field} /></FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                         </>
                     )}
-
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <Input type="password" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                     
 
                     {watchedRole === UserRole.counsellor && (

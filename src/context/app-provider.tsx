@@ -3,7 +3,7 @@
 
 import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole } from '@/lib/types';
-import React, { useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
@@ -11,6 +11,7 @@ import { studentNavItems } from '@/lib/student-nav';
 import { adminNavItems } from '@/lib/admin-nav';
 import { counsellorNavItems } from '@/lib/counsellor-nav';
 import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
+import { get, getDatabase, ref } from 'firebase/database';
 
 type AppContextType = {
   messages: Message[];
@@ -42,7 +43,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [navItems, setNavItems] = React.useState<NavItem[]>(studentNavItems);
 
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   
   const setNavItemsByRole = useCallback((role: UserRole | null) => {
     switch (role) {
@@ -109,6 +110,28 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteContact = (contactId: string) => {
     setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
   };
+
+  useEffect(() => {
+    async function fetchStudentData() {
+      if (user && role === 'student') {
+        const db = getDatabase();
+        const userRoleRef = ref(db, `userRoles/${user.uid}`);
+        const snapshot = await get(userRoleRef);
+        if (snapshot.exists()) {
+          const userData = snapshot.val();
+          if (userData.studentDetails?.emergencyContacts) {
+            const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+              ...contact,
+              id: `${user.uid}-contact-${index}`, // a unique ID
+              avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+            }));
+            setTrustedContacts(contactsFromDb);
+          }
+        }
+      }
+    }
+    fetchStudentData();
+  }, [user, role]);
   
   React.useEffect(() => {
     analyzeCurrentState();
@@ -209,3 +232,5 @@ export function useApp() {
   }
   return context;
 }
+
+    

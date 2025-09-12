@@ -99,10 +99,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const db = getDatabase();
       const userRoleRef = ref(db, `userRoles/${user.uid}`);
-      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any } = { role, fullName, ...details?.studentDetails };
+      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any } = { 
+        role, 
+        fullName
+      };
       
       if (role === UserRole.counsellor && details?.counsellorType) {
         userData.counsellorType = details.counsellorType;
+      }
+
+      if(role === UserRole.student && details?.studentDetails) {
+        userData.studentDetails = details.studentDetails;
       }
       
       await set(userRoleRef, userData);
