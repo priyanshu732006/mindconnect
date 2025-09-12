@@ -21,21 +21,31 @@ import { UserRole } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 
-const registerSchema = z.object({
+const baseSchema = z.object({
     fullName: z.string().min(1, "Full name is required."),
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.nativeEnum(UserRole),
-    counsellorType: z.enum(['on-campus', 'external']).optional(),
-}).refine(data => {
-    if (data.role === UserRole.counsellor) {
-        return !!data.counsellorType;
-    }
-    return true;
-}, {
-    message: "Please select counsellor type",
-    path: ["counsellorType"],
+    personalEmail: z.string().email("Please enter a valid email address.").optional().or(z.literal('')),
 });
+
+const studentSchema = baseSchema.extend({
+    collegeName: z.string().min(1, "College name is required."),
+    course: z.string().min(1, "Course is required."),
+    year: z.string().min(1, "Year of study is required."),
+});
+
+const counsellorSchema = baseSchema.extend({
+     counsellorType: z.enum(['on-campus', 'external'], { required_error: "Please select counsellor type" }),
+});
+
+const registerSchema = z.discriminatedUnion("role", [
+    studentSchema.extend({ role: z.literal(UserRole.student) }),
+    counsellorSchema.extend({ role: z.literal(UserRole.counsellor) }),
+    baseSchema.extend({ role: z.literal(UserRole.admin) }),
+    baseSchema.extend({ role: z.literal(UserRole['peer-buddy']) })
+]);
+
 
 export default function RegisterPage() {
   const [isPending, startTransition] = useTransition();
@@ -58,7 +68,14 @@ export default function RegisterPage() {
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
       try {
-        await register(values.email, values.password, values.fullName, values.role, values.counsellorType);
+        const { role } = values;
+        let counsellorType;
+        if(values.role === UserRole.counsellor){
+            counsellorType = values.counsellorType;
+        }
+
+        await register(values.email, values.password, values.fullName, role, counsellorType);
+        
         toast({
             title: "Registration Successful",
             description: "You can now log in with your new account.",
@@ -121,39 +138,24 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                     />
-                    <FormField
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Email</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="student@university.edu" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                    <FormField
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Password</FormLabel>
-                                <FormControl>
-                                    <Input type="password" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                      <FormField
                         control={form.control}
                         name="role"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>I am a...</FormLabel>
-                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                 <Select onValueChange={(value) => {
+                                     field.onChange(value);
+                                     // Reset conditional fields when role changes
+                                     form.reset({
+                                         ...form.getValues(),
+                                         role: value as UserRole,
+                                         collegeName: '',
+                                         course: '',
+                                         year: '',
+                                         counsellorType: undefined,
+                                     })
+                                 }} defaultValue={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select your role" />
@@ -170,6 +172,93 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                     />
+
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{watchedRole === UserRole.student ? "College Email" : "Email"}</FormLabel>
+                                <FormControl>
+                                    <Input placeholder={watchedRole === UserRole.student ? "student@university.edu" : "user@example.com"} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {watchedRole === UserRole.student && (
+                        <>
+                             <FormField
+                                control={form.control}
+                                name="personalEmail"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Personal Email (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="alex.doe@email.com" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="collegeName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>College Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="State University" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="course"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Course</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="B.Sc. Computer Science" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="year"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Year of Study</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="2nd Year" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
+                   
+
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
 
                     {watchedRole === UserRole.counsellor && (
                          <FormField

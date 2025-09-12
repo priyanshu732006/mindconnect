@@ -48,10 +48,10 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Placeholder for lifestyle tracking components */}
-                 <div className="flex items-center gap-2"><Sunrise /> Sleep Hours</div>
-                 <div className="flex items-center gap-2"><Activity /> Activity Level</div>
-                 <div className="flex items-center gap-2"><Droplet /> Water Intake</div>
-                 <div className="flex items-center gap-2"><Smile /> Social Interaction</div>
+                 <div className="flex items-center gap-2 p-4 rounded-lg bg-muted/50"><Sunrise className="text-primary" /> Sleep Hours</div>
+                 <div className="flex items-center gap-2 p-4 rounded-lg bg-muted/50"><Activity className="text-primary" /> Activity Level</div>
+                 <div className="flex items-center gap-2 p-4 rounded-lg bg-muted/50"><Droplet className="text-primary" /> Water Intake</div>
+                 <div className="flex items-center gap-2 p-4 rounded-lg bg-muted/50"><Smile className="text-primary" /> Social Interaction</div>
             </CardContent>
         </Card>
 
