@@ -40,14 +40,15 @@ export default function LoginPage() {
     startTransition(async () => {
       try {
         await login(values.email, values.password);
+        // On successful login, always go to the root page.
+        // The root page will handle the redirection to the correct dashboard.
+        router.push('/');
       } catch (error) {
         let description = "An unexpected error occurred. Please try again.";
         if (error instanceof FirebaseError) {
             switch(error.code) {
                 case 'auth/user-not-found':
                 case 'auth/wrong-password':
-                    description = "Invalid email or password."
-                    break;
                 case 'auth/invalid-credential':
                     description = "Invalid email or password."
                     break;
@@ -65,6 +66,7 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
+    // If the user is somehow already logged in and lands here, redirect them.
     if (user) {
       router.push('/');
     }

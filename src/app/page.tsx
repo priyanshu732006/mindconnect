@@ -16,19 +16,22 @@ export default function AppRootPage() {
     const router = useRouter();
 
     useEffect(() => {
+        // Wait until loading is completely finished.
         if (loading) {
-            return; // Wait for auth state to be confirmed
-        }
-
-        if (!user) {
-            router.push('/landing'); // Redirect unauthenticated users to the public landing page
             return;
         }
 
-        // If user is logged in and already has a role, redirect to their dashboard
-        if (user && role) {
+        // If loading is done and there's no user, they need to log in.
+        if (!user) {
+            router.push('/landing');
+            return;
+        }
+
+        // If a user is logged in and has a role, redirect to their dashboard.
+        if (role) {
             router.push(`/${role}/dashboard`);
         }
+        // If a user is logged in but has no role, this page will render the role selection UI.
         
     }, [user, role, loading, router]);
     
@@ -38,7 +41,7 @@ export default function AppRootPage() {
         router.push(`/${selectedRole}/dashboard`);
     }
 
-    // Show a loader while authentication is in progress or if a redirect is imminent
+    // Show a loader while authentication is in progress or if a redirect is imminent.
     if (loading || (user && role)) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -47,8 +50,8 @@ export default function AppRootPage() {
         )
     }
     
-    // If user is authenticated but has no role, show the role selection UI
-    if(user && !role){
+    // If user is authenticated but has no role, show the role selection UI.
+    if (user && !role) {
          return (
             <div className="flex min-h-screen items-center justify-center p-4">
                 <Card className="w-full max-w-md text-center">
@@ -70,7 +73,7 @@ export default function AppRootPage() {
         );
     }
 
-    // This is the fallback state for unauthenticated users before the useEffect hook redirects them.
+    // This is a fallback state, primarily for the brief moment before the first redirect.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
