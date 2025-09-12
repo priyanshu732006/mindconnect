@@ -7,6 +7,7 @@ import { GamificationStats } from '@/components/dashboard/gamification-stats';
 import { MoodJournal } from '@/components/dashboard/mood-journal';
 import { Assessments } from '@/components/dashboard/assessments';
 import { WeeklyChallenges } from '@/components/dashboard/weekly-challenges';
+import { LifestyleTracker } from '@/components/dashboard/lifestyle-tracker';
 
 export default function DashboardPage() {
   return (
@@ -31,6 +32,7 @@ export default function DashboardPage() {
         {/* Right Sidebar Column */}
         <div className="space-y-8">
           <WeeklyChallenges />
+          <LifestyleTracker />
           <TrustedContacts />
         </div>
       </div>
