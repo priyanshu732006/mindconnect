@@ -27,7 +27,7 @@ import { TrustedContact } from '@/lib/types';
 import { useEffect } from 'react';
 
 const phoneRegex = new RegExp(
-  /^\+91[6-9]\d{9}$/
+  /^\\+91[6-9]\d{9}$/
 );
 
 const contactSchema = z.object({

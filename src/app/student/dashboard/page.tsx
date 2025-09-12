@@ -59,7 +59,7 @@ export default function DashboardPage() {
             <CardHeader>
                 <CardTitle>Mental Health Assessments</CardTitle>
                 <CardDescription>Take standard questionnaires to gain more insight into your mental state.</CardDescription>
-            </CardHeader>
+            </Header>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Button variant="outline">PHQ-9 (Depression)</Button>
                 <Button variant="outline">GAD-7 (Anxiety)</Button>
