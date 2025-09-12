@@ -47,6 +47,7 @@ const CalculateWellbeingScoreOutputSchema = z.object({
     .string()
     .optional()
     .describe('A brief summary of the conversation and the score.'),
+  selfHarmRisk: z.boolean().describe('Whether the conversation indicates a risk of self-harm.')
 });
 export type CalculateWellbeingScoreOutput = z.infer<
   typeof CalculateWellbeingScoreOutputSchema
@@ -70,6 +71,8 @@ const prompt = ai.definePrompt({
   Also consider the mood and confidence from the facial and voice analysis data, if available.
   
   Your summary should synthesize all available information.
+  
+  Critically, you must analyze the conversation for any indication of self-harm intent or ideation. If any such language is present, set the selfHarmRisk field to true. Otherwise, set it to false.
 
   {{#if conversation}}
   Conversation:
@@ -88,7 +91,7 @@ const prompt = ai.definePrompt({
   - Summary: {{voiceAnalysis.summary}}
   {{/if}}
 
-  Based on the available data, provide a well-being score and a brief summary of your analysis.
+  Based on the available data, provide a well-being score, a brief summary of your analysis, and assess the self-harm risk.
   `,
 });
 
@@ -103,6 +106,7 @@ const calculateWellbeingScoreFlow = ai.defineFlow(
       return {
         wellbeingScore: 0,
         summary: "Start a conversation or use the analysis tools to get your well-being score.",
+        selfHarmRisk: false,
       }
     }
     const {output} = await prompt(input);

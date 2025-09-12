@@ -8,6 +8,7 @@ export type Message = {
 export type WellbeingData = {
   wellbeingScore: number;
   summary: string;
+  selfHarmRisk: boolean;
 };
 
 export type TrustedContact = {
