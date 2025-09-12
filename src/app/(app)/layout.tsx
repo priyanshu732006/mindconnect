@@ -17,10 +17,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/context/auth-provider';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/app-provider';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -82,6 +83,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
+              <VisuallyHidden>
+                <SheetTitle>Main Navigation</SheetTitle>
+              </VisuallyHidden>
               <Logo />
               <NavLinks
                 className="mt-8 flex-col items-stretch gap-2"
