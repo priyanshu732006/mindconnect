@@ -31,16 +31,13 @@ export default function LandingPage() {
             return;
         }
 
-        // If a user is logged in and has a role, redirect them to their dashboard
         if (user && role) {
             router.push(`/${role}/dashboard`);
         }
-        // If they are logged in but have no role, they will be shown the role selection UI.
         
     }, [user, role, loading, router]);
 
 
-    // Show a loader while authentication is in progress or redirects are happening.
     if (loading || (user && role)) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -49,7 +46,6 @@ export default function LandingPage() {
         )
     }
     
-    // If the user is logged in but has no role, show the role selection UI.
     if(user && !role){
          return (
             <div className="flex min-h-screen items-center justify-center p-4">

@@ -28,21 +28,16 @@ export default function AuthGuard({ children, role: requiredRole }: { children: 
       return;
     }
 
-    if (!userRole) {
-      // If user is logged in but has no role, send them to landing to choose.
-      router.push('/landing');
-      return;
-    }
-
-    if (userRole !== requiredRole) {
-      // If the role is set but doesn't match, send them to their correct dashboard.
+    if (userRole && userRole !== requiredRole) {
       router.push(`/${userRole}/dashboard`);
+    } else if (!userRole) {
+      router.push('/landing');
     }
     
   }, [user, userRole, loading, requiredRole, router]);
 
   // While loading, or if conditions for rendering haven't been met, show a spinner.
-  if (loading || !user || !userRole || userRole !== requiredRole) {
+  if (loading || !user || userRole !== requiredRole) {
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
