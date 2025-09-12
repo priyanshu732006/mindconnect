@@ -26,13 +26,6 @@ const baseSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.nativeEnum(UserRole),
-    personalEmail: z.string().email("Please enter a valid email address.").optional().or(z.literal('')),
-});
-
-const studentSchema = baseSchema.extend({
-    collegeName: z.string().min(1, "College name is required."),
-    course: z.string().min(1, "Course is required."),
-    year: z.string().min(1, "Year of study is required."),
 });
 
 const counsellorSchema = baseSchema.extend({
@@ -40,7 +33,7 @@ const counsellorSchema = baseSchema.extend({
 });
 
 const registerSchema = z.discriminatedUnion("role", [
-    studentSchema.extend({ role: z.literal(UserRole.student) }),
+    baseSchema.extend({ role: z.literal(UserRole.student) }),
     counsellorSchema.extend({ role: z.literal(UserRole.counsellor) }),
     baseSchema.extend({ role: z.literal(UserRole.admin) }),
     baseSchema.extend({ role: z.literal(UserRole['peer-buddy']) })
@@ -62,8 +55,6 @@ export default function RegisterPage() {
       role: UserRole.student,
     },
   });
-
-  const watchedRole = form.watch("role");
 
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
@@ -112,6 +103,8 @@ export default function RegisterPage() {
     }
   }, [user, router]);
 
+  const watchedRole = form.watch("role");
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-sm">
@@ -144,18 +137,7 @@ export default function RegisterPage() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>I am a...</FormLabel>
-                                 <Select onValueChange={(value) => {
-                                     field.onChange(value);
-                                     // Reset conditional fields when role changes
-                                     form.reset({
-                                         ...form.getValues(),
-                                         role: value as UserRole,
-                                         collegeName: '',
-                                         course: '',
-                                         year: '',
-                                         counsellorType: undefined,
-                                     })
-                                 }} defaultValue={field.value}>
+                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select your role" />
@@ -178,72 +160,14 @@ export default function RegisterPage() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{watchedRole === UserRole.student ? "College Email" : "Email"}</FormLabel>
+                                <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={watchedRole === UserRole.student ? "student@university.edu" : "user@example.com"} {...field} />
+                                    <Input placeholder="user@example.com" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-
-                    {watchedRole === UserRole.student && (
-                        <>
-                             <FormField
-                                control={form.control}
-                                name="personalEmail"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Personal Email (Optional)</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="alex.doe@email.com" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="collegeName"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>College Name</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="State University" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="course"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Course</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="B.Sc. Computer Science" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                             <FormField
-                                control={form.control}
-                                name="year"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Year of Study</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="2nd Year" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </>
-                    )}
-                   
 
                     <FormField
                         control={form.control}
