@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow that analyzes a conversation, facial analysis, and voice analysis to generate a Well-being Score.
@@ -9,8 +10,20 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { FacialAnalysisOutputSchema } from './facial-analysis';
-import { VoiceAnalysisOutputSchema } from './voice-analysis';
+
+// Define schemas directly here to avoid "use server" export issues.
+const FacialAnalysisOutputSchema = z.object({
+  mood: z.string().describe("The estimated mood of the person in the photo (e.g., Happy, Sad, Neutral, Surprised)."),
+  confidence: z.number().describe("A confidence score (0-1) for the mood estimation."),
+  summary: z.string().describe("A brief summary of the facial expression analysis."),
+});
+
+const VoiceAnalysisOutputSchema = z.object({
+  mood: z.string().describe("The estimated primary mood from the voice tone (e.g., Calm, Anxious, Happy, Sad)."),
+  confidence: z.number().describe("A confidence score (0-1) for the mood estimation."),
+  summary: z.string().describe("A brief summary of the voice analysis, including notes on pace, tone, and sentiment."),
+});
+
 
 const CalculateWellbeingScoreInputSchema = z.object({
   conversation: z

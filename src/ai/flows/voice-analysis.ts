@@ -21,7 +21,7 @@ const VoiceAnalysisInputSchema = z.object({
 });
 export type VoiceAnalysisInput = z.infer<typeof VoiceAnalysisInputSchema>;
 
-export const VoiceAnalysisOutputSchema = z.object({
+const VoiceAnalysisOutputSchema = z.object({
   mood: z.string().describe("The estimated primary mood from the voice tone (e.g., Calm, Anxious, Happy, Sad)."),
   confidence: z.number().describe("A confidence score (0-1) for the mood estimation."),
   summary: z.string().describe("A brief summary of the voice analysis, including notes on pace, tone, and sentiment."),

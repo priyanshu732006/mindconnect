@@ -21,7 +21,7 @@ const FacialAnalysisInputSchema = z.object({
 });
 export type FacialAnalysisInput = z.infer<typeof FacialAnalysisInputSchema>;
 
-export const FacialAnalysisOutputSchema = z.object({
+const FacialAnalysisOutputSchema = z.object({
   mood: z.string().describe("The estimated mood of the person in the photo (e.g., Happy, Sad, Neutral, Surprised)."),
   confidence: z.number().describe("A confidence score (0-1) for the mood estimation."),
   summary: z.string().describe("A brief summary of the facial expression analysis."),
