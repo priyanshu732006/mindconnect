@@ -31,13 +31,14 @@ export default function AppRootPage() {
             return;
         }
 
+        // If user is logged in and already has a role, redirect to their dashboard
         if (user && role) {
             router.push(`/${role}/dashboard`);
         }
         
     }, [user, role, loading, router]);
 
-
+    // Show a loader while authentication is in progress or redirection is about to happen
     if (loading || (user && role)) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -46,6 +47,7 @@ export default function AppRootPage() {
         )
     }
     
+    // If user is authenticated but has no role, show the role selection UI
     if(user && !role){
          return (
             <div className="flex min-h-screen items-center justify-center p-4">

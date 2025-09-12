@@ -31,11 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(true);
       if (user) {
         setUser(user);
+        // Try getting role from session storage first for faster loads on navigation
         const sessionRole = sessionStorage.getItem('userRole') as UserRole;
         if (sessionRole) {
-          setRole(sessionRole);
-          setLoading(false);
+            setRole(sessionRole);
+            setLoading(false);
         } else {
+            // If not in session, fetch from DB
             const db = getDatabase();
             const userRoleRef = ref(db, `userRoles/${user.uid}`);
             try {

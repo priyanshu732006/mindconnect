@@ -28,10 +28,12 @@ export default function AuthGuard({ children, role: requiredRole }: { children: 
       return;
     }
 
+    // After loading, if user has a role and it does NOT match, redirect them
     if (userRole && userRole !== requiredRole) {
       router.push(`/${userRole}/dashboard`);
     } else if (!userRole) {
-      router.push('/landing');
+      // If loading is done and there's still no role, they need to select one.
+      router.push('/'); 
     }
     
   }, [user, userRole, loading, requiredRole, router]);
@@ -45,5 +47,6 @@ export default function AuthGuard({ children, role: requiredRole }: { children: 
     );
   }
 
+  // If all checks pass, render the children
   return <>{children}</>;
 }
