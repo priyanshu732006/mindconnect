@@ -104,11 +104,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleLogin = async (email:string, password:string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    // After login, clear session storage to force a re-fetch of role data
+    sessionStorage.removeItem('userRole');
+    sessionStorage.removeItem('counsellorType');
+    // The onAuthStateChanged listener will handle fetching and setting the new user's data
     return userCredential;
   }
   
   const handleLogout = async () => {
     await signOut(auth);
+    // The onAuthStateChanged listener will handle state cleanup
   }
 
   const handleSetRole = (newRole: UserRole) => {
