@@ -2,30 +2,21 @@
 'use client';
 
 import {
-  SidebarProvider,
-  Sidebar,
-  SidebarTrigger,
-  SidebarInset,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
-import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
+  Book,
   Bot,
-  BookHeart,
-  CalendarCheck,
-  Users,
+  Home,
   LogOut,
+  Menu,
   Smile,
+  Users,
+  CalendarCheck,
 } from 'lucide-react';
-import Logo from '@/components/logo';
 import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+
+import Logo from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,15 +25,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/context/auth-provider';
-import { useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const navItems = [
-  { href: '/student/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/student/dashboard', icon: Home, label: 'Dashboard' },
   { href: '/student/chat', icon: Bot, label: 'AI Companion' },
   { href: '/student/facial-analysis', icon: Smile, label: 'Facial Analysis' },
-  { href: '/student/resources', icon: BookHeart, label: 'Resources' },
+  { href: '/student/resources', icon: Book, label: 'Resources' },
   { href: '/student/booking', icon: CalendarCheck, label: 'Booking' },
   { href: '/student/support', icon: Users, label: 'Peer Support' },
 ];
@@ -55,59 +46,97 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const handleLogout = async () => {
     await logout();
     router.push('/');
-  }
+  };
+
+  const NavLinks = ({
+    className,
+    onClick,
+  }: {
+    className?: string;
+    onClick?: () => void;
+  }) => (
+    <nav
+      className={cn('flex items-center gap-2', className)}
+      aria-label="Main navigation"
+    >
+      {navItems.map(item => (
+        <Button
+          key={item.href}
+          asChild
+          variant={pathname === item.href ? 'secondary' : 'ghost'}
+          onClick={onClick}
+          className="justify-start"
+        >
+          <Link href={item.href}>
+            <item.icon className="h-5 w-5" />
+            <span>{item.label}</span>
+          </Link>
+        </Button>
+      ))}
+    </nav>
+  );
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <div className="flex items-center justify-between">
-            <Logo />
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex items-center gap-4">
+             <Sheet>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 md:hidden"
+                  >
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle navigation menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="flex flex-col">
+                  <Logo />
+                  <NavLinks className="mt-8 flex-col items-start gap-4" />
+                </SheetContent>
+              </Sheet>
+            <div className="hidden md:block">
+                <Logo />
+            </div>
           </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {navItems.map(item => (
-              <SidebarMenuItem key={item.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === item.href}
-                  tooltip={item.label}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
+          
+          <div className="hidden md:flex">
+             <NavLinks />
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex h-auto w-full items-center justify-start gap-2 p-2"
+                className="relative h-10 w-10 rounded-full"
               >
-                <Avatar className="h-8 w-8">
+                <Avatar className="h-10 w-10">
                   <AvatarImage
-                    src={user?.photoURL ?? "https://picsum.photos/seed/student/100/100"}
+                    src={
+                      user?.photoURL ?? 'https://picsum.photos/seed/student/100/100'
+                    }
                     alt="User"
                     data-ai-hint="student avatar"
                   />
-                  <AvatarFallback>{user?.email?.charAt(0).toUpperCase() ?? 'U'}</AvatarFallback>
+                  <AvatarFallback>
+                    {user?.email?.charAt(0).toUpperCase() ?? 'U'}
+                  </AvatarFallback>
                 </Avatar>
-                <div className="text-left group-data-[collapsible=icon]:hidden">
-                  <p className="text-sm font-medium">{user?.displayName ?? 'Student'}</p>
-                  <p className="text-xs text-muted-foreground truncate">
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="bottom" align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {user?.displayName ?? 'Student'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
                     {user?.email}
                   </p>
                 </div>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="right" align="start" className="w-56">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
@@ -118,15 +147,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset className="max-w-screen-2xl mx-auto p-4 md:p-6 lg:p-8">
-        <header className="mb-6 flex items-center justify-between">
-          <SidebarTrigger className="md:hidden" />
-          <div className="flex-1" />
-        </header>
-        {children}
-      </SidebarInset>
-    </SidebarProvider>
+        </div>
+      </header>
+      <main className="flex-1 p-4 sm:px-6 sm:py-0 md:p-8">{children}</main>
+    </div>
   );
 }
