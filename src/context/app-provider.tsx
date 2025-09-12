@@ -8,11 +8,6 @@ import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
 
-const initialContacts: Omit<TrustedContact, 'id' | 'avatar'>[] = [
-    { name: 'Priyansh', relation: 'Friend', phone: '+919876543210' },
-    { name: 'Dr. Emily Carter', relation: 'Counselor', phone: '+919988776655' },
-];
-
 type AppContextType = {
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
@@ -35,13 +30,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [wellbeingData, setWellbeingData] = useState<WellbeingData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>(() => 
-    initialContacts.map((contact, index) => ({
-      ...contact,
-      id: (index + 1).toString(),
-      avatar: `https://picsum.photos/seed/${index + 1}/100/100`,
-    }))
-  );
+  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
   const [facialAnalysis, setFacialAnalysis] = useState<FacialAnalysisData | null>(null);
   const [voiceAnalysis, setVoiceAnalysis] = useState<VoiceAnalysisData | null>(null);
 
