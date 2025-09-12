@@ -1,4 +1,7 @@
 
+import { FacialAnalysisOutput } from "./ai/flows/facial-analysis";
+import { VoiceAnalysisOutput } from "./ai/flows/voice-analysis";
+
 export type Message = {
   id: string;
   role: 'user' | 'assistant';
@@ -17,3 +20,6 @@ export type TrustedContact = {
     avatar: string;
     phone: string;
 };
+
+export type FacialAnalysisData = FacialAnalysisOutput;
+export type VoiceAnalysisData = VoiceAnalysisOutput;

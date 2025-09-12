@@ -4,8 +4,8 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt';
-import { wellbeingScoreFromConversation } from '@/ai/flows/wellbeing-score-from-conversation';
-import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
+import { calculateWellbeingScore } from '@/ai/flows/calculate-wellbeing-score';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
 import { analyzeVoice, VoiceAnalysisOutput } from '@/ai/flows/voice-analysis';
 import twilio from 'twilio';
@@ -35,15 +35,20 @@ Companion:`;
 }
 
 export async function analyzeWellbeing(
-  history: Message[]
+  messages: Message[],
+  facialAnalysis: FacialAnalysisData | null,
+  voiceAnalysis: VoiceAnalysisData | null,
 ): Promise<WellbeingData | null> {
-  if (history.length === 0) return null;
   try {
-    const conversation = history
+    const conversation = messages
       .map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`)
       .join('\n\n');
 
-    const result = await wellbeingScoreFromConversation({ conversation });
+    const result = await calculateWellbeingScore({ 
+      conversation: conversation.length > 0 ? conversation : undefined,
+      facialAnalysis: facialAnalysis || undefined,
+      voiceAnalysis: voiceAnalysis || undefined,
+     });
     return result;
   } catch (error) {
     console.error('Error analyzing wellbeing:', error);
@@ -77,8 +82,11 @@ export async function sendSmsAction(to: string, body: string): Promise<{ success
     const from = process.env.TWILIO_PHONE_NUMBER;
 
     if (!accountSid || !authToken || !from) {
-        console.error('Twilio credentials are not configured correctly in .env file.');
         return { success: false, error: 'Twilio is not configured. Please check your environment variables.' };
+    }
+    
+    if(!accountSid.startsWith("AC")){
+       return { success: false, error: 'Your Twilio Account SID appears to be invalid. Please check your environment variables.' };
     }
 
     const phoneRegex = new RegExp(

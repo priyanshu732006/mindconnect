@@ -23,21 +23,22 @@ import Link from 'next/link';
 import { Skeleton } from '../ui/skeleton';
 
 export function WellbeingScore() {
-  const { wellbeingData, messages, isAnalyzing } =
+  const { wellbeingData, messages, facialAnalysis, voiceAnalysis, isAnalyzing } =
     useApp();
 
   const score = wellbeingData?.wellbeingScore ?? 0;
   const categoryInfo = getWellbeingCategory(score);
   const chartData = [{ name: 'score', value: score }];
+  const hasAnyData = messages.length > 0 || facialAnalysis || voiceAnalysis;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Your Well-being Score</CardTitle>
         <CardDescription>
-          {messages.length > 0 && wellbeingData
-            ? 'Based on your recent conversation, updated in real-time.'
-            : 'Start a conversation to see your score.'}
+          {hasAnyData && wellbeingData
+            ? 'Based on your recent activity, updated in real-time.'
+            : 'Use any of the analysis tools to see your score.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -45,7 +46,7 @@ export function WellbeingScore() {
           {isAnalyzing && !wellbeingData ? (
              <div className="flex h-full flex-col items-center justify-center text-center">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="mt-4 text-muted-foreground">Analyzing your conversation...</p>
+                <p className="mt-4 text-muted-foreground">Analyzing your data...</p>
              </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
@@ -112,13 +113,13 @@ export function WellbeingScore() {
         )}
       </CardContent>
        <CardFooter className="flex-col gap-4 items-center justify-center text-xs text-muted-foreground">
-         {messages.length === 0 && (
+         {!hasAnyData && (
             <Button asChild>
-                <Link href="/student/chat">Chat Now</Link>
+                <Link href="/student/chat">Get Your Score</Link>
             </Button>
          )}
           <p>
-            {messages.length > 0 ? 'Your score updates automatically after each AI response.' : 'Your well-being analysis will appear here after your first chat.'}
+            {hasAnyData ? 'Your score updates automatically based on your activity.' : 'Your well-being analysis will appear here after your first activity.'}
           </p>
       </CardFooter>
     </Card>

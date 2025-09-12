@@ -2,11 +2,16 @@
 'use client';
 
 import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData } from '@/lib/types';
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
+
+const initialContacts: Omit<TrustedContact, 'id' | 'avatar'>[] = [
+    { name: 'Priyansh', relation: 'Friend', phone: '+919876543210' },
+    { name: 'Dr. Emily Carter', relation: 'Counselor', phone: '+919988776655' },
+];
 
 type AppContextType = {
   messages: Message[];
@@ -14,22 +19,32 @@ type AppContextType = {
   addMessage: (role: 'user' | 'assistant', content: string) => void;
   wellbeingData: WellbeingData | null;
   isAnalyzing: boolean;
-  analyzeConversation: () => Promise<void>;
   trustedContacts: TrustedContact[];
   addContact: (contact: Omit<TrustedContact, 'id' | 'avatar'>) => void;
   updateContact: (contact: TrustedContact) => void;
   deleteContact: (contactId: string) => void;
+  facialAnalysis: FacialAnalysisData | null;
+  setFacialAnalysis: React.Dispatch<React.SetStateAction<FacialAnalysisData | null>>;
+  voiceAnalysis: VoiceAnalysisData | null;
+  setVoiceAnalysis: React.Dispatch<React.SetStateAction<VoiceAnalysisData | null>>;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [wellbeingData, setWellbeingData] = useState<WellbeingData | null>(
-    null
-  );
+  const [wellbeingData, setWellbeingData] = useState<WellbeingData | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
+  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>(() => 
+    initialContacts.map((contact, index) => ({
+      ...contact,
+      id: (index + 1).toString(),
+      avatar: `https://picsum.photos/seed/${index + 1}/100/100`,
+    }))
+  );
+  const [facialAnalysis, setFacialAnalysis] = useState<FacialAnalysisData | null>(null);
+  const [voiceAnalysis, setVoiceAnalysis] = useState<VoiceAnalysisData | null>(null);
+
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -37,11 +52,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
   };
 
-  const analyzeConversation = async () => {
-    if (messages.length === 0) return;
+  const analyzeCurrentState = useCallback(async () => {
     setIsAnalyzing(true);
     try {
-      const data = await analyzeWellbeing(messages);
+      const data = await analyzeWellbeing(messages, facialAnalysis, voiceAnalysis);
       if (data) {
         setWellbeingData(data);
       }
@@ -50,7 +64,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsAnalyzing(false);
     }
-  };
+  }, [messages, facialAnalysis, voiceAnalysis]);
 
    const addContact = (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
     const newId = (trustedContacts.length + 1).toString() + Date.now().toString();
@@ -73,26 +87,28 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteContact = (contactId: string) => {
     setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
   };
-
-
+  
   useEffect(() => {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.role === 'assistant') {
-      analyzeConversation();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages]);
+    analyzeCurrentState();
+  }, [messages, facialAnalysis, voiceAnalysis, analyzeCurrentState]);
   
   const triggerCrisisAlerts = useCallback(async (currentContacts: TrustedContact[]) => {
     const studentName = user?.displayName || 'A student';
     const messageBody = `Crisis Alert: ${studentName} may be in distress. Please check in with them. This is an automated message from the Student Wellness Hub.`;
 
+    if(currentContacts.length === 0) {
+        toast({
+            variant: 'destructive',
+            title: 'No Trusted Contacts',
+            description: 'Please add a trusted contact to send crisis alerts.',
+            duration: 10000,
+        });
+        return;
+    }
+
     const contactPromises = currentContacts.map(contact => 
         sendSmsAction(contact.phone, messageBody)
     );
-
-    // In a real app, you would also notify the on-campus counselor.
-    // For now, we just notify trusted contacts.
 
     const results = await Promise.all(contactPromises);
     const successfulContacts = currentContacts.filter((_, index) => results[index].success);
@@ -122,10 +138,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [user, toast]);
 
   useEffect(() => {
-    if (wellbeingData) {
+    let triggered = false;
+    if (wellbeingData && !triggered) {
       const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
       if (name === 'Crisis') {
-        triggerCrisisAlerts(trustedContacts);
+        // This is a simplistic check to prevent spamming alerts. 
+        // In a real app, this should be more robust (e.g., timestamp-based).
+        const lastAlert = sessionStorage.getItem('lastCrisisAlert');
+        if(!lastAlert || Date.now() - Number(lastAlert) > 300000) { // 5 minutes cooldown
+           triggerCrisisAlerts(trustedContacts);
+           sessionStorage.setItem('lastCrisisAlert', Date.now().toString());
+           triggered = true;
+        }
       }
     }
   }, [wellbeingData, triggerCrisisAlerts, trustedContacts]);
@@ -137,11 +161,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     addMessage,
     wellbeingData,
     isAnalyzing,
-    analyzeConversation,
     trustedContacts,
     addContact,
     updateContact,
     deleteContact,
+    facialAnalysis,
+    setFacialAnalysis,
+    voiceAnalysis,
+    setVoiceAnalysis,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

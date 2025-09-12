@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mic, Square, UserCheck } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { analyzeVoiceAction } from '@/app/actions';
-import type { VoiceAnalysisOutput } from '@/ai/flows/voice-analysis';
+import { useApp } from '@/context/app-provider';
 
 export default function VoiceAnalysisPage() {
   const { toast } = useToast();
@@ -18,7 +18,7 @@ export default function VoiceAnalysisPage() {
   const [hasMicPermission, setHasMicPermission] = useState<boolean | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<VoiceAnalysisOutput | null>(null);
+  const { voiceAnalysis, setVoiceAnalysis } = useApp();
   const [recordingTime, setRecordingTime] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -28,7 +28,7 @@ export default function VoiceAnalysisPage() {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         setHasMicPermission(true);
         setIsRecording(true);
-        setAnalysisResult(null);
+        setVoiceAnalysis(null);
 
         mediaRecorderRef.current = new MediaRecorder(stream);
         mediaRecorderRef.current.ondataavailable = (event) => {
@@ -80,7 +80,11 @@ export default function VoiceAnalysisPage() {
         try {
             const result = await analyzeVoiceAction(audioDataUri);
             if (result) {
-                setAnalysisResult(result);
+                setVoiceAnalysis(result);
+                toast({
+                    title: 'Analysis Complete',
+                    description: 'Your voice analysis has been updated.',
+                });
             } else {
                 toast({
                     variant: 'destructive',
@@ -99,7 +103,7 @@ export default function VoiceAnalysisPage() {
             setIsAnalyzing(false);
         }
     };
-  }, [toast]);
+  }, [toast, setVoiceAnalysis]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -162,15 +166,15 @@ export default function VoiceAnalysisPage() {
           </div>
       )}
 
-      {analysisResult && (
+      {voiceAnalysis && (
         <Card>
           <CardHeader>
             <CardTitle>Analysis Result</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-lg"><strong>Mood:</strong> {analysisResult.mood}</p>
-            <p><strong>Confidence:</strong> {Math.round(analysisResult.confidence * 100)}%</p>
-            <p className="text-muted-foreground">{analysisResult.summary}</p>
+            <p className="text-lg"><strong>Mood:</strong> {voiceAnalysis.mood}</p>
+            <p><strong>Confidence:</strong> {Math.round(voiceAnalysis.confidence * 100)}%</p>
+            <p className="text-muted-foreground">{voiceAnalysis.summary}</p>
           </CardContent>
         </Card>
       )}

@@ -9,6 +9,7 @@ import { Loader2, Camera, UserCheck } from 'lucide-react';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { analyzeFacialExpressionAction } from '@/app/actions';
 import type { FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
+import { useApp } from '@/context/app-provider';
 
 export default function FacialAnalysisPage() {
   const { toast } = useToast();
@@ -16,7 +17,7 @@ export default function FacialAnalysisPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<FacialAnalysisOutput | null>(null);
+  const { facialAnalysis, setFacialAnalysis } = useApp();
   const [isCameraOn, setIsCameraOn] = useState(false);
 
   const startCamera = async () => {
@@ -53,7 +54,7 @@ export default function FacialAnalysisPage() {
     if (!videoRef.current || !canvasRef.current) return;
 
     setIsAnalyzing(true);
-    setAnalysisResult(null);
+    setFacialAnalysis(null);
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -67,7 +68,11 @@ export default function FacialAnalysisPage() {
         try {
             const result = await analyzeFacialExpressionAction(photoDataUri);
             if (result) {
-                setAnalysisResult(result);
+                setFacialAnalysis(result);
+                 toast({
+                    title: 'Analysis Complete',
+                    description: 'Your facial analysis has been updated.',
+                });
             } else {
                 toast({
                     variant: 'destructive',
@@ -86,7 +91,7 @@ export default function FacialAnalysisPage() {
             setIsAnalyzing(false);
         }
     }
-  }, []);
+  }, [setFacialAnalysis, toast]);
 
   return (
     <div className="space-y-8">
@@ -150,15 +155,15 @@ export default function FacialAnalysisPage() {
           </div>
       )}
 
-      {analysisResult && (
+      {facialAnalysis && (
         <Card>
           <CardHeader>
             <CardTitle>Analysis Result</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
-            <p className="text-lg"><strong>Mood:</strong> {analysisResult.mood}</p>
-            <p><strong>Confidence:</strong> {Math.round(analysisResult.confidence * 100)}%</p>
-            <p className="text-muted-foreground">{analysisResult.summary}</p>
+            <p className="text-lg"><strong>Mood:</strong> {facialAnalysis.mood}</p>
+            <p><strong>Confidence:</strong> {Math.round(facialAnalysis.confidence * 100)}%</p>
+            <p className="text-muted-foreground">{facialAnalysis.summary}</p>
           </CardContent>
         </Card>
       )}
