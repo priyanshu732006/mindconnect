@@ -51,6 +51,8 @@ export default function VoiceAnalysisPage() {
           description: 'Please enable microphone permissions in your browser settings.',
         });
       }
+    } else {
+        setHasMicPermission(false);
     }
   };
   
@@ -60,11 +62,21 @@ export default function VoiceAnalysisPage() {
           setIsRecording(false);
           if(timerRef.current) clearInterval(timerRef.current);
           
-          // Stop all media tracks
           const stream = mediaRecorderRef.current.stream;
           stream.getTracks().forEach(track => track.stop());
       }
   }
+
+    useEffect(() => {
+        return () => {
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+                stopRecording();
+            }
+             if (timerRef.current) {
+                clearInterval(timerRef.current);
+            }
+        }
+    }, []);
 
   const handleAnalysis = useCallback(async () => {
     if (audioChunksRef.current.length === 0) return;
@@ -140,14 +152,14 @@ export default function VoiceAnalysisPage() {
             <Alert variant="destructive">
               <AlertTitle>Microphone Access Required</AlertTitle>
               <AlertDescription>
-                Please allow microphone access in your browser to use this feature.
+                Please allow microphone access in your browser to use this feature. You may need to refresh the page after granting permission.
               </AlertDescription>
             </Alert>
           )}
 
           <div className="flex justify-center gap-2">
              {!isRecording ? (
-                 <Button onClick={startRecording} disabled={isAnalyzing}>
+                 <Button onClick={startRecording} disabled={isAnalyzing || hasMicPermission === false}>
                      <Mic className="mr-2" /> Start Recording
                  </Button>
              ) : (

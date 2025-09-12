@@ -93,7 +93,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [messages, facialAnalysis, voiceAnalysis, analyzeCurrentState]);
   
   const triggerCrisisAlerts = useCallback(async (currentContacts: TrustedContact[]) => {
-    const studentName = user?.displayName || 'A student';
+    if (!user || !user.displayName) {
+        // Don't send alerts if there's no user or user name.
+        return;
+    }
+    const studentName = user.displayName;
     const messageBody = `Crisis Alert: ${studentName} may be in distress. Please check in with them. This is an automated message from the Student Wellness Hub.`;
 
     if(currentContacts.length === 0) {

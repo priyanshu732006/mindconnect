@@ -19,11 +19,13 @@ export default function FacialAnalysisPage() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { facialAnalysis, setFacialAnalysis } = useApp();
   const [isCameraOn, setIsCameraOn] = useState(false);
+  const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        streamRef.current = stream;
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -38,17 +40,27 @@ export default function FacialAnalysisPage() {
           description: 'Please enable camera permissions in your browser settings.',
         });
       }
+    } else {
+        setHasCameraPermission(false);
     }
   };
   
   const stopCamera = () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-          const stream = videoRef.current.srcObject as MediaStream;
-          stream.getTracks().forEach(track => track.stop());
-          videoRef.current.srcObject = null;
+      if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if(videoRef.current) {
+        videoRef.current.srcObject = null;
       }
       setIsCameraOn(false);
+      streamRef.current = null;
   }
+
+  useEffect(() => {
+    return () => {
+        stopCamera();
+    }
+  }, []);
 
   const handleAnalysis = useCallback(async () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -121,14 +133,14 @@ export default function FacialAnalysisPage() {
             <Alert variant="destructive">
               <AlertTitle>Camera Access Required</AlertTitle>
               <AlertDescription>
-                Please allow camera access in your browser to use this feature.
+                Please allow camera access in your browser settings to use this feature. You may need to refresh the page after granting permission.
               </AlertDescription>
             </Alert>
           )}
 
           <div className="flex gap-2">
              {!isCameraOn ? (
-                 <Button onClick={startCamera}>
+                 <Button onClick={startCamera} disabled={hasCameraPermission === false}>
                      <Camera className="mr-2" /> Start Camera
                  </Button>
              ) : (
