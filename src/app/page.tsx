@@ -27,7 +27,7 @@ export default function AppRootPage() {
         }
 
         if (!user) {
-            router.push('/login');
+            router.push('/landing'); // Redirect unauthenticated users to the public landing page
             return;
         }
 
