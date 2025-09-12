@@ -10,7 +10,7 @@ import { Loader2, ArrowRight } from "lucide-react";
 import Logo from "@/components/logo";
 import { useApp } from "@/context/app-provider";
 
-export default function LandingPage() {
+export default function AppRootPage() {
     const { user, role, loading, setRole: setAuthRole } = useAuth();
     const { setNavItemsByRole } = useApp();
     const router = useRouter();

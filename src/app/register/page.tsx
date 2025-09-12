@@ -77,7 +77,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/landing');
+      router.push('/');
     }
   }, [user, router]);
 
