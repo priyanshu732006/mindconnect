@@ -1,3 +1,4 @@
+
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -6,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export type WellbeingCategory = {
-  name: 'Stable' | 'Mild Concern' | 'Moderate Concern' | 'Crisis';
+  name: 'Stable' | 'Mild Concern' | 'Moderate Concern' | 'Severe Concern' | 'Crisis';
   colorClass: string;
   backgroundColorClass: string;
   ringColorClass: string;
@@ -40,6 +41,15 @@ export function getWellbeingCategory(score: number): WellbeingCategory {
       ringColorClass: 'ring-chart-3',
       rechartsColor: 'hsl(var(--chart-3))',
     };
+  }
+  if (score > 10) {
+    return {
+        name: 'Severe Concern',
+        colorClass: 'text-chart-5',
+        backgroundColorClass: 'bg-chart-5/10',
+        ringColorClass: 'ring-chart-5',
+        rechartsColor: 'hsl(var(--chart-5))',
+    }
   }
   return {
     name: 'Crisis',
