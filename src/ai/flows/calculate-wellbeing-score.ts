@@ -45,6 +45,7 @@ const CalculateWellbeingScoreOutputSchema = z.object({
     ),
   summary: z
     .string()
+    .optional()
     .describe('A brief summary of the conversation and the score.'),
 });
 export type CalculateWellbeingScoreOutput = z.infer<
@@ -87,7 +88,7 @@ const prompt = ai.definePrompt({
   - Summary: {{voiceAnalysis.summary}}
   {{/if}}
 
-  Based on the available data, provide a well-being score and a brief summary of your analysis. If no data is provided, the score should be 0 and the summary should state that more data is needed.
+  Based on the available data, provide a well-being score and a brief summary of your analysis.
   `,
 });
 
