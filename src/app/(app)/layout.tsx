@@ -31,7 +31,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     await logout();
-    router.push('/');
+    router.push('/login');
   };
 
   const closeSheet = () => setSheetOpen(false);
@@ -110,7 +110,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <AvatarImage
                   src={
                     user?.photoURL ??
-                    `https://picsum.photos/seed/${role}/100/100`
+                    `https://picsum.photos/seed/${role ?? 'user'}/100/100`
                   }
                   alt="User"
                   data-ai-hint={`${role} avatar`}
@@ -130,9 +130,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
                 </p>
-                 <p className="text-xs leading-none text-muted-foreground capitalize pt-1">
+                 {role && (<p className="text-xs leading-none text-muted-foreground capitalize pt-1">
                   {role}
-                </p>
+                </p>)}
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />

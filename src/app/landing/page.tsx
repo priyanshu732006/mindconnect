@@ -8,13 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowRight } from "lucide-react";
 import Logo from "@/components/logo";
+import { useApp } from "@/context/app-provider";
 
 export default function LandingPage() {
-    const { user, role, loading, setRole } = useAuth();
+    const { user, role, loading, setRole: setAuthRole } = useAuth();
+    const { setNavItemsByRole } = useApp();
     const router = useRouter();
 
     const handleRoleSelect = (selectedRole: UserRole) => {
-        setRole(selectedRole);
+        setAuthRole(selectedRole); // Set the role in the auth context
+        setNavItemsByRole(selectedRole); // Set the nav items in the app context
         router.push(`/${selectedRole}/dashboard`);
     }
 

@@ -2,8 +2,8 @@
 'use client';
 
 import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem } from '@/lib/types';
-import React, { useMemo } from 'react';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole } from '@/lib/types';
+import React, { useMemo, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
@@ -27,6 +27,7 @@ type AppContextType = {
   voiceAnalysis: VoiceAnalysisData | null;
   setVoiceAnalysis: React.Dispatch<React.SetStateAction<VoiceAnalysisData | null>>;
   navItems: NavItem[];
+  setNavItemsByRole: (role: UserRole | null) => void;
 };
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -38,28 +39,37 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [trustedContacts, setTrustedContacts] = React.useState<TrustedContact[]>([]);
   const [facialAnalysis, setFacialAnalysis] = React.useState<FacialAnalysisData | null>(null);
   const [voiceAnalysis, setVoiceAnalysis] = React.useState<VoiceAnalysisData | null>(null);
+  const [navItems, setNavItems] = React.useState<NavItem[]>(studentNavItems);
 
   const { toast } = useToast();
-  const { user, role } = useAuth();
-
-  const navItems = useMemo(() => {
+  const { user } = useAuth();
+  
+  const setNavItemsByRole = useCallback((role: UserRole | null) => {
     switch (role) {
       case 'admin':
-        return adminNavItems;
+        setNavItems(adminNavItems);
+        break;
       case 'counsellor':
-        return counsellorNavItems;
+        setNavItems(counsellorNavItems);
+        break;
       case 'peer-buddy':
-        return peerBuddyNavItems;
+        setNavItems(peerBuddyNavItems);
+        break;
+      case 'student':
       default:
-        return studentNavItems;
+        setNavItems(studentNavItems);
+        break;
     }
-  }, [role]);
+  }, []);
+
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
   };
 
   const analyzeCurrentState = React.useCallback(async () => {
+    if (!user) return; // Don't analyze if there's no user
+    
     if (messages.length === 0 && !facialAnalysis && !voiceAnalysis) {
       setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
       return;
@@ -76,7 +86,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsAnalyzing(false);
     }
-  }, [messages, facialAnalysis, voiceAnalysis]);
+  }, [messages, facialAnalysis, voiceAnalysis, user]);
 
    const addContact = (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
     const newId = (trustedContacts.length + 1).toString() + Date.now().toString();
@@ -186,6 +196,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     voiceAnalysis,
     setVoiceAnalysis,
     navItems,
+    setNavItemsByRole,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
