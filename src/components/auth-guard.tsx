@@ -33,7 +33,8 @@ export default function AuthGuard({ children, role: requiredRole }: { children: 
       router.push(`/${userRole}/dashboard`);
     } else if (!userRole) {
       // If loading is done and there's still no role, they need to select one.
-      router.push('/'); 
+      // This is a fallback; ideally, this state should not be reached in a normal flow.
+      router.push('/landing'); 
     }
     
   }, [user, userRole, loading, requiredRole, router]);
