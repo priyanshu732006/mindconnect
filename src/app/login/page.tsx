@@ -28,7 +28,7 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const { login, user } = useAuth();
+  const { login, user, loading } = useAuth();
   const router = useRouter();
   
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -65,7 +65,6 @@ export default function LoginPage() {
                     description = "Invalid email or password."
                     break;
                 case 'auth/custom-error':
-                    // This is our custom error from the auth provider for role mismatch
                     description = (error as any).customData?._tokenResponse?.error?.message || error.message;
                     break;
                 default:
@@ -85,16 +84,24 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       router.push('/');
     }
-  }, [user, router]);
+  }, [user, loading, router]);
   
   const roleConfig = {
       [UserRole.student]: { icon: User, label: "Student" },
       [UserRole.counsellor]: { icon: Briefcase, label: "Counsellor" },
       [UserRole['peer-buddy']]: { icon: Users, label: "Peer Buddy" },
       [UserRole.admin]: { icon: UserCog, label: "Admin" },
+  }
+  
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   return (
