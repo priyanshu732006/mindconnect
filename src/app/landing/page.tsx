@@ -19,17 +19,21 @@ export default function LandingPage() {
     }
 
     useEffect(() => {
-        // If a role is already set, redirect to the corresponding dashboard.
-        if (!loading && user && role) {
+        if (loading) {
+            return; // Wait for auth state to be confirmed
+        }
+
+        if (!user) {
+            router.push('/login');
+            return;
+        }
+
+        // If a user is logged in and has a role, redirect them to their dashboard
+        if (user && role) {
             router.push(`/${role}/dashboard`);
         }
+        // If they are logged in but have no role, they will see the role selection UI.
     }, [user, role, loading, router]);
-    
-     useEffect(() => {
-        if (!loading && !user) {
-            router.push('/login');
-        }
-    }, [user, loading, router]);
 
 
     if (loading || (user && role)) {
@@ -63,5 +67,10 @@ export default function LandingPage() {
         );
     }
 
-    return null;
+    // This state is temporary while redirects are happening.
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
 }

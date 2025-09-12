@@ -28,7 +28,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setLoading(true);
       if (user) {
         setUser(user);
         const sessionRole = sessionStorage.getItem('userRole') as UserRole;
@@ -80,8 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Re-trigger onAuthStateChanged to get updated user info
       setUser({...user, displayName: fullName });
-      setRole(role);
-      sessionStorage.setItem('userRole', role);
     }
   };
 
@@ -89,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     if (user) {
+        setLoading(true);
         const db = getDatabase();
         const userRoleRef = ref(db, `userRoles/${user.uid}`);
         const snapshot = await get(userRoleRef);
@@ -101,6 +99,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setRole(UserRole.student);
             sessionStorage.setItem('userRole', UserRole.student);
         }
+        setLoading(false);
     }
     return userCredential;
   }
