@@ -26,33 +26,6 @@ export function WellbeingScore() {
   const { wellbeingData, messages, isAnalyzing } =
     useApp();
 
-  if (messages.length === 0) {
-    return (
-      <Card className="flex flex-col items-center justify-center text-center p-8">
-        <CardHeader>
-          <CardTitle>Welcome to Your Dashboard</CardTitle>
-          <CardDescription>
-            Start a conversation with your AI Companion to get your first
-            well-being analysis.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <img
-            src="https://picsum.photos/seed/zen/300/200"
-            alt="Calm illustration"
-            className="rounded-lg"
-            data-ai-hint="calm relax"
-          />
-        </CardContent>
-        <CardFooter>
-          <Button asChild>
-            <Link href="/student/chat">Chat Now</Link>
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
-
   const score = wellbeingData?.wellbeingScore ?? 0;
   const categoryInfo = getWellbeingCategory(score);
   const chartData = [{ name: 'score', value: score }];
@@ -62,7 +35,7 @@ export function WellbeingScore() {
       <CardHeader>
         <CardTitle>Your Well-being Score</CardTitle>
         <CardDescription>
-          {wellbeingData
+          {messages.length > 0 && wellbeingData
             ? 'Based on your recent conversation, updated in real-time.'
             : 'Start a conversation to see your score.'}
         </CardDescription>
@@ -138,8 +111,15 @@ export function WellbeingScore() {
           </div>
         )}
       </CardContent>
-       <CardFooter className="justify-center text-xs text-muted-foreground">
-          <p>Your score updates automatically after each AI response.</p>
+       <CardFooter className="flex-col gap-4 items-center justify-center text-xs text-muted-foreground">
+         {messages.length === 0 && (
+            <Button asChild>
+                <Link href="/student/chat">Chat Now</Link>
+            </Button>
+         )}
+          <p>
+            {messages.length > 0 ? 'Your score updates automatically after each AI response.' : 'Your well-being analysis will appear here after your first chat.'}
+          </p>
       </CardFooter>
     </Card>
   );
