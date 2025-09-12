@@ -16,25 +16,20 @@ export default function AppRootPage() {
             return; // Wait until auth state is determined
         }
 
-        if (!user) {
-            router.push('/landing');
-            return;
-        }
-        
-        // If user is logged in and has a role, redirect to their dashboard
-        if (role) {
+        if (user && role) {
+            // If user and role are present, redirect to the correct dashboard
             setNavItemsByRole(role);
             router.push(`/${role}/dashboard`);
-        } else {
-            // This case should ideally not be hit for a logged-in user
-            // as the role should be set upon login/registration.
-            // As a fallback, we push them to the landing page to restart the flow.
+        } else if (!user) {
+            // If there's no user, redirect to the landing page
             router.push('/landing');
         }
+        // If there's a user but no role yet, we wait. 
+        // The auth provider is likely still fetching it. The effect will re-run when `role` updates.
         
     }, [user, role, loading, router, setNavItemsByRole]);
     
-    // Fallback loader for any transient states.
+    // Show a loader while waiting for redirection to happen.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
