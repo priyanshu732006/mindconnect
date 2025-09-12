@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export type WellbeingCategory = {
-  name: 'Stable' | 'Mild Concern' | 'Moderate Concern' | 'Severe Concern' | 'Crisis';
+  name: 'Low Concern' | 'Moderate Concern' | 'High Concern' | 'Crisis';
   colorClass: string;
   backgroundColorClass: string;
   ringColorClass: string;
@@ -17,34 +17,25 @@ export type WellbeingCategory = {
 export function getWellbeingCategory(score: number): WellbeingCategory {
   if (score > 75) {
     return {
-      name: 'Stable',
+      name: 'Low Concern',
       colorClass: 'text-chart-1',
       backgroundColorClass: 'bg-chart-1/10',
       ringColorClass: 'ring-chart-1',
       rechartsColor: 'hsl(var(--chart-1))',
     };
   }
-  if (score > 50) {
+  if (score > 35) {
     return {
-      name: 'Mild Concern',
+      name: 'Moderate Concern',
       colorClass: 'text-chart-2',
       backgroundColorClass: 'bg-chart-2/10',
       ringColorClass: 'ring-chart-2',
       rechartsColor: 'hsl(var(--chart-2))',
     };
   }
-  if (score > 25) {
-    return {
-      name: 'Moderate Concern',
-      colorClass: 'text-chart-3',
-      backgroundColorClass: 'bg-chart-3/10',
-      ringColorClass: 'ring-chart-3',
-      rechartsColor: 'hsl(var(--chart-3))',
-    };
-  }
   if (score > 10) {
     return {
-        name: 'Severe Concern',
+        name: 'High Concern',
         colorClass: 'text-chart-5',
         backgroundColorClass: 'bg-chart-5/10',
         ringColorClass: 'ring-chart-5',
@@ -59,3 +50,4 @@ export function getWellbeingCategory(score: number): WellbeingCategory {
     rechartsColor: 'hsl(var(--chart-4))',
   };
 }
+
