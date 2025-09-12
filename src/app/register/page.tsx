@@ -23,18 +23,27 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const baseSchema = z.object({
     fullName: z.string().min(1, "Full name is required."),
-    email: z.string().email("Please enter a valid email address."),
+    email: z.string().email("Please enter a valid college email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
     role: z.nativeEnum(UserRole),
 });
 
+const studentSchema = baseSchema.extend({
+    role: z.literal(UserRole.student),
+    collegeName: z.string().min(1, "College name is required."),
+    course: z.string().min(1, "Course is required."),
+    year: z.string().min(1, "Year of study is required."),
+    personalEmail: z.string().email("Please enter a valid personal email.").optional().or(z.literal('')),
+});
+
 const counsellorSchema = baseSchema.extend({
+     role: z.literal(UserRole.counsellor),
      counsellorType: z.enum(['on-campus', 'external'], { required_error: "Please select counsellor type" }),
 });
 
 const registerSchema = z.discriminatedUnion("role", [
-    baseSchema.extend({ role: z.literal(UserRole.student) }),
-    counsellorSchema.extend({ role: z.literal(UserRole.counsellor) }),
+    studentSchema,
+    counsellorSchema,
     baseSchema.extend({ role: z.literal(UserRole.admin) }),
     baseSchema.extend({ role: z.literal(UserRole['peer-buddy']) })
 ]);
@@ -59,13 +68,21 @@ export default function RegisterPage() {
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
       try {
-        const { role } = values;
+        let studentDetails;
         let counsellorType;
-        if(values.role === UserRole.counsellor){
-            counsellorType = values.counsellorType;
+
+        if (values.role === UserRole.student) {
+          studentDetails = {
+            collegeName: values.collegeName,
+            course: values.course,
+            year: values.year,
+            personalEmail: values.personalEmail,
+          };
+        } else if (values.role === UserRole.counsellor) {
+          counsellorType = values.counsellorType;
         }
 
-        await register(values.email, values.password, values.fullName, role, counsellorType);
+        await register(values.email, values.password, values.fullName, values.role, { counsellorType, studentDetails });
         
         toast({
             title: "Registration Successful",
@@ -99,7 +116,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/');
+      router.push('/landing');
     }
   }, [user, router]);
 
@@ -118,19 +135,6 @@ export default function RegisterPage() {
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardContent className="space-y-4">
-                    <FormField
-                        control={form.control}
-                        name="fullName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Full Name</FormLabel>
-                                <FormControl>
-                                    <Input placeholder="Alex Doe" {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
                      <FormField
                         control={form.control}
                         name="role"
@@ -154,20 +158,89 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                     />
-
                     <FormField
                         control={form.control}
-                        name="email"
+                        name="fullName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>Full Name</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="user@example.com" {...field} />
+                                    <Input placeholder="Alex Doe" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>{watchedRole === UserRole.student ? 'College Email' : 'Email'}</FormLabel>
+                                <FormControl>
+                                    <Input placeholder={watchedRole === UserRole.student ? "user@college.edu" : "user@example.com"} {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {watchedRole === UserRole.student && (
+                        <>
+                             <FormField
+                                control={form.control}
+                                name="personalEmail"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Personal Email (Optional)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="alex.doe@email.com" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="collegeName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>College Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="University of Example" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="course"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Course</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., Computer Science" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="year"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Year of Study</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g., 2nd Year" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                        </>
+                    )}
 
                     <FormField
                         control={form.control}
@@ -240,3 +313,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+    

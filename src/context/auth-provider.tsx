@@ -16,7 +16,7 @@ type AuthContextType = {
   counsellorType: CounsellorType | null;
   setRole: (role: UserRole) => void;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
-  register: (email: string, password: string, fullName: string, role: UserRole, counsellorType?: CounsellorType) => Promise<void>;
+  register: (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any }) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const register = async (email: string, password: string, fullName: string, role: UserRole, counsellorType?: CounsellorType) => {
+  const register = async (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     if (user) {
@@ -99,10 +99,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const db = getDatabase();
       const userRoleRef = ref(db, `userRoles/${user.uid}`);
-      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType } = { role, fullName };
-      if (role === UserRole.counsellor && counsellorType) {
-        userData.counsellorType = counsellorType;
+      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any } = { role, fullName, ...details?.studentDetails };
+      
+      if (role === UserRole.counsellor && details?.counsellorType) {
+        userData.counsellorType = details.counsellorType;
       }
+      
       await set(userRoleRef, userData);
 
       // Do not set user/role state here. The onAuthStateChanged listener will handle it.
@@ -211,3 +213,5 @@ export function useAuth() {
   }
   return context;
 }
+
+    
