@@ -28,29 +28,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      setLoading(true);
       if (user) {
         setUser(user);
-        // Fetch role from session storage or database
         const sessionRole = sessionStorage.getItem('userRole') as UserRole;
         if (sessionRole) {
           setRole(sessionRole);
+          setLoading(false);
         } else {
-            // Fallback to database if not in session
             const db = getDatabase();
             const userRoleRef = ref(db, `userRoles/${user.uid}`);
-            const snapshot = await get(userRoleRef);
-            if(snapshot.exists()) {
-                const userRole = snapshot.val().role;
-                setRole(userRole);
-                sessionStorage.setItem('userRole', userRole);
+            try {
+                const snapshot = await get(userRoleRef);
+                if(snapshot.exists()) {
+                    const userRole = snapshot.val().role;
+                    setRole(userRole);
+                    sessionStorage.setItem('userRole', userRole);
+                } else {
+                    setRole(null); // No role found
+                }
+            } catch (error) {
+                console.error("Failed to fetch user role:", error);
+                setRole(null);
+            } finally {
+                setLoading(false);
             }
         }
       } else {
         setUser(null);
         setRole(null);
         sessionStorage.removeItem('userRole');
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

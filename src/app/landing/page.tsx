@@ -24,6 +24,12 @@ export default function LandingPage() {
             router.push(`/${role}/dashboard`);
         }
     }, [user, role, loading, router]);
+    
+     useEffect(() => {
+        if (!loading && !user) {
+            router.push('/login');
+        }
+    }, [user, loading, router]);
 
 
     if (loading || (user && role)) {
@@ -55,12 +61,6 @@ export default function LandingPage() {
                 </Card>
             </div>
         );
-    }
-
-    // Fallback if something is wrong, redirect to login
-    if(!loading && !user){
-        router.push('/login');
-        return null;
     }
 
     return null;
