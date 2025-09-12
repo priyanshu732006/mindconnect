@@ -29,6 +29,14 @@ type AppContextType = {
   setVoiceAnalysis: React.Dispatch<React.SetStateAction<VoiceAnalysisData | null>>;
   navItems: NavItem[];
   setNavItemsByRole: (role: UserRole | null) => void;
+
+  // Gamification
+  coins: number;
+  setCoins: React.Dispatch<React.SetStateAction<number>>;
+  streak: number;
+  setStreak: React.Dispatch<React.SetStateAction<number>>;
+  addJournalEntry: (mood: string, entry: string) => void;
+  completeAssessment: (assessmentName: string) => void;
 };
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -41,6 +49,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [facialAnalysis, setFacialAnalysis] = React.useState<FacialAnalysisData | null>(null);
   const [voiceAnalysis, setVoiceAnalysis] = React.useState<VoiceAnalysisData | null>(null);
   const [navItems, setNavItems] = React.useState<NavItem[]>(studentNavItems);
+  
+  // Gamification state
+  const [coins, setCoins] = React.useState(15); // Start with 15 for creating account
+  const [streak, setStreak] = React.useState(0);
+
 
   const { toast } = useToast();
   const { user, role } = useAuth();
@@ -109,6 +122,25 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const deleteContact = (contactId: string) => {
     setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
+  };
+  
+  const addJournalEntry = (mood: string, entry: string) => {
+    // In a real app, you'd save this to a database.
+    // For now, we'll simulate the rewards.
+    setCoins(c => c + 2);
+    setStreak(s => s + 1);
+    toast({
+      title: "Journal Entry Saved!",
+      description: `You've earned 2 coins and extended your streak to ${streak + 1} days!`,
+    });
+  };
+
+  const completeAssessment = (assessmentName: string) => {
+    setCoins(c => c + 1);
+    toast({
+      title: `${assessmentName} Completed!`,
+      description: "You've earned 1 coin for checking in on your mental health.",
+    });
   };
 
   useEffect(() => {
@@ -220,6 +252,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setVoiceAnalysis,
     navItems,
     setNavItemsByRole,
+    coins,
+    setCoins,
+    streak,
+    setStreak,
+    addJournalEntry,
+    completeAssessment,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -232,5 +270,3 @@ export function useApp() {
   }
   return context;
 }
-
-    

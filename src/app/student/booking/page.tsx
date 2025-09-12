@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Calendar as CalendarIcon, Phone } from 'lucide-react';
+import { Calendar as CalendarIcon, Phone, Coins } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -44,11 +44,15 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useApp } from '@/context/app-provider';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 const bookingSchema = z.object({
   counselor: z.string().min(1, 'Please select a counselor.'),
   date: z.date({ required_error: 'Please select a date.' }),
   time: z.string().min(1, 'Please select a time slot.'),
+  useCoins: z.boolean().default(false),
 });
 
 const onCampusCounselors = [
@@ -70,14 +74,27 @@ const helplines = [
 
 export default function BookingPage() {
   const { toast } = useToast();
+  const { coins, setCoins } = useApp();
   const form = useForm<z.infer<typeof bookingSchema>>({
     resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      useCoins: false,
+    }
   });
 
+  const coinDiscount = (coins * 0.5).toFixed(2);
+  const useCoins = form.watch('useCoins');
+
   function onCampusSubmit(values: z.infer<typeof bookingSchema>) {
+    let description = `Your on-campus session with ${values.counselor} on ${format(values.date, 'PPP')} at ${values.time} is confirmed.`;
+    if(values.useCoins && coins > 0) {
+        description += ` A discount of ₹${coinDiscount} has been applied. Remaining coins: 0.`;
+        setCoins(0);
+    }
+    
     toast({
       title: 'Appointment Booked!',
-      description: `Your on-campus session with ${values.counselor} on ${format(values.date, 'PPP')} at ${values.time} is confirmed.`,
+      description,
     });
     form.reset();
   }
@@ -110,7 +127,7 @@ export default function BookingPage() {
             <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle>Schedule an On-Campus Session</CardTitle>
-                <CardDescription>Appointments are free and confidential for all students.</CardDescription>
+                <CardDescription>Appointments are free and confidential for all students. You can use your coins for discounts on any fees.</CardDescription>
               </CardHeader>
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onCampusSubmit)}>
@@ -223,9 +240,38 @@ export default function BookingPage() {
                         )}
                       />
                     </div>
+                     <Card className="bg-accent/50 border-dashed">
+                      <CardHeader className="p-4">
+                        <CardTitle className="text-base flex items-center gap-2"><Coins /> Rewards</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-0">
+                         <p className="text-sm text-muted-foreground mb-4">You have {coins} coins available, which can be redeemed for a discount of ₹{coinDiscount}.</p>
+                        <FormField
+                            control={form.control}
+                            name="useCoins"
+                            render={({ field }) => (
+                                <FormItem className="flex items-center space-x-2">
+                                    <FormControl>
+                                        <Switch
+                                            id="use-coins"
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={coins === 0}
+                                        />
+                                    </FormControl>
+                                     <Label htmlFor="use-coins" className={cn("font-normal", coins === 0 && "text-muted-foreground")}>
+                                       Use my coins for a ₹{coinDiscount} discount
+                                    </Label>
+                                </FormItem>
+                            )}
+                        />
+                      </CardContent>
+                    </Card>
                   </CardContent>
                   <CardFooter>
-                    <Button type="submit">Book On-Campus Appointment</Button>
+                    <Button type="submit">
+                        {useCoins ? `Book & Redeem (₹${coinDiscount} Off)`: 'Book On-Campus Appointment'}
+                    </Button>
                   </CardFooter>
                 </form>
               </Form>
