@@ -10,7 +10,7 @@ import Link from 'next/link';
 export function CrisisAlert() {
   const { wellbeingData } = useApp();
 
-  if (!wellbeingData) return null;
+  if (!wellbeingData || wellbeingData.wellbeingScore === 0) return null;
 
   const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
 
