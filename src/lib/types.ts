@@ -1,4 +1,6 @@
 
+import { LucideIcon } from "lucide-react";
+
 export type Message = {
   id: string;
   role: 'user' | 'assistant';
@@ -29,3 +31,16 @@ export type VoiceAnalysisData = {
     confidence: number;
     summary: string;
 };
+
+export enum UserRole {
+    student = 'student',
+    admin = 'admin',
+    counsellor = 'counsellor',
+    'peer-buddy' = 'peer-buddy'
+}
+
+export type NavItem = {
+    href: string;
+    icon: LucideIcon;
+    label: string;
+}

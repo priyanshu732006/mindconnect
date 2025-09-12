@@ -2,11 +2,15 @@
 'use client';
 
 import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData } from '@/lib/types';
-import React, from 'react';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem } from '@/lib/types';
+import React, { useMemo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
+import { studentNavItems } from '@/lib/student-nav';
+import { adminNavItems } from '@/lib/admin-nav';
+import { counsellorNavItems } from '@/lib/counsellor-nav';
+import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
 
 type AppContextType = {
   messages: Message[];
@@ -22,6 +26,7 @@ type AppContextType = {
   setFacialAnalysis: React.Dispatch<React.SetStateAction<FacialAnalysisData | null>>;
   voiceAnalysis: VoiceAnalysisData | null;
   setVoiceAnalysis: React.Dispatch<React.SetStateAction<VoiceAnalysisData | null>>;
+  navItems: NavItem[];
 };
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -35,13 +40,31 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [voiceAnalysis, setVoiceAnalysis] = React.useState<VoiceAnalysisData | null>(null);
 
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+
+  const navItems = useMemo(() => {
+    switch (role) {
+      case 'admin':
+        return adminNavItems;
+      case 'counsellor':
+        return counsellorNavItems;
+      case 'peer-buddy':
+        return peerBuddyNavItems;
+      default:
+        return studentNavItems;
+    }
+  }, [role]);
 
   const addMessage = (role: 'user' | 'assistant', content: string) => {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
   };
 
   const analyzeCurrentState = React.useCallback(async () => {
+    if (messages.length === 0 && !facialAnalysis && !voiceAnalysis) {
+      setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
+      return;
+    }
+
     setIsAnalyzing(true);
     try {
       const data = await analyzeWellbeing(messages, facialAnalysis, voiceAnalysis);
@@ -162,6 +185,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setFacialAnalysis,
     voiceAnalysis,
     setVoiceAnalysis,
+    navItems,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

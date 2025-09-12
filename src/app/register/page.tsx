@@ -16,11 +16,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-provider";
 import { FirebaseError } from "firebase/app";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { UserRole } from "@/lib/types";
+
 
 const registerSchema = z.object({
     fullName: z.string().min(1, "Full name is required."),
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(8, "Password must be at least 8 characters long."),
+    role: z.nativeEnum(UserRole),
 });
 
 export default function RegisterPage() {
@@ -35,13 +39,14 @@ export default function RegisterPage() {
       fullName: "",
       email: "",
       password: "",
+      role: UserRole.student,
     },
   });
 
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
       try {
-        await register(values.email, values.password, values.fullName);
+        await register(values.email, values.password, values.fullName, values.role);
         toast({
             title: "Registration Successful",
             description: "You can now log in with your new account.",
@@ -72,7 +77,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/student/dashboard');
+      router.push('/landing');
     }
   }, [user, router]);
 
@@ -124,6 +129,29 @@ export default function RegisterPage() {
                                 <FormControl>
                                     <Input type="password" {...field} />
                                 </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                     <FormField
+                        control={form.control}
+                        name="role"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>I am a...</FormLabel>
+                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select your role" />
+                                    </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="student">Student</SelectItem>
+                                        <SelectItem value="counsellor">Counsellor</SelectItem>
+                                        <SelectItem value="peer-buddy">Peer Buddy</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )}

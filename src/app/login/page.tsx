@@ -66,7 +66,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/student/dashboard');
+      router.push('/landing');
     }
   }, [user, router]);
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
           <Logo className="justify-center mb-2" />
           <CardTitle>Login to Your Account</CardTitle>
           <CardDescription>
-            Enter your credentials to access your dashboard.
+            Enter your credentials to access the platform.
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -90,7 +90,7 @@ export default function LoginPage() {
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="student@university.edu" {...field} />
+                                    <Input placeholder="user@university.edu" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

@@ -1,19 +1,10 @@
 
 'use client';
 
-import {
-  Book,
-  Bot,
-  Home,
-  LogOut,
-  Menu,
-  Mic,
-  Smile,
-  Users,
-  CalendarCheck,
-} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import React, { useMemo } from 'react';
+import { LogOut, Menu } from 'lucide-react';
 
 import Logo from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -29,23 +20,14 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/context/auth-provider';
 import { cn } from '@/lib/utils';
-import React from 'react';
-
-const navItems = [
-  { href: '/student/dashboard', icon: Home, label: 'Dashboard' },
-  { href: '/student/chat', icon: Bot, label: 'AI Companion' },
-  { href: '/student/facial-analysis', icon: Smile, label: 'Facial Analysis' },
-  { href: '/student/voice-analysis', icon: Mic, label: 'Voice Analysis' },
-  { href: '/student/resources', icon: Book, label: 'Resources' },
-  { href: '/student/booking', icon: CalendarCheck, label: 'Booking' },
-  { href: '/student/support', icon: Users, label: 'Peer Support' },
-];
+import { useApp } from '@/context/app-provider';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout, role } = useAuth();
   const router = useRouter();
   const [isSheetOpen, setSheetOpen] = React.useState(false);
+  const { navItems } = useApp();
 
   const handleLogout = async () => {
     await logout();
@@ -128,10 +110,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <AvatarImage
                   src={
                     user?.photoURL ??
-                    'https://picsum.photos/seed/student/100/100'
+                    `https://picsum.photos/seed/${role}/100/100`
                   }
                   alt="User"
-                  data-ai-hint="student avatar"
+                  data-ai-hint={`${role} avatar`}
                 />
                 <AvatarFallback>
                   {user?.email?.charAt(0).toUpperCase() ?? 'U'}
@@ -143,10 +125,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium leading-none">
-                  {user?.displayName ?? 'Student'}
+                  {user?.displayName ?? 'User'}
                 </p>
                 <p className="text-xs leading-none text-muted-foreground">
                   {user?.email}
+                </p>
+                 <p className="text-xs leading-none text-muted-foreground capitalize pt-1">
+                  {role}
                 </p>
               </div>
             </DropdownMenuLabel>
