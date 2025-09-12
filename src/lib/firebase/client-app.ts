@@ -1,4 +1,3 @@
-
 // src/lib/firebase/client-app.ts
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -11,7 +10,7 @@ const firebaseConfig = {
   "apiKey": "AIzaSyDjTXaJcQU7uak1yh818P-biRjc6-0SDl4",
   "authDomain": "studio-6588365639-fa5e2.firebaseapp.com",
   "measurementId": "",
-  "databaseURL": "https://studio-6588365639-fa5e2-default-rtdb.firebaseio.com/"
+  "databaseURL": "https://studio-6588365639-fa5e2-default-rtdb.asia-southeast1.firebasedatabase.app/"
 };
 
 // Initialize Firebase
