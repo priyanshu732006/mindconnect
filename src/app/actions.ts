@@ -7,6 +7,7 @@ import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt
 import { wellbeingScoreFromConversation } from '@/ai/flows/wellbeing-score-from-conversation';
 import type { Message, WellbeingData, TrustedContact } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
+import { analyzeVoice, VoiceAnalysisOutput } from '@/ai/flows/voice-analysis';
 import twilio from 'twilio';
 
 
@@ -60,12 +61,22 @@ export async function analyzeFacialExpressionAction(photoDataUri: string): Promi
     }
 }
 
+export async function analyzeVoiceAction(audioDataUri: string): Promise<VoiceAnalysisOutput | null> {
+    try {
+        const result = await analyzeVoice({ audioDataUri });
+        return result;
+    } catch (error) {
+        console.error('Error analyzing voice:', error);
+        return null;
+    }
+}
+
 export async function sendSmsAction(to: string, body: string): Promise<{ success: boolean; error?: string }> {
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
     const authToken = process.env.TWILIO_AUTH_TOKEN;
     const from = process.env.TWILIO_PHONE_NUMBER;
 
-    if (!accountSid || !authToken || !from || !accountSid.startsWith('AC')) {
+    if (!accountSid || !authToken || !from) {
         console.error('Twilio credentials are not configured correctly in .env file.');
         return { success: false, error: 'Twilio is not configured. Please check your environment variables.' };
     }

@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight, Bot, BookHeart, CalendarCheck } from 'lucide-react';
+import { ArrowRight, Bot, BookHeart, CalendarCheck, Mic } from 'lucide-react';
 
 const links = [
   {
@@ -10,6 +10,13 @@ const links = [
     description: 'Talk through your thoughts anytime.',
     icon: Bot,
     color: 'bg-blue-100 text-blue-700',
+  },
+  {
+    href: '/student/voice-analysis',
+    title: 'Voice Analysis',
+    description: 'Analyze your tone and mood.',
+    icon: Mic,
+    color: 'bg-orange-100 text-orange-700',
   },
   {
     href: '/student/resources',
@@ -29,7 +36,7 @@ const links = [
 
 export function QuickLinks() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {links.map(link => (
         <Link href={link.href} key={link.href} className="group">
           <Card className="h-full transition-all duration-300 group-hover:border-primary group-hover:shadow-lg group-hover:-translate-y-1">
