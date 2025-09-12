@@ -11,7 +11,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTransition, useEffect, useState } from "react";
-import { Loader2, ArrowRight, User, Briefcase, Users, UserCog } from "lucide-react";
+import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-provider";
 import { useRouter } from "next/navigation";
@@ -30,8 +30,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const { login, user } = useAuth();
   const router = useRouter();
-  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-
+  
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -39,11 +38,16 @@ export default function LoginPage() {
       password: "",
     },
   });
+
+  const selectedRole = form.watch("role");
   
   const handleRoleSelect = (role: UserRole) => {
-    setSelectedRole(role);
     form.setValue("role", role);
     form.clearErrors(); // Clear previous errors when role changes
+  }
+
+  const handleBackToRoleSelection = () => {
+    form.reset();
   }
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
@@ -99,12 +103,11 @@ export default function LoginPage() {
         <CardHeader className="text-center">
           <Logo className="justify-center mb-2" />
           <CardTitle>Login to Your Account</CardTitle>
-           {!selectedRole && (
+           {!selectedRole ? (
                 <CardDescription>
                     Please select your role to continue.
                 </CardDescription>
-           )}
-           {selectedRole && (
+           ) : (
                 <CardDescription>
                     Logging in as a <span className="font-bold capitalize">{selectedRole.replace('-', ' ')}</span>.
                 </CardDescription>
@@ -169,7 +172,8 @@ export default function LoginPage() {
                         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Login
                       </Button>
-                      <Button variant="link" size="sm" onClick={() => setSelectedRole(null)}>
+                      <Button variant="link" size="sm" onClick={handleBackToRoleSelection}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to role selection
                       </Button>
                     </CardFooter>
