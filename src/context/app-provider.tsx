@@ -142,17 +142,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [user, toast]);
 
   useEffect(() => {
-    let triggered = false;
-    if (wellbeingData && !triggered) {
+    if (wellbeingData && wellbeingData.wellbeingScore > 0) {
       const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
       if (name === 'Crisis') {
-        // This is a simplistic check to prevent spamming alerts. 
-        // In a real app, this should be more robust (e.g., timestamp-based).
         const lastAlert = sessionStorage.getItem('lastCrisisAlert');
         if(!lastAlert || Date.now() - Number(lastAlert) > 300000) { // 5 minutes cooldown
            triggerCrisisAlerts(trustedContacts);
            sessionStorage.setItem('lastCrisisAlert', Date.now().toString());
-           triggered = true;
         }
       }
     }
