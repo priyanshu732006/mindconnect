@@ -3,7 +3,7 @@
 
 import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData } from '@/lib/types';
-import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import React, from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
@@ -24,15 +24,15 @@ type AppContextType = {
   setVoiceAnalysis: React.Dispatch<React.SetStateAction<VoiceAnalysisData | null>>;
 };
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = React.createContext<AppContextType | undefined>(undefined);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [wellbeingData, setWellbeingData] = useState<WellbeingData | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
-  const [facialAnalysis, setFacialAnalysis] = useState<FacialAnalysisData | null>(null);
-  const [voiceAnalysis, setVoiceAnalysis] = useState<VoiceAnalysisData | null>(null);
+export function AppProvider({ children }: { children: React.ReactNode }) {
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [wellbeingData, setWellbeingData] = React.useState<WellbeingData | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = React.useState(false);
+  const [trustedContacts, setTrustedContacts] = React.useState<TrustedContact[]>([]);
+  const [facialAnalysis, setFacialAnalysis] = React.useState<FacialAnalysisData | null>(null);
+  const [voiceAnalysis, setVoiceAnalysis] = React.useState<VoiceAnalysisData | null>(null);
 
   const { toast } = useToast();
   const { user } = useAuth();
@@ -41,7 +41,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
   };
 
-  const analyzeCurrentState = useCallback(async () => {
+  const analyzeCurrentState = React.useCallback(async () => {
     setIsAnalyzing(true);
     try {
       const data = await analyzeWellbeing(messages, facialAnalysis, voiceAnalysis);
@@ -77,11 +77,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
   };
   
-  useEffect(() => {
+  React.useEffect(() => {
     analyzeCurrentState();
   }, [messages, facialAnalysis, voiceAnalysis, analyzeCurrentState]);
   
-  const triggerCrisisAlerts = useCallback(async (currentContacts: TrustedContact[], isSelfHarmRisk: boolean) => {
+  const triggerCrisisAlerts = React.useCallback(async (currentContacts: TrustedContact[], isSelfHarmRisk: boolean) => {
     if (!user || !user.displayName) {
         // Don't send alerts if there's no user or user name.
         return;
@@ -138,15 +138,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [user, toast]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (wellbeingData && wellbeingData.wellbeingScore > 0) {
       const { name } = getWellbeingCategory(wellbeingData.wellbeingScore);
       if (name === 'Crisis') {
-        const lastAlert = sessionStorage.getItem('lastCrisisAlert');
-        if(!lastAlert || Date.now() - Number(lastAlert) > 300000) { // 5 minutes cooldown
-           triggerCrisisAlerts(trustedContacts, wellbeingData.selfHarmRisk);
-           sessionStorage.setItem('lastCrisisAlert', Date.now().toString());
-        }
+        triggerCrisisAlerts(trustedContacts, wellbeingData.selfHarmRisk);
       }
     }
   }, [wellbeingData, triggerCrisisAlerts, trustedContacts]);
@@ -172,7 +168,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 }
 
 export function useApp() {
-  const context = useContext(AppContext);
+  const context = React.useContext(AppContext);
   if (context === undefined) {
     throw new Error('useApp must be used within an AppProvider');
   }
