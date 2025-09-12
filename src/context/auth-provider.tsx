@@ -112,7 +112,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout: handleLogout,
   };
-
+  
+  // Do not render children until loading is complete
   if (loading) {
     return (
         <div className="flex h-screen items-center justify-center">

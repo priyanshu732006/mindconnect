@@ -15,12 +15,6 @@ export default function AppRootPage() {
     const { setNavItemsByRole } = useApp();
     const router = useRouter();
 
-    const handleRoleSelect = (selectedRole: UserRole) => {
-        setAuthRole(selectedRole); // Set the role in the auth context
-        setNavItemsByRole(selectedRole); // Set the nav items in the app context
-        router.push(`/${selectedRole}/dashboard`);
-    }
-
     useEffect(() => {
         if (loading) {
             return; // Wait for auth state to be confirmed
@@ -37,8 +31,14 @@ export default function AppRootPage() {
         }
         
     }, [user, role, loading, router]);
+    
+    const handleRoleSelect = (selectedRole: UserRole) => {
+        setAuthRole(selectedRole);
+        setNavItemsByRole(selectedRole);
+        router.push(`/${selectedRole}/dashboard`);
+    }
 
-    // Show a loader while authentication is in progress or redirection is about to happen
+    // Show a loader while authentication is in progress or if a redirect is imminent
     if (loading || (user && role)) {
         return (
             <div className="flex h-screen items-center justify-center">
@@ -70,7 +70,7 @@ export default function AppRootPage() {
         );
     }
 
-    // This is the fallback state, usually when the user is logged out and about to be redirected.
+    // This is the fallback state for unauthenticated users before the useEffect hook redirects them.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
