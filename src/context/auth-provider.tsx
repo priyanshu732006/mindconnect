@@ -62,8 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   sessionStorage.removeItem('counsellorType');
                 }
               } else {
-                setRole(null); // No role in DB
+                // This is a new user who just registered. They need to select a role.
+                setRole(null);
                 sessionStorage.removeItem('userRole');
+                setUser(user);
               }
             } catch (error) {
               console.error("Failed to fetch user role:", error);
@@ -97,14 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const db = getDatabase();
       const userRoleRef = ref(db, `userRoles/${user.uid}`);
-      const userData: { role: UserRole, counsellorType?: CounsellorType } = { role };
+      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType } = { role, fullName };
       if (role === UserRole.counsellor && counsellorType) {
         userData.counsellorType = counsellorType;
       }
       await set(userRoleRef, userData);
 
-      setUser({ ...user, displayName: fullName });
-      // We don't set the role here, login flow will handle it.
+      // Do not set user/role state here. The onAuthStateChanged listener will handle it.
     }
   };
 
@@ -142,14 +143,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         } else {
             await signOut(auth);
-            throw new Error("Login failed. User data not found in the database.");
+            throw new Error("Login failed. User role not found in the database. Please register first.");
         }
     }
   }
 
   const handleLogout = async () => {
     await signOut(auth);
-    // onAuthStateChanged will handle clearing user state
+    // onAuthStateChanged will handle clearing user and role state
   }
 
   const handleSetRole = async (newRole: UserRole) => {
@@ -161,8 +162,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         const snapshot = await get(userRoleRef);
         const existingData = snapshot.exists() ? snapshot.val() : {};
+        
+        const updateData = {
+           ...existingData,
+           role: newRole,
+           fullName: user.displayName || 'Anonymous' 
+        };
 
-        await set(userRoleRef, { ...existingData, role: newRole });
+        await set(userRoleRef, updateData);
         setRole(newRole);
         sessionStorage.setItem('userRole', newRole);
       } catch (error) {
@@ -183,7 +190,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     register,
     logout: handleLogout,
   };
-
+  
+  // Do not render children until loading is false
+  // to prevent race conditions with routing.
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">

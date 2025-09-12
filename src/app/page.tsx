@@ -17,27 +17,31 @@ export default function AppRootPage() {
 
     useEffect(() => {
         if (loading) {
-            return;
+            return; // Wait until auth state is determined
         }
 
         if (!user) {
             router.push('/landing');
             return;
         }
-
+        
+        // If user is logged in and has a role, redirect to their dashboard
         if (role) {
+            setNavItemsByRole(role);
             router.push(`/${role}/dashboard`);
         }
         
-    }, [user, role, loading, router]);
+        // If user is logged in but has no role, the UI for role selection will be shown.
+
+    }, [user, role, loading, router, setNavItemsByRole]);
     
     const handleRoleSelect = (selectedRole: UserRole) => {
         setAuthRole(selectedRole);
-        setNavItemsByRole(selectedRole);
-        router.push(`/${selectedRole}/dashboard`);
+        // The useEffect will trigger the redirect once the role is set.
     }
 
-    if (loading || (user && role)) {
+    // This is the gatekeeper. It shows a loader while auth state is being determined.
+    if (loading) {
         return (
             <div className="flex h-screen items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin" />
@@ -45,16 +49,17 @@ export default function AppRootPage() {
         )
     }
     
+    // If auth is done, user is logged in, but no role is assigned yet.
     if (user && !role) {
          return (
             <div className="flex min-h-screen items-center justify-center p-4">
                 <Card className="w-full max-w-md text-center">
                     <CardHeader>
                         <Logo className="justify-center mb-4" />
-                        <CardTitle>Select Your Dashboard</CardTitle>
+                        <CardTitle>Welcome! Select Your Role</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <p className="text-muted-foreground">Choose which dashboard you want to proceed to. You will only have to do this once.</p>
+                        <p className="text-muted-foreground">To continue to your dashboard, please select your role. You will only need to do this once.</p>
                         <div className="flex flex-col gap-3">
                             <Button onClick={() => handleRoleSelect(UserRole.student)} size="lg">Student Dashboard <ArrowRight className="ml-2" /></Button>
                             <Button onClick={() => handleRoleSelect(UserRole.counsellor)} size="lg" variant="outline">Counsellor Dashboard <ArrowRight className="ml-2" /></Button>
@@ -66,7 +71,8 @@ export default function AppRootPage() {
             </div>
         );
     }
-
+    
+    // Fallback loader for any other transient states.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />

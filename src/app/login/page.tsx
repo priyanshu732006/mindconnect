@@ -43,6 +43,7 @@ export default function LoginPage() {
   const handleRoleSelect = (role: UserRole) => {
     setSelectedRole(role);
     form.setValue("role", role);
+    form.clearErrors(); // Clear previous errors when role changes
   }
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
@@ -60,10 +61,11 @@ export default function LoginPage() {
                     description = "Invalid email or password."
                     break;
                 case 'auth/custom-error':
-                    description = (error as any).customData._tokenResponse.error.message;
+                    // This is our custom error from the auth provider for role mismatch
+                    description = (error as any).customData?._tokenResponse?.error?.message || error.message;
                     break;
                 default:
-                    description = "An error occurred during login. Please try again."
+                    description = `An error occurred during login: ${error.message}`
             }
         } else if (error instanceof Error) {
             description = error.message;
@@ -174,7 +176,7 @@ export default function LoginPage() {
                 </form>
             </Form>
         )}
-        <CardFooter className={cn("flex-col", selectedRole && "hidden")}>
+        <CardFooter className={cn("flex-col pt-6 border-t", !selectedRole ? "flex" : "hidden")}>
              <p className="text-xs text-center text-muted-foreground">
                 Don't have an account?{" "}
                 <Link href="/register" className="underline hover:text-primary">

@@ -77,6 +77,8 @@ export default function RegisterPage() {
                 default:
                     description = "An error occurred during registration. Please try again."
             }
+        } else if (error instanceof Error) {
+            description = error.message;
         }
         toast({
           variant: "destructive",
