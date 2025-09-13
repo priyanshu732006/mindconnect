@@ -20,7 +20,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut } from 'lucide-react';
 
-function ExternalCounsellorLayoutContent({ children }: { children: React.ReactNode }) {
+function ExternalCounsellorLayoutContent({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
 
@@ -40,7 +44,8 @@ function ExternalCounsellorLayoutContent({ children }: { children: React.ReactNo
                   className={cn(
                     'rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900',
                     {
-                      'bg-green-100 text-green-700 font-semibold': pathname === item.href,
+                      'bg-green-100 text-green-700 font-semibold':
+                        pathname === item.href,
                     }
                   )}
                 >
@@ -52,19 +57,22 @@ function ExternalCounsellorLayoutContent({ children }: { children: React.ReactNo
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar className="h-10 w-10 border-2 border-white">
-                    <AvatarFallback className="bg-gray-700 text-white">
-                      {user?.displayName?.charAt(0) ?? 'N'}
-                    </AvatarFallback>
-                  </Avatar>
-               </Button>
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full"
+              >
+                <Avatar className="h-10 w-10 border-2 border-white">
+                  <AvatarFallback className="bg-gray-700 text-white">
+                    {user?.displayName?.charAt(0) ?? 'N'}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent side="bottom" align="end" className="w-56">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                     {user?.displayName ?? 'Dr. Emily Carter'}
+                    {user?.displayName ?? 'Dr. Emily Carter'}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
                     Counselor
@@ -80,16 +88,21 @@ function ExternalCounsellorLayoutContent({ children }: { children: React.ReactNo
           </DropdownMenu>
         </div>
       </header>
-      <main className="flex-1 overflow-y-auto p-8">{children}</main>
+      <main className="flex-1 p-8">{children}</main>
     </div>
   );
 }
 
-
-export default function ExternalCounsellorLayout({ children }: { children: React.ReactNode }) {
-    return (
-        <AuthGuard role={UserRole.counsellor}>
-            <ExternalCounsellorLayoutContent>{children}</ExternalCounsellorLayoutContent>
-        </AuthGuard>
-    )
+export default function ExternalCounsellorLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AuthGuard role={UserRole.counsellor}>
+      <ExternalCounsellorLayoutContent>
+        {children}
+      </ExternalCounsellorLayoutContent>
+    </AuthGuard>
+  );
 }
