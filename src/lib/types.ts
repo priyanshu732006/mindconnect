@@ -53,3 +53,43 @@ export type DailyCheckinData = {
     sleepHours: number;
     screenTimeHours: number;
 }
+
+// Assessment Types
+export type AssessmentId = 'phq-9' | 'gad-7' | 'ghq-12';
+
+export type AssessmentQuestion = {
+    text: string;
+};
+
+export type AssessmentOption = {
+    text: string;
+    value: number;
+};
+
+export type InterpretationThreshold = {
+    minScore: number;
+    text: string;
+};
+
+export type Assessment = {
+    id: AssessmentId;
+    name: string;
+    description: string;
+    questions: AssessmentQuestion[];
+    options: AssessmentOption[];
+    interpretation: InterpretationThreshold[];
+};
+
+export type Answer = {
+    questionIndex: number;
+    value: number;
+};
+
+export type AssessmentResult = {
+    id: AssessmentId;
+    name: string;
+    score: number;
+    interpretation: string;
+    answers: Answer[];
+    date: string;
+}

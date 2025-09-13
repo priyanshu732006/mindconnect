@@ -2,7 +2,7 @@
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData, AssessmentId, AssessmentResult } from '@/lib/types';
 import React, { useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
@@ -38,14 +38,16 @@ type AppContextType = {
   streak: number;
   setStreak: React.Dispatch<React.SetStateAction<number>>;
   addJournalEntry: (data: DailyCheckinData) => void;
-  completeAssessment: (assessmentName: string) => void;
-
+  
   // Daily Check-in
   isCheckinOpen: boolean;
   setCheckinOpen: React.Dispatch<React.SetStateAction<boolean>>;
   dailyCheckinData: DailyCheckinData | null;
   setDailyCheckinData: React.Dispatch<React.SetStateAction<DailyCheckinData | null>>;
 
+  // Assessments
+  assessmentResults: Record<AssessmentId, AssessmentResult | undefined>;
+  addAssessmentResult: (result: AssessmentResult) => void;
 };
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -66,7 +68,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Daily Check-in state
   const [isCheckinOpen, setCheckinOpen] = React.useState(false);
   const [dailyCheckinData, setDailyCheckinData] = React.useState<DailyCheckinData | null>(null);
-
+  
+  // Assessment state
+  const [assessmentResults, setAssessmentResults] = React.useState<Record<AssessmentId, AssessmentResult | undefined>>({
+    "phq-9": undefined,
+    "gad-7": undefined,
+    "ghq-12": undefined,
+  });
 
   const { toast } = useToast();
   const { user, role } = useAuth();
@@ -158,12 +166,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem('hasCheckedInToday', 'true');
   };
 
-  const completeAssessment = (assessmentName: string) => {
-    setCoins(c => c + 1);
+  const addAssessmentResult = (result: AssessmentResult) => {
+    setAssessmentResults(prev => ({
+        ...prev,
+        [result.id]: result,
+    }));
+    setCoins(c => c + 5);
     toast({
-      title: `${assessmentName} Completed!`,
-      description: "You've earned 1 coin for checking in on your mental health.",
+        title: `${result.name} Completed!`,
+        description: `You've earned 5 coins. Your score of ${result.score} suggests ${result.interpretation}. A detailed report is available.`
     });
+    // Here you would also trigger a recalculation of the wellbeing score
   };
 
   useEffect(() => {
@@ -280,11 +293,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     streak,
     setStreak,
     addJournalEntry,
-    completeAssessment,
     isCheckinOpen,
     setCheckinOpen,
     dailyCheckinData,
     setDailyCheckinData,
+    assessmentResults,
+    addAssessmentResult,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
