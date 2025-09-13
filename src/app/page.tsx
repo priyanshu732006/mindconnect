@@ -17,11 +17,18 @@ export default function AppRootPage() {
         }
 
         if (user) {
-            // User is logged in, but role might still be loading.
-            // The AuthGuard on the target page will handle role-specific redirection.
-            const targetRole = role || sessionStorage.getItem('userRole') || 'student';
-            setNavItemsByRole(targetRole as any);
-            router.push(`/${targetRole}/dashboard`);
+            // User is logged in, but role might still be loading from the hook.
+            // Use sessionStorage as a faster, more reliable fallback for immediate redirection.
+            const targetRole = role || sessionStorage.getItem('userRole');
+
+            if(targetRole) {
+                setNavItemsByRole(targetRole as any);
+                router.push(`/${targetRole}/dashboard`);
+            } else {
+                // If role is still not found, it's an edge case.
+                // Redirect to landing to prevent getting stuck.
+                router.push('/landing');
+            }
         } else {
             // If there's no user, redirect to the landing page
             router.push('/landing');
