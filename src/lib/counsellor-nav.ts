@@ -1,10 +1,9 @@
-
-import { CalendarCheck, ShieldAlert, MessagesSquare, BarChart2 } from "lucide-react";
+import { Calendar, LayoutGrid, Users, AlertTriangle } from "lucide-react";
 import { NavItem } from "./types";
 
 export const counsellorNavItems: NavItem[] = [
-    { href: '/counsellor/dashboard', icon: BarChart2, label: 'Dashboard' },
-    { href: '/counsellor/appointments', icon: CalendarCheck, label: 'Appointments' },
-    { href: '/counsellor/crisis-alerts', icon: ShieldAlert, label: 'Crisis Alerts' },
-    { href: '/counsellor/community', icon: MessagesSquare, label: 'Community' },
+    { href: '/counsellor/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+    { href: '/counsellor/appointments', icon: Calendar, label: 'Appointments' },
+    { href: '/counsellor/community', icon: Users, label: 'Community' },
+    { href: '/counsellor/crisis-alerts', icon: AlertTriangle, label: 'Crisis Alerts' },
 ];
