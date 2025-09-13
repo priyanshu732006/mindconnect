@@ -86,53 +86,63 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // --- DATABASE SYNC ---
   useEffect(() => {
     async function fetchStudentData() {
-        if (loading || !user || role !== 'student') {
-            isDataLoaded.current = false; // Not a student, or still loading
+        if (loading || !user) {
+            isDataLoaded.current = false;
             return;
         }
-
-        try {
-            // Fetch emergency contacts from userRoles
-            const userRoleRef = ref(db, `userRoles/${user.uid}`);
-            const userRoleSnapshot = await get(userRoleRef);
-            if (userRoleSnapshot.exists()) {
-                const userData = userRoleSnapshot.val();
-                if (userData.studentDetails?.emergencyContacts) {
-                    const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
-                        ...contact,
-                        id: `${user.uid}-contact-${index}`,
-                        avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
-                    }));
-                    setTrustedContacts(contactsFromDb);
+        
+        // This is the critical fix: Only attempt to fetch student data if the role is 'student'.
+        if (role === 'student') {
+            try {
+                // Fetch emergency contacts from userRoles
+                const userRoleRef = ref(db, `userRoles/${user.uid}`);
+                const userRoleSnapshot = await get(userRoleRef);
+                if (userRoleSnapshot.exists()) {
+                    const userData = userRoleSnapshot.val();
+                    if (userData.studentDetails?.emergencyContacts) {
+                        const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+                            ...contact,
+                            id: `${user.uid}-contact-${index}`,
+                            avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+                        }));
+                        setTrustedContacts(contactsFromDb);
+                    }
                 }
-            }
 
-            // Fetch main student data
-            const studentDataRef = ref(db, `studentData/${user.uid}`);
-            const studentDataSnapshot = await get(studentDataRef);
-            if (studentDataSnapshot.exists()) {
-                const data = studentDataSnapshot.val();
-                setMessages(data.messages || []);
-                setAssessmentResults(data.assessmentResults || {"phq-9": null, "gad-7": null, "ghq-12": null});
-                setDailyCheckinData(data.dailyCheckinData || null);
-                setCoins(data.coins ?? 15);
-                setStreak(data.streak ?? 0);
-            } else {
-                 setMessages([]);
-                 setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
-                 setDailyCheckinData(null);
-                 setCoins(15);
-                 setStreak(0);
+                // Fetch main student data
+                const studentDataRef = ref(db, `studentData/${user.uid}`);
+                const studentDataSnapshot = await get(studentDataRef);
+                if (studentDataSnapshot.exists()) {
+                    const data = studentDataSnapshot.val();
+                    setMessages(data.messages || []);
+                    setAssessmentResults(data.assessmentResults || {"phq-9": null, "gad-7": null, "ghq-12": null});
+                    setDailyCheckinData(data.dailyCheckinData || null);
+                    setCoins(data.coins ?? 15);
+                    setStreak(data.streak ?? 0);
+                } else {
+                     setMessages([]);
+                     setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
+                     setDailyCheckinData(null);
+                     setCoins(15);
+                     setStreak(0);
+                }
+                isDataLoaded.current = true;
+            } catch (error) {
+                console.error("Error fetching student data:", error);
+                isDataLoaded.current = true; // Still allow the app to function even if data load fails
+                toast({
+                    variant: 'destructive',
+                    title: 'Data Load Error',
+                    description: 'Could not load your saved data. Please try refreshing.'
+                });
             }
+        } else {
+            // For non-student roles, ensure student-specific state is cleared and mark as loaded.
             isDataLoaded.current = true;
-        } catch (error) {
-            console.error("Error fetching student data:", error);
-            isDataLoaded.current = true; // Still allow the app to function even if data load fails
-            toast({
-                variant: 'destructive',
-                title: 'Data Load Error',
-                description: 'Could not load your saved data. Please try refreshing.'
-            });
+            setMessages([]);
+            setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
+            setDailyCheckinData(null);
+            setTrustedContacts([]);
         }
     }
 
