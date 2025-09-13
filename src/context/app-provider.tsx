@@ -11,7 +11,7 @@ import { studentNavItems } from '@/lib/student-nav';
 import { adminNavItems } from '@/lib/admin-nav';
 import { counsellorNavItems } from '@/lib/counsellor-nav';
 import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
-import { get, getDatabase, ref, set, update } from 'firebase/database';
+import { get, getDatabase, ref, set } from 'firebase/database';
 import { sendSmsAction } from '@/app/actions';
 
 
