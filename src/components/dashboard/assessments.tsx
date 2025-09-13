@@ -1,25 +1,31 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { assessmentData } from "@/lib/assessments";
 import { useApp } from "@/context/app-provider";
+import { AssessmentId } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export function Assessments() {
   const { assessmentResults } = useApp();
+
+  const allAssessmentIds = Object.keys(assessmentData) as AssessmentId[];
+  const allCompleted = allAssessmentIds.every(id => !!assessmentResults[id]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Standard Assessments</CardTitle>
         <CardDescription>
-          Complete these standardized screenings to get a clearer picture of your well-being. You can take them once a week.
+          Complete these one-time standardized screenings to get a clearer picture of your well-being.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {Object.values(assessmentData).map(assessment => {
+        {allAssessmentIds.map(assessmentId => {
+          const assessment = assessmentData[assessmentId];
           const result = assessmentResults[assessment.id];
           const hasTaken = !!result;
 
@@ -30,17 +36,31 @@ export function Assessments() {
                 <p className="text-sm text-muted-foreground">{assessment.description}</p>
                 {hasTaken && (
                   <p className="text-xs text-primary mt-1">
-                    Last score: {result.score} ({result.interpretation}). Taken on {new Date(result.date).toLocaleDateString()}.
+                    Completed on {new Date(result.date).toLocaleDateString()}. Score: {result.score} ({result.interpretation}).
                   </p>
                 )}
               </div>
-              <Button asChild>
-                  <Link href={`/student/assessment/${assessment.id}`}>{hasTaken ? 'Retake' : 'Start'} Assessment</Link>
+              <Button asChild={!hasTaken} disabled={hasTaken}>
+                  {hasTaken ? (
+                    <span>Completed</span>
+                  ) : (
+                    <Link href={`/student/assessment/${assessment.id}`}>Start Assessment</Link>
+                  )}
               </Button>
             </div>
           )
         })}
       </CardContent>
+       <CardFooter className="flex-col gap-2 border-t pt-6">
+          <Button asChild disabled={!allCompleted} className="w-full">
+            <Link href="/student/assessment/report">View Final Report</Link>
+          </Button>
+          {!allCompleted && (
+            <p className="text-xs text-muted-foreground">
+              You must complete all assessments to view the final report.
+            </p>
+          )}
+      </CardFooter>
     </Card>
   );
 }

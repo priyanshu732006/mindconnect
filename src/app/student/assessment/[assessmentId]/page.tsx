@@ -9,12 +9,22 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { AssessmentId } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
+import { useApp } from '@/context/app-provider';
+import { useEffect } from 'react';
 
 export default function AssessmentPage() {
   const router = useRouter();
   const params = useParams();
   const assessmentId = params.assessmentId as AssessmentId;
   const currentAssessment = assessmentData[assessmentId];
+  const { assessmentResults } = useApp();
+
+  useEffect(() => {
+    // If the assessment has already been taken, redirect to the dashboard.
+    if (assessmentResults[assessmentId]) {
+      router.push('/student/dashboard');
+    }
+  }, [assessmentId, assessmentResults, router]);
 
   if (!currentAssessment) {
     return (
@@ -40,6 +50,11 @@ export default function AssessmentPage() {
         </Card>
       </div>
     );
+  }
+  
+  // Render a loading state or nothing while the redirect is being processed.
+  if (assessmentResults[assessmentId]) {
+    return null;
   }
 
   return (

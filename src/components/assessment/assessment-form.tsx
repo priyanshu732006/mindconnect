@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +10,9 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Progress } from '@/components/ui/progress';
-import { ReportPage } from './report-page';
 import { Assessment, Answer } from '@/lib/types';
 import { useApp } from '@/context/app-provider';
-import { useAuth } from '@/context/auth-provider';
+import { useRouter } from 'next/navigation';
 
 type AssessmentFormProps = {
   assessment: Assessment;
@@ -21,12 +20,8 @@ type AssessmentFormProps = {
 
 export function AssessmentForm({ assessment }: AssessmentFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [interpretation, setInterpretation] = useState('');
-  const [answers, setAnswers] = useState<Answer[]>([]);
   const { addAssessmentResult } = useApp();
-  const { user } = useAuth();
+  const router = useRouter();
 
 
   // Dynamically create a Zod schema based on the number of questions
@@ -77,11 +72,6 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
     const resultInterpretation =
       assessment.interpretation.find(interp => totalScore >= interp.minScore)?.text || 'N/A';
     
-    setScore(totalScore);
-    setInterpretation(resultInterpretation);
-    setAnswers(submittedAnswers);
-    setIsCompleted(true);
-    
     addAssessmentResult({
         id: assessment.id,
         name: assessment.name,
@@ -90,20 +80,10 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
         answers: submittedAnswers,
         date: new Date().toISOString()
     });
-  };
 
-  if (isCompleted) {
-    return (
-      <ReportPage
-        assessment={assessment}
-        studentName={user?.displayName || 'Student'}
-        score={score}
-        interpretation={interpretation}
-        answers={answers}
-        date={new Date()}
-      />
-    );
-  }
+    // Redirect to dashboard after completion
+    router.push('/student/dashboard');
+  };
 
   return (
     <Form {...form}>
@@ -153,7 +133,7 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
               Back
             </Button>
             <Button type="button" onClick={handleNext}>
-              {currentStep === totalSteps - 1 ? 'Finish & See Results' : 'Next'}
+              {currentStep === totalSteps - 1 ? 'Finish Assessment' : 'Next'}
             </Button>
           </CardFooter>
         </Card>
