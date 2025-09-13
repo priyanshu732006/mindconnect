@@ -14,11 +14,11 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Sparkles, Copy, Send } from 'lucide-react';
+import { Loader2, Sparkles, Send } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { generateSessionSummaryAction } from '@/app/actions';
 import { GenerateSessionSummaryOutput } from '@/ai/flows/generate-session-summary';
-import { Check } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 export default function SessionSummaryPage() {
   const [studentName, setStudentName] = useState('');
@@ -27,7 +27,6 @@ export default function SessionSummaryPage() {
   const [summaryResult, setSummaryResult] =
     useState<GenerateSessionSummaryOutput | null>(null);
   const { toast } = useToast();
-  const [isCopied, setIsCopied] = useState(false);
 
   const handleGenerateSummary = async () => {
     if (!studentName.trim() || !sessionNotes.trim()) {
@@ -70,22 +69,6 @@ export default function SessionSummaryPage() {
     }
   };
 
-  const handleCopy = () => {
-    if (!summaryResult) return;
-    const fullText = `Session Summary:\n${
-      summaryResult.summary
-    }\n\nActionable Advice:\n${summaryResult.actionableAdvice
-      .map(item => `- ${item}`)
-      .join('\n')}`;
-    navigator.clipboard.writeText(fullText);
-    setIsCopied(true);
-    toast({
-      title: 'Copied to Clipboard!',
-      description: 'The summary and advice have been copied.',
-    });
-    setTimeout(() => setIsCopied(false), 2000);
-  };
-
   const handleSendEmail = () => {
      if (!summaryResult) return;
      toast({
@@ -107,9 +90,8 @@ export default function SessionSummaryPage() {
         </p>
       </div>
 
-      <Card className="shadow-sm">
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
+      <div className="p-6 space-y-6 rounded-lg bg-blue-50/50 border border-blue-100">
+        <div className="space-y-2">
             <Label htmlFor="student-name">Student Name</Label>
             <Input
               id="student-name"
@@ -117,6 +99,7 @@ export default function SessionSummaryPage() {
               value={studentName}
               onChange={e => setStudentName(e.target.value)}
               disabled={isLoading}
+              className="bg-white"
             />
           </div>
           <div className="space-y-2">
@@ -126,13 +109,12 @@ export default function SessionSummaryPage() {
               placeholder="Enter detailed notes from the counseling session..."
               value={sessionNotes}
               onChange={e => setSessionNotes(e.target.value)}
-              rows={10}
+              rows={5}
               disabled={isLoading}
+              className="bg-white"
             />
           </div>
-        </CardContent>
-        <CardFooter>
-          <Button onClick={handleGenerateSummary} disabled={isLoading}>
+           <Button onClick={handleGenerateSummary} disabled={isLoading}>
             {isLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (
@@ -140,49 +122,39 @@ export default function SessionSummaryPage() {
             )}
             Generate Summary
           </Button>
-        </CardFooter>
-      </Card>
+      </div>
+      
 
-      {summaryResult && (
-        <Card className="shadow-sm bg-white animate-in fade-in-50">
-          <CardHeader>
-            <CardTitle>Generated Summary for {studentName}</CardTitle>
-            <CardDescription>
-              Review the AI-generated content below. You can copy it or send it
-              directly to the student.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Session Summary</h3>
-              <p className="text-gray-700 bg-gray-50 p-4 rounded-md border">
-                {summaryResult.summary}
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Actionable Advice</h3>
-              <ul className="list-disc list-inside space-y-2 text-gray-700 bg-gray-50 p-4 rounded-md border">
-                {summaryResult.actionableAdvice.map((item, index) => (
-                  <li key={index}>{item}</li>
-                ))}
-              </ul>
-            </div>
-          </CardContent>
-          <CardFooter className="gap-2">
-            <Button onClick={handleCopy} variant="outline">
-              {isCopied ? (
-                <Check className="mr-2 h-4 w-4 text-green-500" />
-              ) : (
-                <Copy className="mr-2 h-4 w-4" />
-              )}
-              {isCopied ? 'Copied!' : 'Copy'}
-            </Button>
-            <Button onClick={handleSendEmail}>
-              <Send className="mr-2 h-4 w-4" />
-              Send via Email
-            </Button>
-          </CardFooter>
-        </Card>
+      {(isLoading || summaryResult) && (
+        <div className="p-6 space-y-6 rounded-lg bg-blue-50/50 border border-blue-100 animate-in fade-in-50">
+            {isLoading && !summaryResult && (
+                <div className="flex items-center justify-center py-8">
+                     <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                     <p className="text-muted-foreground">Generating summary...</p>
+                </div>
+            )}
+            {summaryResult && (
+                <>
+                    <div>
+                        <h3 className="font-semibold text-lg mb-2">Generated Summary</h3>
+                        <p className="text-gray-700">
+                            {summaryResult.summary}
+                        </p>
+                    </div>
+                    <Separator />
+                    <div>
+                        <h3 className="font-semibold text-lg mb-2">Actionable Advice</h3>
+                        <p className="text-gray-700 whitespace-pre-line">
+                            {summaryResult.actionableAdvice.join('\n')}
+                        </p>
+                    </div>
+                     <Button onClick={handleSendEmail} className="bg-green-100 text-green-800 hover:bg-green-200">
+                        <Send className="mr-2 h-4 w-4" />
+                        Send to Student
+                    </Button>
+                </>
+            )}
+        </div>
       )}
     </div>
   );
