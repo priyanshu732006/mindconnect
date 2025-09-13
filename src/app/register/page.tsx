@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-provider";
 import { FirebaseError } from "firebase/app";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserRole } from "@/lib/types";
+import { UserRole, CounsellorType } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -53,7 +53,7 @@ const studentSchema = baseSchema.extend({
 
 const counsellorSchema = baseSchema.extend({
      role: z.literal(UserRole.counsellor),
-     counsellorType: z.enum(['on-campus', 'external'], { required_error: "Please select counsellor type" }),
+     counsellorType: z.nativeEnum(CounsellorType, { required_error: "Please select counsellor type" }),
 });
 
 const peerBuddySchema = baseSchema.extend({
@@ -171,7 +171,7 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (user) {
-      router.push('/landing');
+      router.push('/');
     }
   }, [user, router]);
 
