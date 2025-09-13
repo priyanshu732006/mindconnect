@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useFormStatus, useFormState } from 'react-dom';
+import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useRef } from 'react';
 import { handleCreatePost } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +25,6 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 function SubmitButton() {
@@ -44,7 +44,7 @@ const initialState = {
 };
 
 export function CreatePostForm() {
-  const [state, formAction] = useFormState(handleCreatePost, initialState);
+  const [state, formAction] = useActionState(handleCreatePost, initialState);
   const formRef = useRef<HTMLFormElement>(null);
   const { toast } = useToast();
 
