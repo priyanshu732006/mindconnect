@@ -150,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
       </div>
-    )
+    );
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
