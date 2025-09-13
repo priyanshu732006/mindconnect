@@ -94,4 +94,4 @@ export type AssessmentResult = {
     date: string;
 };
 
-export type AssessmentResults = Record<AssessmentId, AssessmentResult | undefined>;
+export type AssessmentResults = Record<AssessmentId, AssessmentResult | null>;

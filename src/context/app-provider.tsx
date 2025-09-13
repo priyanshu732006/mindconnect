@@ -71,9 +71,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   // Assessment state
   const [assessmentResults, setAssessmentResults] = React.useState<AssessmentResults>({
-    "phq-9": undefined,
-    "gad-7": undefined,
-    "ghq-12": undefined,
+    "phq-9": null,
+    "gad-7": null,
+    "ghq-12": null,
   });
 
   const { toast } = useToast();
@@ -113,13 +113,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             if (studentDataSnapshot.exists()) {
                 const data = studentDataSnapshot.val();
                 setMessages(data.messages || []);
-                setAssessmentResults(data.assessmentResults || {"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
+                setAssessmentResults(data.assessmentResults || {"phq-9": null, "gad-7": null, "ghq-12": null});
                 setDailyCheckinData(data.dailyCheckinData || null);
                 setCoins(data.coins ?? 15);
                 setStreak(data.streak ?? 0);
             } else {
                  setMessages([]);
-                 setAssessmentResults({"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
+                 setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
                  setDailyCheckinData(null);
                  setCoins(15);
                  setStreak(0);
