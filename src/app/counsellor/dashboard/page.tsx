@@ -43,6 +43,9 @@ export default function CounsellorDashboardPage() {
     const { user } = useAuth();
     const counsellorName = user?.displayName?.split(' ')[0] || 'Counsellor';
 
+    // This page is now only for on-campus counsellors.
+    // External counsellors are routed to /counsellor/external/dashboard
+
     return (
         <div className="space-y-8">
             <header>

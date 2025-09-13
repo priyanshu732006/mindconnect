@@ -7,7 +7,7 @@ import { Loader2 } from "lucide-react";
 import { useApp } from "@/context/app-provider";
 
 export default function AppRootPage() {
-    const { user, role, loading } = useAuth();
+    const { user, role, loading, counsellorType } = useAuth();
     const { setNavItemsByRole } = useApp();
     const router = useRouter();
 
@@ -20,10 +20,17 @@ export default function AppRootPage() {
             // User is logged in, but role might still be loading from the hook.
             // Use sessionStorage as a faster, more reliable fallback for immediate redirection.
             const targetRole = role || sessionStorage.getItem('userRole');
+            const targetCounsellorType = counsellorType || sessionStorage.getItem('counsellorType');
 
             if(targetRole) {
                 setNavItemsByRole(targetRole as any);
-                router.push(`/${targetRole}/dashboard`);
+
+                if (targetRole === 'counsellor' && targetCounsellorType === 'external') {
+                    router.push(`/counsellor/external/dashboard`);
+                } else {
+                    router.push(`/${targetRole}/dashboard`);
+                }
+
             } else {
                 // If role is still not found, it's an edge case.
                 // Redirect to landing to prevent getting stuck.
@@ -34,7 +41,7 @@ export default function AppRootPage() {
             router.push('/landing');
         }
         
-    }, [user, role, loading, router, setNavItemsByRole]);
+    }, [user, role, loading, router, setNavItemsByRole, counsellorType]);
     
     // Show a loader while waiting for redirection to happen.
     return (
