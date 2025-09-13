@@ -95,3 +95,19 @@ export type AssessmentResult = {
 };
 
 export type AssessmentResults = Record<AssessmentId, AssessmentResult | null>;
+
+
+// Peer Buddy Types
+export type PeerBuddy = {
+    id: string;
+    name: string;
+    specializations: string[];
+    status: 'Available' | 'Busy';
+}
+
+export type ChatMessage = {
+    id: string;
+    sender: string; // 'You' or buddy's name
+    text: string;
+    timestamp: string;
+}
