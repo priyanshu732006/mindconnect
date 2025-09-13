@@ -2,7 +2,7 @@
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData, AssessmentId, AssessmentResult } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
 import React, { useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
@@ -46,7 +46,7 @@ type AppContextType = {
   setDailyCheckinData: React.Dispatch<React.SetStateAction<DailyCheckinData | null>>;
 
   // Assessments
-  assessmentResults: Record<AssessmentId, AssessmentResult | undefined>;
+  assessmentResults: AssessmentResults;
   addAssessmentResult: (result: AssessmentResult) => void;
 };
 
@@ -70,7 +70,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [dailyCheckinData, setDailyCheckinData] = React.useState<DailyCheckinData | null>(null);
   
   // Assessment state
-  const [assessmentResults, setAssessmentResults] = React.useState<Record<AssessmentId, AssessmentResult | undefined>>({
+  const [assessmentResults, setAssessmentResults] = React.useState<AssessmentResults>({
     "phq-9": undefined,
     "gad-7": undefined,
     "ghq-12": undefined,
@@ -102,12 +102,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
   };
 
-  const analyzeCurrentState = React.useCallback(async () => {
+  const analyzeCurrentState = React.useCallback(async (currentAssessmentResults?: AssessmentResults) => {
     if (!user) return; // Don't analyze if there's no user
     
     const conversation = messages.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n');
+    const resultsToAnalyze = currentAssessmentResults || assessmentResults;
+    const completedAssessments = Object.values(resultsToAnalyze).filter(Boolean) as AssessmentResult[];
 
-    if (messages.length === 0 && !facialAnalysis && !voiceAnalysis && !dailyCheckinData) {
+
+    if (messages.length === 0 && !facialAnalysis && !voiceAnalysis && !dailyCheckinData && completedAssessments.length === 0) {
       setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
       return;
     }
@@ -122,6 +125,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         journalEntry: dailyCheckinData?.journalEntry,
         sleepHours: dailyCheckinData?.sleepHours,
         screenTimeHours: dailyCheckinData?.screenTimeHours,
+        assessmentResults: completedAssessments.length > 0 ? completedAssessments : undefined,
       });
       if (data) {
         setWellbeingData(data);
@@ -131,7 +135,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsAnalyzing(false);
     }
-  }, [messages, facialAnalysis, voiceAnalysis, dailyCheckinData, user]);
+  }, [user, messages, facialAnalysis, voiceAnalysis, dailyCheckinData, assessmentResults]);
+
 
    const addContact = (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
     const newId = (trustedContacts.length + 1).toString() + Date.now().toString();
@@ -167,16 +172,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addAssessmentResult = (result: AssessmentResult) => {
-    setAssessmentResults(prev => ({
-        ...prev,
+    const newResults = {
+        ...assessmentResults,
         [result.id]: result,
-    }));
+    };
+    setAssessmentResults(newResults);
     setCoins(c => c + 5);
     toast({
         title: `${result.name} Completed!`,
-        description: `You've earned 5 coins. Your score of ${result.score} suggests ${result.interpretation}. A detailed report is available.`
+        description: `You've earned 5 coins. Your score is being updated.`
     });
-    // Here you would also trigger a recalculation of the wellbeing score
+    // Trigger analysis with the newest results immediately
+    analyzeCurrentState(newResults);
   };
 
   useEffect(() => {

@@ -92,4 +92,6 @@ export type AssessmentResult = {
     interpretation: string;
     answers: Answer[];
     date: string;
-}
+};
+
+export type AssessmentResults = Record<AssessmentId, AssessmentResult | undefined>;

@@ -81,8 +81,8 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
         date: new Date().toISOString()
     });
 
-    // Redirect to dashboard after completion
-    router.push('/student/dashboard');
+    // Redirect to the specific report page for this assessment
+    router.push(`/student/assessment/${assessment.id}/report`);
   };
 
   return (
@@ -133,7 +133,7 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
               Back
             </Button>
             <Button type="button" onClick={handleNext}>
-              {currentStep === totalSteps - 1 ? 'Finish Assessment' : 'Next'}
+              {currentStep === totalSteps - 1 ? 'Finish & View Report' : 'Next'}
             </Button>
           </CardFooter>
         </Card>

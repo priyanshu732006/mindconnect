@@ -24,6 +24,13 @@ const VoiceAnalysisOutputSchema = z.object({
   summary: z.string().describe("A brief summary of the voice analysis, including notes on pace, tone, and sentiment."),
 });
 
+const AssessmentResultSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    score: z.number(),
+    interpretation: z.string(),
+    date: z.string(),
+});
 
 const CalculateWellbeingScoreInputSchema = z.object({
   conversation: z
@@ -36,6 +43,7 @@ const CalculateWellbeingScoreInputSchema = z.object({
   journalEntry: z.string().optional().describe('A journal entry from the student.'),
   sleepHours: z.number().optional().describe('The number of hours the student slept.'),
   screenTimeHours: z.number().optional().describe('The number of hours the student spent on screens.'),
+  assessmentResults: z.array(AssessmentResultSchema).optional().describe("An array of completed standardized assessment results (e.g., PHQ-9, GAD-7)."),
 });
 export type CalculateWellbeingScoreInput = z.infer<
   typeof CalculateWellbeingScoreInputSchema
@@ -71,7 +79,7 @@ const prompt = ai.definePrompt({
 
   The well-being score should be a number between 1 and 100. A score of 1 indicates a severe crisis, while a score of 100 indicates excellent well-being.
 
-  Consider all available factors, including expressed emotions in conversations, mood from analysis tools, and self-reported data.
+  Consider all available factors: expressed emotions in conversations, mood from analysis tools, self-reported data, and formal assessment results. Higher scores on assessments like PHQ-9 (depression) and GAD-7 (anxiety) should lower the well-being score significantly.
   
   Your summary should synthesize all available information.
   
@@ -111,6 +119,13 @@ const prompt = ai.definePrompt({
   Screen Time (hours): {{screenTimeHours}}
   {{/if}}
 
+  {{#if assessmentResults}}
+  Completed Assessments:
+  {{#each assessmentResults}}
+  - {{this.name}}: Score {{this.score}} (Interpretation: {{this.interpretation}})
+  {{/each}}
+  {{/if}}
+
   Based on all the available data, provide a well-being score, a brief summary of your analysis, and assess the self-harm risk.
   `,
 });
@@ -122,7 +137,7 @@ const calculateWellbeingScoreFlow = ai.defineFlow(
     outputSchema: CalculateWellbeingScoreOutputSchema,
   },
   async input => {
-    if (!input.conversation && !input.facialAnalysis && !input.voiceAnalysis && !input.mood) {
+    if (!input.conversation && !input.facialAnalysis && !input.voiceAnalysis && !input.mood && !input.assessmentResults) {
       return {
         wellbeingScore: 0,
         summary: "Start a conversation or use the analysis tools to get your well-being score.",

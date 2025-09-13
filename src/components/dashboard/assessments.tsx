@@ -13,7 +13,6 @@ export function Assessments() {
   const { assessmentResults } = useApp();
 
   const allAssessmentIds = Object.keys(assessmentData) as AssessmentId[];
-  const allCompleted = allAssessmentIds.every(id => !!assessmentResults[id]);
 
   return (
     <Card>
@@ -40,9 +39,9 @@ export function Assessments() {
                   </p>
                 )}
               </div>
-              <Button asChild={!hasTaken} disabled={hasTaken}>
+              <Button asChild variant={hasTaken ? 'secondary' : 'default'}>
                   {hasTaken ? (
-                    <span>Completed</span>
+                    <Link href={`/student/assessment/${assessment.id}/report`}>View Report</Link>
                   ) : (
                     <Link href={`/student/assessment/${assessment.id}`}>Start Assessment</Link>
                   )}
@@ -51,16 +50,6 @@ export function Assessments() {
           )
         })}
       </CardContent>
-       <CardFooter className="flex-col gap-2 border-t pt-6">
-          <Button asChild disabled={!allCompleted} className="w-full">
-            <Link href="/student/assessment/report">View Final Report</Link>
-          </Button>
-          {!allCompleted && (
-            <p className="text-xs text-muted-foreground">
-              You must complete all assessments to view the final report.
-            </p>
-          )}
-      </CardFooter>
     </Card>
   );
 }
