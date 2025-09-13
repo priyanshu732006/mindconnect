@@ -4,7 +4,7 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt';
-import { calculateWellbeingScore } from '@/ai/flows/calculate-wellbeing-score';
+import { calculateWellbeingScore, CalculateWellbeingScoreInput } from '@/ai/flows/calculate-wellbeing-score';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
 import { analyzeVoice, VoiceAnalysisOutput } from '@/ai/flows/voice-analysis';
@@ -35,20 +35,15 @@ Companion:`;
 }
 
 export async function analyzeWellbeing(
-  messages: Message[],
-  facialAnalysis: FacialAnalysisData | null,
-  voiceAnalysis: VoiceAnalysisData | null,
+  input: CalculateWellbeingScoreInput,
 ): Promise<WellbeingData | null> {
   try {
-    const conversation = messages
-      .map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`)
-      .join('\n\n');
+    const conversation = input.conversation || (input.messages?.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n') ?? '');
 
-    const result = await calculateWellbeingScore({ 
+    const result = await calculateWellbeingScore({
+      ...input,
       conversation: conversation.length > 0 ? conversation : undefined,
-      facialAnalysis: facialAnalysis || undefined,
-      voiceAnalysis: voiceAnalysis || undefined,
-     });
+    });
     return result;
   } catch (error) {
     console.error('Error analyzing wellbeing:', error);

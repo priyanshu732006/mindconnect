@@ -1,8 +1,8 @@
 
 'use client';
 
-import { analyzeWellbeing, sendSmsAction } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole } from '@/lib/types';
+import { analyzeWellbeing } from '@/app/actions';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData } from '@/lib/types';
 import React, { useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
@@ -12,6 +12,8 @@ import { adminNavItems } from '@/lib/admin-nav';
 import { counsellorNavItems } from '@/lib/counsellor-nav';
 import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
 import { get, getDatabase, ref } from 'firebase/database';
+import { sendSmsAction } from '@/app/actions';
+
 
 type AppContextType = {
   messages: Message[];
@@ -35,8 +37,15 @@ type AppContextType = {
   setCoins: React.Dispatch<React.SetStateAction<number>>;
   streak: number;
   setStreak: React.Dispatch<React.SetStateAction<number>>;
-  addJournalEntry: (mood: string, entry: string) => void;
+  addJournalEntry: (data: DailyCheckinData) => void;
   completeAssessment: (assessmentName: string) => void;
+
+  // Daily Check-in
+  isCheckinOpen: boolean;
+  setCheckinOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  dailyCheckinData: DailyCheckinData | null;
+  setDailyCheckinData: React.Dispatch<React.SetStateAction<DailyCheckinData | null>>;
+
 };
 
 const AppContext = React.createContext<AppContextType | undefined>(undefined);
@@ -53,6 +62,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Gamification state
   const [coins, setCoins] = React.useState(15); // Start with 15 for creating account
   const [streak, setStreak] = React.useState(0);
+  
+  // Daily Check-in state
+  const [isCheckinOpen, setCheckinOpen] = React.useState(false);
+  const [dailyCheckinData, setDailyCheckinData] = React.useState<DailyCheckinData | null>(null);
 
 
   const { toast } = useToast();
@@ -84,23 +97,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const analyzeCurrentState = React.useCallback(async () => {
     if (!user) return; // Don't analyze if there's no user
     
-    if (messages.length === 0 && !facialAnalysis && !voiceAnalysis) {
+    const conversation = messages.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n');
+
+    if (messages.length === 0 && !facialAnalysis && !voiceAnalysis && !dailyCheckinData) {
       setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
       return;
     }
 
     setIsAnalyzing(true);
     try {
-      const data = await analyzeWellbeing(messages, facialAnalysis, voiceAnalysis);
+      const data = await analyzeWellbeing({
+        conversation: conversation.length > 0 ? conversation : undefined,
+        facialAnalysis: facialAnalysis || undefined,
+        voiceAnalysis: voiceAnalysis || undefined,
+        mood: dailyCheckinData?.mood,
+        journalEntry: dailyCheckinData?.journalEntry,
+        sleepHours: dailyCheckinData?.sleepHours,
+        screenTimeHours: dailyCheckinData?.screenTimeHours,
+      });
       if (data) {
         setWellbeingData(data);
       }
     } catch (error) {
-      console.error('Failed to analyze conversation:', error);
+      console.error('Failed to analyze wellbeing:', error);
     } finally {
       setIsAnalyzing(false);
     }
-  }, [messages, facialAnalysis, voiceAnalysis, user]);
+  }, [messages, facialAnalysis, voiceAnalysis, dailyCheckinData, user]);
 
    const addContact = (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
     const newId = (trustedContacts.length + 1).toString() + Date.now().toString();
@@ -124,15 +147,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
   };
   
-  const addJournalEntry = (mood: string, entry: string) => {
-    // In a real app, you'd save this to a database.
-    // For now, we'll simulate the rewards.
+  const addJournalEntry = (data: DailyCheckinData) => {
+    setDailyCheckinData(data);
     setCoins(c => c + 2);
     setStreak(s => s + 1);
     toast({
-      title: "Journal Entry Saved!",
-      description: `You've earned 2 coins and extended your streak to ${streak + 1} days!`,
+      title: "Daily Check-in Complete!",
+      description: `You've earned 2 coins and extended your streak to ${streak + 1} days! Your Well-being Score is being updated.`,
     });
+    sessionStorage.setItem('hasCheckedInToday', 'true');
   };
 
   const completeAssessment = (assessmentName: string) => {
@@ -167,7 +190,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   React.useEffect(() => {
     analyzeCurrentState();
-  }, [messages, facialAnalysis, voiceAnalysis, analyzeCurrentState]);
+  }, [messages, facialAnalysis, voiceAnalysis, dailyCheckinData, analyzeCurrentState]);
   
   const triggerCrisisAlerts = React.useCallback(async (currentContacts: TrustedContact[], isSelfHarmRisk: boolean) => {
     if (!user || !user.displayName) {
@@ -258,6 +281,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setStreak,
     addJournalEntry,
     completeAssessment,
+    isCheckinOpen,
+    setCheckinOpen,
+    dailyCheckinData,
+    setDailyCheckinData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -46,3 +46,10 @@ export type NavItem = {
     icon: LucideIcon;
     label: string;
 }
+
+export type DailyCheckinData = {
+    mood: string;
+    journalEntry?: string;
+    sleepHours: number;
+    screenTimeHours: number;
+}

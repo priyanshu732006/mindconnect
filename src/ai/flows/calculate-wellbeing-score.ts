@@ -32,6 +32,10 @@ const CalculateWellbeingScoreInputSchema = z.object({
     .describe('The conversation between the student and the AI companion.'),
   facialAnalysis: FacialAnalysisOutputSchema.optional().describe('The results of a facial analysis.'),
   voiceAnalysis: VoiceAnalysisOutputSchema.optional().describe('The results of a voice analysis.'),
+  mood: z.string().optional().describe('The student\'s self-reported mood for the day.'),
+  journalEntry: z.string().optional().describe('A journal entry from the student.'),
+  sleepHours: z.number().optional().describe('The number of hours the student slept.'),
+  screenTimeHours: z.number().optional().describe('The number of hours the student spent on screens.'),
 });
 export type CalculateWellbeingScoreInput = z.infer<
   typeof CalculateWellbeingScoreInputSchema
@@ -67,15 +71,14 @@ const prompt = ai.definePrompt({
 
   The well-being score should be a number between 1 and 100. A score of 1 indicates a severe crisis, while a score of 100 indicates excellent well-being.
 
-  Consider factors such as the student's expressed emotions, concerns, and overall tone from the conversation.
-  Also consider the mood and confidence from the facial and voice analysis data, if available.
+  Consider all available factors, including expressed emotions in conversations, mood from analysis tools, and self-reported data.
   
   Your summary should synthesize all available information.
   
-  Critically, you must analyze the conversation for any indication of self-harm intent or ideation. If any such language is present, set the selfHarmRisk field to true. Otherwise, set it to false.
+  Critically, you must analyze the conversation and journal entries for any indication of self-harm intent or ideation. If any such language is present, set the selfHarmRisk field to true. Otherwise, set it to false.
 
   {{#if conversation}}
-  Conversation:
+  Conversation History:
   {{{conversation}}}
   {{/if}}
 
@@ -90,8 +93,25 @@ const prompt = ai.definePrompt({
   - Mood: {{voiceAnalysis.mood}} (Confidence: {{voiceAnalysis.confidence}})
   - Summary: {{voiceAnalysis.summary}}
   {{/if}}
+  
+  {{#if mood}}
+  Self-Reported Mood: {{mood}}
+  {{/if}}
 
-  Based on the available data, provide a well-being score, a brief summary of your analysis, and assess the self-harm risk.
+  {{#if journalEntry}}
+  Journal Entry:
+  {{{journalEntry}}}
+  {{/if}}
+
+  {{#if sleepHours}}
+  Hours Slept: {{sleepHours}}
+  {{/if}}
+  
+  {{#if screenTimeHours}}
+  Screen Time (hours): {{screenTimeHours}}
+  {{/if}}
+
+  Based on all the available data, provide a well-being score, a brief summary of your analysis, and assess the self-harm risk.
   `,
 });
 
@@ -102,7 +122,7 @@ const calculateWellbeingScoreFlow = ai.defineFlow(
     outputSchema: CalculateWellbeingScoreOutputSchema,
   },
   async input => {
-    if (!input.conversation && !input.facialAnalysis && !input.voiceAnalysis) {
+    if (!input.conversation && !input.facialAnalysis && !input.voiceAnalysis && !input.mood) {
       return {
         wellbeingScore: 0,
         summary: "Start a conversation or use the analysis tools to get your well-being score.",
