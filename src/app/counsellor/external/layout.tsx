@@ -9,52 +9,78 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import AuthGuard from '@/components/auth-guard';
 import { UserRole } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { LogOut } from 'lucide-react';
 
 function ExternalCounsellorLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen bg-slate-50 text-gray-800">
-      <aside className="flex w-64 flex-col bg-white p-6 shadow-md">
-        <div className="mb-8 text-2xl font-bold">CounselorConnect</div>
-        <nav className="flex-1">
-          <ul>
-            {externalCounsellorNavItems.map(item => (
-              <li key={item.href}>
+    <div className="flex min-h-screen w-full flex-col bg-slate-50 text-gray-800">
+      <header className="sticky top-0 z-40 w-full border-b bg-white">
+        <div className="container mx-auto flex h-16 items-center justify-between px-4">
+          <div className="flex items-center gap-6">
+            <Link href="#" className="text-2xl font-bold">
+              CounselorConnect
+            </Link>
+            <nav className="hidden items-center gap-4 md:flex">
+              {externalCounsellorNavItems.map(item => (
                 <Link
+                  key={item.href}
                   href={item.href}
                   className={cn(
-                    'mb-2 flex items-center gap-3 rounded-lg p-3 text-base font-medium text-gray-600 transition-colors hover:bg-gray-100',
+                    'text-sm font-medium text-gray-600 transition-colors hover:text-gray-900',
                     {
-                      'bg-green-100 text-green-800 hover:bg-green-100':
-                        pathname === item.href,
+                      'text-green-700 font-semibold': pathname === item.href,
                     }
                   )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span>{item.label}</span>
+                  {item.label}
                 </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="mt-auto">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border-2 border-white">
-              <AvatarFallback className="bg-gray-700 text-white">
-                {user?.displayName?.charAt(0) ?? 'N'}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-bold">{user?.displayName ?? 'Dr. Emily Carter'}</p>
-              <p className="text-sm text-gray-500">Counselor</p>
-            </div>
+              ))}
+            </nav>
           </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Avatar className="h-10 w-10 border-2 border-white">
+                    <AvatarFallback className="bg-gray-700 text-white">
+                      {user?.displayName?.charAt(0) ?? 'N'}
+                    </AvatarFallback>
+                  </Avatar>
+               </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="bottom" align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                     {user?.displayName ?? 'Dr. Emily Carter'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    Counselor
+                  </p>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => logout()}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-      </aside>
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      </header>
+      <main className="flex-1 overflow-y-auto p-8">{children}</main>
     </div>
   );
 }
