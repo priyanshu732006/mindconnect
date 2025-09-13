@@ -10,7 +10,7 @@ const firebaseConfig = {
   "apiKey": "AIzaSyDjTXaJcQU7uak1yh818P-biRjc6-0SDl4",
   "authDomain": "studio-6588365639-fa5e2.firebaseapp.com",
   "measurementId": "",
-  "databaseURL": "https://studio-6588365639-fa5e2-default-rtdb.asia-southeast1.firebasedatabase.app/"
+  "databaseURL": "https://studio-6588365639-fa5e2-default-rtdb.asia-southeast1.firebasedatabase.app"
 };
 
 // Initialize Firebase

@@ -3,7 +3,7 @@
 
 import { analyzeWellbeing } from '@/app/actions';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
@@ -81,51 +81,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const db = getDatabase();
   
   // Ref to track if initial data load is complete
-  const isDataLoaded = React.useRef(false);
+  const isDataLoaded = useRef(false);
 
   // --- DATABASE SYNC ---
   useEffect(() => {
     async function fetchStudentData() {
-        if (user && role === 'student' && !loading) {
-            try {
-                // Fetch emergency contacts from userRoles
-                const userRoleRef = ref(db, `userRoles/${user.uid}`);
-                const userRoleSnapshot = await get(userRoleRef);
-                if (userRoleSnapshot.exists()) {
-                    const userData = userRoleSnapshot.val();
-                    if (userData.studentDetails?.emergencyContacts) {
-                        const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
-                            ...contact,
-                            id: `${user.uid}-contact-${index}`,
-                            avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
-                        }));
-                        setTrustedContacts(contactsFromDb);
-                    }
-                }
+        if (!user || !user.uid || role !== 'student' || loading) {
+            isDataLoaded.current = false;
+            return;
+        }
 
-                // Fetch main student data
-                const studentDataRef = ref(db, `studentData/${user.uid}`);
-                const studentDataSnapshot = await get(studentDataRef);
-                if (studentDataSnapshot.exists()) {
-                    const data = studentDataSnapshot.val();
-                    setMessages(data.messages || []);
-                    setAssessmentResults(data.assessmentResults || {"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
-                    setDailyCheckinData(data.dailyCheckinData || null);
-                    setCoins(data.coins || 15);
-                    setStreak(data.streak || 0);
+        try {
+            // Fetch emergency contacts from userRoles
+            const userRoleRef = ref(db, `userRoles/${user.uid}`);
+            const userRoleSnapshot = await get(userRoleRef);
+            if (userRoleSnapshot.exists()) {
+                const userData = userRoleSnapshot.val();
+                if (userData.studentDetails?.emergencyContacts) {
+                    const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+                        ...contact,
+                        id: `${user.uid}-contact-${index}`,
+                        avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+                    }));
+                    setTrustedContacts(contactsFromDb);
                 }
-                isDataLoaded.current = true;
-            } catch (error) {
-                console.error("Error fetching student data:", error);
-                toast({
-                    variant: 'destructive',
-                    title: 'Data Load Error',
-                    description: 'Could not load your saved data. Please try refreshing.'
-                });
             }
+
+            // Fetch main student data
+            const studentDataRef = ref(db, `studentData/${user.uid}`);
+            const studentDataSnapshot = await get(studentDataRef);
+            if (studentDataSnapshot.exists()) {
+                const data = studentDataSnapshot.val();
+                setMessages(data.messages || []);
+                setAssessmentResults(data.assessmentResults || {"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
+                setDailyCheckinData(data.dailyCheckinData || null);
+                setCoins(data.coins ?? 15);
+                setStreak(data.streak ?? 0);
+            } else {
+                 setMessages([]);
+                 setAssessmentResults({"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
+                 setDailyCheckinData(null);
+                 setCoins(15);
+                 setStreak(0);
+            }
+            isDataLoaded.current = true;
+        } catch (error) {
+            console.error("Error fetching student data:", error);
+            isDataLoaded.current = true; // Still allow the app to function even if data load fails
+            toast({
+                variant: 'destructive',
+                title: 'Data Load Error',
+                description: 'Could not load your saved data. Please try refreshing.'
+            });
         }
     }
-    fetchStudentData();
+
+    if (!loading) {
+      fetchStudentData();
+    }
   }, [user, role, loading, db, toast]);
   
   const writeStudentData = useCallback(() => {
@@ -137,12 +150,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             dailyCheckinData,
             coins,
             streak,
+        }).catch(error => {
+            console.error("Error writing student data:", error);
         });
     }
   }, [user, role, db, messages, assessmentResults, dailyCheckinData, coins, streak]);
 
   useEffect(() => {
-    writeStudentData();
+    // This effect ensures data is written back to DB whenever it changes, but only after initial load.
+    if (isDataLoaded.current) {
+        writeStudentData();
+    }
   }, [writeStudentData]);
   // --- END DATABASE SYNC ---
 
