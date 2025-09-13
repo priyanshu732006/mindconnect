@@ -61,7 +61,7 @@ export default function CounsellorProfilePage() {
         </CardContent>
          <CardFooter>
           <Button asChild>
-            <Link href="#">Edit Profile</Link>
+            <Link href="/counsellor/settings">Edit Profile</Link>
           </Button>
         </CardFooter>
       </Card>
