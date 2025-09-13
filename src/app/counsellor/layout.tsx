@@ -6,6 +6,8 @@ import { Loader2 } from 'lucide-react';
 import AppLayout from '../(app)/layout';
 import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
+import AuthGuard from '@/components/auth-guard';
+import { UserRole } from '@/lib/types';
 import ExternalCounsellorLayout from './external/layout';
 
 export default function CounsellorLayout({
@@ -18,10 +20,7 @@ export default function CounsellorLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // This effect ensures that as soon as the counsellorType is determined,
-    // we are on the correct path.
     if (!loading && counsellorType === 'external') {
-        // If we are an external counsellor but not on the external path, redirect.
         if(!pathname.startsWith('/counsellor/external')) {
             router.replace('/counsellor/external/dashboard');
         }
@@ -39,9 +38,14 @@ export default function CounsellorLayout({
 
   // If the user is an external counselor AND is on an external page, use the dedicated layout.
   if (counsellorType === 'external' && pathname.startsWith('/counsellor/external')) {
+    // AuthGuard is now inside ExternalCounsellorLayout
     return <ExternalCounsellorLayout>{children}</ExternalCounsellorLayout>;
   }
-
+  
   // For all other cases (e.g., on-campus counselor), use the default AppLayout.
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <AuthGuard role={UserRole.counsellor}>
+        <AppLayout>{children}</AppLayout>
+    </AuthGuard>
+  );
 }

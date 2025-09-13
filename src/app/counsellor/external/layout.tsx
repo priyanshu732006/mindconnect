@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut } from 'lucide-react';
 
-function ExternalCounsellorLayout({ children }: { children: React.ReactNode }) {
+function ExternalCounsellorLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
 
@@ -38,9 +38,9 @@ function ExternalCounsellorLayout({ children }: { children: React.ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    'text-sm font-medium text-gray-600 transition-colors hover:text-gray-900',
+                    'rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900',
                     {
-                      'text-green-700 font-semibold': pathname === item.href,
+                      'bg-green-100 text-green-700 font-semibold': pathname === item.href,
                     }
                   )}
                 >
@@ -86,10 +86,10 @@ function ExternalCounsellorLayout({ children }: { children: React.ReactNode }) {
 }
 
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function ExternalCounsellorLayout({ children }: { children: React.ReactNode }) {
     return (
         <AuthGuard role={UserRole.counsellor}>
-            <ExternalCounsellorLayout>{children}</ExternalCounsellorLayout>
+            <ExternalCounsellorLayoutContent>{children}</ExternalCounsellorLayoutContent>
         </AuthGuard>
     )
 }
