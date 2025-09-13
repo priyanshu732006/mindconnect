@@ -29,46 +29,45 @@ function ExternalCounsellorLayoutContent({
   const pathname = usePathname();
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-slate-50 text-gray-800">
-      <header className="sticky top-0 z-40 w-full border-b bg-white">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="flex items-center gap-6">
-            <Link href="/counsellor/external/dashboard" className="text-2xl font-bold">
-              CounselorConnect
+    <div className="flex min-h-screen w-full bg-slate-50 text-gray-800">
+       <aside className="flex w-64 flex-col border-r bg-white p-6">
+        <Link href="/counsellor/external/dashboard" className="mb-8 text-2xl font-bold">
+          CounselorConnect
+        </Link>
+        <nav className="flex flex-col gap-2">
+          {externalCounsellorNavItems.map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-4 py-2 text-gray-600 transition-colors hover:bg-green-50 hover:text-green-700',
+                {
+                  'bg-green-100 text-green-700 font-semibold':
+                    pathname === item.href,
+                }
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span>{item.label}</span>
             </Link>
-            <nav className="hidden items-center gap-4 md:flex">
-              {externalCounsellorNavItems.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    'rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:text-gray-900',
-                    {
-                      'bg-green-100 text-green-700 font-semibold':
-                        pathname === item.href,
-                    }
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <DropdownMenu>
+          ))}
+        </nav>
+        <div className="mt-auto">
+           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="relative h-10 w-10 rounded-full"
-              >
-                <Avatar className="h-10 w-10 border-2 border-white">
-                  <AvatarFallback className="bg-gray-700 text-white">
-                    {user?.displayName?.charAt(0) ?? 'N'}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
+                <div className="flex cursor-pointer items-center gap-3 rounded-lg p-2 transition-colors hover:bg-gray-100">
+                    <Avatar className="h-10 w-10 border-2 border-white">
+                        <AvatarFallback className="bg-gray-700 text-white">
+                            {user?.displayName?.charAt(0) ?? 'N'}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <p className="font-semibold">{user?.displayName ?? 'Dr. Emily Carter'}</p>
+                        <p className="text-sm text-gray-500">Counselor</p>
+                    </div>
+                </div>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="end" className="w-56">
+            <DropdownMenuContent side="top" align="start" className="w-56 mb-2">
               <DropdownMenuLabel>
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
@@ -87,11 +86,12 @@ function ExternalCounsellorLayoutContent({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </header>
+      </aside>
       <main className="flex-1 p-8">{children}</main>
     </div>
   );
 }
+
 
 export default function ExternalCounsellorLayout({
   children,

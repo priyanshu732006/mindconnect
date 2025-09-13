@@ -14,7 +14,7 @@ export const externalCounsellorNavItems: NavItem[] = [
     icon: LayoutGrid,
     label: 'Dashboard',
   },
-  { href: '#/scheduled', icon: CalendarCheck, label: 'Scheduled' },
+  { href: '/counsellor/external/scheduled', icon: CalendarCheck, label: 'Scheduled' },
   { href: '#/waitlisted', icon: Clock, label: 'Waitlisted' },
   { href: '#/completed', icon: Check, label: 'Completed' },
   { href: '#/summary', icon: FileText, label: 'Session Summary' },
