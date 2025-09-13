@@ -11,7 +11,7 @@ import { studentNavItems } from '@/lib/student-nav';
 import { adminNavItems } from '@/lib/admin-nav';
 import { counsellorNavItems } from '@/lib/counsellor-nav';
 import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
-import { get, getDatabase, ref, set } from 'firebase/database';
+import { getDatabase, ref, set, get } from 'firebase/database';
 import { sendSmsAction } from '@/app/actions';
 
 
@@ -87,37 +87,46 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function fetchStudentData() {
         if (user && role === 'student' && !loading) {
-            // Fetch emergency contacts from userRoles
-            const userRoleRef = ref(db, `userRoles/${user.uid}`);
-            const userRoleSnapshot = await get(userRoleRef);
-            if (userRoleSnapshot.exists()) {
-                const userData = userRoleSnapshot.val();
-                if (userData.studentDetails?.emergencyContacts) {
-                    const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
-                        ...contact,
-                        id: `${user.uid}-contact-${index}`,
-                        avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
-                    }));
-                    setTrustedContacts(contactsFromDb);
+            try {
+                // Fetch emergency contacts from userRoles
+                const userRoleRef = ref(db, `userRoles/${user.uid}`);
+                const userRoleSnapshot = await get(userRoleRef);
+                if (userRoleSnapshot.exists()) {
+                    const userData = userRoleSnapshot.val();
+                    if (userData.studentDetails?.emergencyContacts) {
+                        const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+                            ...contact,
+                            id: `${user.uid}-contact-${index}`,
+                            avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+                        }));
+                        setTrustedContacts(contactsFromDb);
+                    }
                 }
-            }
 
-            // Fetch main student data
-            const studentDataRef = ref(db, `studentData/${user.uid}`);
-            const studentDataSnapshot = await get(studentDataRef);
-            if (studentDataSnapshot.exists()) {
-                const data = studentDataSnapshot.val();
-                setMessages(data.messages || []);
-                setAssessmentResults(data.assessmentResults || {"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
-                setDailyCheckinData(data.dailyCheckinData || null);
-                setCoins(data.coins || 15);
-                setStreak(data.streak || 0);
+                // Fetch main student data
+                const studentDataRef = ref(db, `studentData/${user.uid}`);
+                const studentDataSnapshot = await get(studentDataRef);
+                if (studentDataSnapshot.exists()) {
+                    const data = studentDataSnapshot.val();
+                    setMessages(data.messages || []);
+                    setAssessmentResults(data.assessmentResults || {"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
+                    setDailyCheckinData(data.dailyCheckinData || null);
+                    setCoins(data.coins || 15);
+                    setStreak(data.streak || 0);
+                }
+                isDataLoaded.current = true;
+            } catch (error) {
+                console.error("Error fetching student data:", error);
+                toast({
+                    variant: 'destructive',
+                    title: 'Data Load Error',
+                    description: 'Could not load your saved data. Please try refreshing.'
+                });
             }
-            isDataLoaded.current = true;
         }
     }
     fetchStudentData();
-  }, [user, role, loading, db]);
+  }, [user, role, loading, db, toast]);
   
   const writeStudentData = useCallback(() => {
     if (user && role === 'student' && isDataLoaded.current) {
