@@ -12,6 +12,7 @@ import twilio from 'twilio';
 import { moderatePost } from '@/ai/flows/moderate-community-posts';
 import { addPost } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
+import { generateSessionSummary, GenerateSessionSummaryOutput, GenerateSessionSummaryInput } from '@/ai/flows/generate-session-summary';
 
 
 export async function getAIResponse(
@@ -171,4 +172,14 @@ export async function handleCreatePost(
       error: 'An unexpected error occurred. Please try again.',
     };
   }
+}
+
+export async function generateSessionSummaryAction(input: GenerateSessionSummaryInput): Promise<GenerateSessionSummaryOutput | null> {
+    try {
+        const result = await generateSessionSummary(input);
+        return result;
+    } catch (error) {
+        console.error('Error generating session summary:', error);
+        return null;
+    }
 }

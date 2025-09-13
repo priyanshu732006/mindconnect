@@ -9,3 +9,5 @@ import '@/ai/flows/facial-analysis.ts';
 import '@/ai/flows/voice-analysis.ts';
 import '@/ai/flows/moderate-community-posts.ts';
 import '@/ai/flows/analyze-chat-risk.ts';
+import '@/ai/flows/generate-session-summary.ts';
+
