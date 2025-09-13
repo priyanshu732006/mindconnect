@@ -17,6 +17,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Shield } from 'lucide-react';
+import { useState } from 'react';
+import { ComplaintDialog } from '@/components/counsellor/external/complaint-dialog';
 
 const completedAppointments = [
   {
@@ -35,9 +37,25 @@ const completedAppointments = [
   },
 ];
 
+export type Appointment = typeof completedAppointments[0];
+
 export default function CompletedAppointmentsPage() {
+  const [isComplaintDialogOpen, setComplaintDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+
+  const handleOpenComplaintDialog = (appt: Appointment) => {
+    setSelectedAppointment(appt);
+    setComplaintDialogOpen(true);
+  };
+
+
   return (
     <div>
+      <ComplaintDialog 
+        isOpen={isComplaintDialogOpen}
+        setIsOpen={setComplaintDialogOpen}
+        appointment={selectedAppointment}
+      />
       <h1 className="text-3xl font-bold text-gray-800">
         Completed Appointments
       </h1>
@@ -82,7 +100,7 @@ export default function CompletedAppointmentsPage() {
                     <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">Completed</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" onClick={() => handleOpenComplaintDialog(appt)}>
                       <Shield className="mr-2 h-4 w-4" />
                       Complaint
                     </Button>
