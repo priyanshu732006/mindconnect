@@ -14,7 +14,7 @@ type AuthContextType = {
   loading: boolean;
   role: UserRole | null;
   counsellorType: CounsellorType | null;
-  login: (email: string, password: string, role: UserRole) => Promise<void>;
+  login: (email: string, password: string, role: UserRole, counsellorType?: CounsellorType) => Promise<void>;
   register: (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any }) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string, loginRole: UserRole) => {
+  const login = async (email: string, password: string, loginRole: UserRole, counsellorType?: CounsellorType) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const loggedInUser = userCredential.user;
 
@@ -132,6 +132,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if(dbRole !== loginRole) {
                 await signOut(auth);
                 throw new Error(`Login failed. This account is registered as a ${dbRole.replace('-', ' ')}, not a ${loginRole.replace('-', ' ')}.`);
+            }
+
+            if (loginRole === UserRole.counsellor) {
+                const dbCounsellorType = userData.counsellorType as CounsellorType;
+                if (dbCounsellorType !== counsellorType) {
+                    await signOut(auth);
+                    throw new Error(`Login failed. This account is registered as an ${dbCounsellorType.replace('-', ' ')} counsellor, not an ${counsellorType?.replace('-', ' ')} one.`);
+                }
             }
 
             // Roles match, proceed with setting state and session storage.

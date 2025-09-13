@@ -23,6 +23,7 @@ const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(1, "Password is required."),
     role: z.nativeEnum(UserRole, { errorMap: () => ({ message: "Please select a role to continue." }) }),
+    counsellorType: z.nativeEnum(CounsellorType).optional(),
 });
 
 export default function LoginPage() {
@@ -47,6 +48,12 @@ export default function LoginPage() {
     form.clearErrors();
   }
 
+  const handleCounsellorTypeSelect = (type: CounsellorType) => {
+    setCounsellorTypeSelection(type);
+    form.setValue("counsellorType", type);
+    form.clearErrors();
+  }
+
   const handleBackToRoleSelection = () => {
     form.reset();
     setCounsellorTypeSelection(null);
@@ -55,7 +62,7 @@ export default function LoginPage() {
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
       try {
-        await login(values.email, values.password, values.role);
+        await login(values.email, values.password, values.role, values.counsellorType);
         router.push('/');
       } catch (error) {
         let description = "An unexpected error occurred. Please try again.";
@@ -149,11 +156,11 @@ export default function LoginPage() {
             </CardContent>
         ) : showCounsellorTypeSelection ? (
              <CardContent className="grid grid-cols-2 gap-4">
-                 <Button variant="outline" className="flex flex-col h-24" onClick={() => setCounsellorTypeSelection('on-campus')}>
+                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect('on-campus')}>
                     <Building className="w-8 h-8 mb-2" />
                     <span>On-Campus</span>
                  </Button>
-                 <Button variant="outline" className="flex flex-col h-24" onClick={() => setCounsellorTypeSelection('external')}>
+                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect('external')}>
                     <Globe className="w-8 h-8 mb-2" />
                     <span>External</span>
                 </Button>
