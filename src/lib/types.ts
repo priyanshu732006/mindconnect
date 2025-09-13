@@ -1,4 +1,5 @@
 
+
 import { LucideIcon } from "lucide-react";
 
 export type Message = {
@@ -116,10 +117,11 @@ export type ChatMessage = {
     timestamp: string;
 }
 
-// Community Types
+// Community & Chat Types
 export type User = {
     id: string;
     alias: string;
+    avatar: string;
     role: 'student' | 'peer-buddy';
 };
   
@@ -141,3 +143,25 @@ export type Post = {
     upvotes: number;
     comments: Comment[];
 };
+
+
+export type Conversation = {
+    id: string;
+    participant: User;
+    messages: Message[];
+    unreadCount: number;
+    lastMessage: string;
+    lastMessageTimestamp: string;
+    status: 'improving' | 'stable' | 'declining';
+    tags: string[];
+    risk: 'low' | 'medium' | 'high';
+    requestStatus: 'pending' | 'accepted';
+  };
+  
+  export type Message = {
+    id: string;
+    sender: 'me' | User;
+    content: string;
+    timestamp: string;
+  };
+  
