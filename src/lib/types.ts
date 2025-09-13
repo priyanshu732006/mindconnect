@@ -122,7 +122,7 @@ export type User = {
     id: string;
     alias: string;
     avatar: string;
-    role: 'student' | 'peer-buddy';
+    role: 'student' | 'peer-buddy' | 'counsellor';
 };
   
 export type Comment = {

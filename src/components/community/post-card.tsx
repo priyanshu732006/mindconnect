@@ -11,8 +11,9 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowUp, MessageSquare, Share2, User } from 'lucide-react';
+import { Heart, MessageSquare, Share2, User } from 'lucide-react';
 import type { Post } from '@/lib/types';
+import Link from 'next/link';
 
 type PostCardProps = {
   post: Post;
@@ -26,17 +27,19 @@ export function PostCard({ post }: PostCardProps) {
           <div className="flex items-center gap-3">
             <Avatar className="bg-muted">
               <AvatarFallback>
-                <User className="h-5 w-5" />
+                {post.author.alias.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
-              <p className="font-semibold">{post.author.alias}</p>
+              <p className="font-semibold hover:underline cursor-pointer">{post.author.alias}</p>
               <p className="text-xs text-muted-foreground">
                 {post.timestamp}
               </p>
             </div>
           </div>
-          <Badge variant="outline" className="capitalize">{post.category}</Badge>
+           <Link href="#">
+            <Badge variant="outline" className="capitalize cursor-pointer hover:bg-accent">{post.category}</Badge>
+           </Link>
         </div>
       </CardHeader>
       <CardContent>
@@ -47,7 +50,7 @@ export function PostCard({ post }: PostCardProps) {
       </CardContent>
       <CardFooter className="gap-4 text-muted-foreground text-sm">
         <div className="flex items-center gap-1">
-          <ArrowUp className="h-4 w-4" />
+          <Heart className="h-4 w-4" />
           <span>{post.upvotes}</span>
         </div>
         <div className="flex items-center gap-1">
