@@ -86,8 +86,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // --- DATABASE SYNC ---
   useEffect(() => {
     async function fetchStudentData() {
-        if (!user || !user.uid || role !== 'student' || loading) {
-            isDataLoaded.current = false;
+        if (loading || !user || role !== 'student') {
+            isDataLoaded.current = false; // Not a student, or still loading
             return;
         }
 
@@ -138,6 +138,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (!loading) {
       fetchStudentData();
+    } else {
+      isDataLoaded.current = false;
     }
   }, [user, role, loading, db, toast]);
   
