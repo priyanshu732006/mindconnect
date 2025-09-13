@@ -1,0 +1,69 @@
+
+'use client';
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/context/auth-provider';
+import { Separator } from '@/components/ui/separator';
+
+export default function CounsellorProfilePage() {
+  const { user } = useAuth();
+  const counsellorName = user?.displayName || 'Jane Doe';
+  const counsellorEmail = user?.email || 'jane.doe@university.edu';
+  const aboutMeText =
+    'Dedicated to supporting student well-being and success. I specialize in stress management and academic anxiety. Feel free to reach out to schedule a confidential session.';
+
+  return (
+    <div className="space-y-8">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">
+          Profile
+        </h1>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>My Profile</CardTitle>
+          <CardDescription>
+            This is your public profile information.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-8">
+          <div className="flex items-center gap-6">
+            <Avatar className="h-24 w-24">
+              <AvatarImage
+                src="https://picsum.photos/seed/counsellor_profile/200"
+                alt={counsellorName}
+                data-ai-hint="counsellor avatar"
+              />
+              <AvatarFallback>{counsellorName.charAt(0)}</AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold">{counsellorName}</h2>
+              <p className="text-muted-foreground">On-Campus Counselor</p>
+              <p className="text-sm text-muted-foreground">
+                {counsellorEmail}
+              </p>
+            </div>
+          </div>
+
+          <Separator />
+
+          <div>
+            <h3 className="text-lg font-semibold">About Me</h3>
+            <p className="mt-2 text-muted-foreground">{aboutMeText}</p>
+          </div>
+
+          <Button>Edit Profile</Button>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useMemo } from 'react';
-import { LogOut, Menu } from 'lucide-react';
+import { LogOut, Menu, Bell } from 'lucide-react';
 
 import Logo from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,6 +22,7 @@ import { useAuth } from '@/context/auth-provider';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/app-provider';
 import { VisuallyHidden } from '@/components/ui/visually-hidden';
+import { Badge } from '@/components/ui/badge';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -104,51 +105,60 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Right Section - User Menu */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="relative h-10 w-10 rounded-full"
-            >
-              <Avatar className="h-10 w-10">
-                <AvatarImage
-                  src={
-                    user?.photoURL ??
-                    `https://picsum.photos/seed/${role ?? 'user'}/100/100`
-                  }
-                  alt="User"
-                  data-ai-hint={`${role} avatar`}
-                />
-                <AvatarFallback>
-                  {user?.email?.charAt(0).toUpperCase() ?? 'U'}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="end" className="w-56">
-            <DropdownMenuLabel>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">
-                  {user?.displayName ?? 'User'}
-                </p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
-                 {role && (<p className="text-xs leading-none text-muted-foreground capitalize pt-1">
-                  {role}
-                </p>)}
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" className="relative">
+            <Bell className="h-5 w-5" />
+             <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0" variant="destructive">3</Badge>
+            <span className="sr-only">Notifications</span>
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="relative h-10 w-10 rounded-full"
+              >
+                <Avatar className="h-10 w-10">
+                  <AvatarImage
+                    src={
+                      user?.photoURL ??
+                      `https://picsum.photos/seed/${role ?? 'user'}/100/100`
+                    }
+                    alt="User"
+                    data-ai-hint={`${role} avatar`}
+                  />
+                  <AvatarFallback>
+                    {user?.email?.charAt(0).toUpperCase() ?? 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="bottom" align="end" className="w-56">
+              <DropdownMenuLabel>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {user?.displayName ?? 'User'}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                   {role && (<p className="text-xs leading-none text-muted-foreground capitalize pt-1">
+                    {role.replace('-', ' ')}
+                  </p>)}
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/${role}/profile`}>Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Log out</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
       <main className="flex-1 p-4 sm:px-6 sm:py-0 md:p-8">{children}</main>
     </div>
