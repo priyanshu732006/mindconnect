@@ -86,7 +86,7 @@ export default function RegisterPage() {
       email: "",
       password: "",
       role: UserRole.student,
-      // @ts-expect-error
+      // Student fields
       collegeName: "",
       course: "",
       year: "",
@@ -96,7 +96,11 @@ export default function RegisterPage() {
       emergencyContactPhone: "",
       sleepHours: "",
       screenTimeHours: "",
+      // Peer Buddy fields
+      collegePhone: "",
       specializations: [],
+      // Counsellor fields
+      counsellorType: undefined,
     },
   });
 
@@ -507,5 +511,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
-    
