@@ -11,12 +11,12 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTransition, useEffect, useState } from "react";
-import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog } from "lucide-react";
+import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-provider";
 import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
-import { UserRole } from "@/lib/types";
+import { UserRole, CounsellorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const loginSchema = z.object({
@@ -30,6 +30,7 @@ export default function LoginPage() {
   const { toast } = useToast();
   const { login, user, loading } = useAuth();
   const router = useRouter();
+  const [counsellorTypeSelection, setCounsellorTypeSelection] = useState<CounsellorType | null>(null);
   
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -43,11 +44,12 @@ export default function LoginPage() {
   
   const handleRoleSelect = (role: UserRole) => {
     form.setValue("role", role);
-    form.clearErrors(); // Clear previous errors when role changes
+    form.clearErrors();
   }
 
   const handleBackToRoleSelection = () => {
     form.reset();
+    setCounsellorTypeSelection(null);
   }
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
@@ -95,6 +97,9 @@ export default function LoginPage() {
       [UserRole['peer-buddy']]: { icon: Users, label: "Peer Buddy" },
       [UserRole.admin]: { icon: UserCog, label: "Admin" },
   }
+
+  const showCounsellorTypeSelection = selectedRole === UserRole.counsellor && !counsellorTypeSelection;
+  const showLoginForm = selectedRole && (!showCounsellorTypeSelection);
   
   if (loading) {
     return (
@@ -114,9 +119,13 @@ export default function LoginPage() {
                 <CardDescription>
                     Please select your role to continue.
                 </CardDescription>
+           ) : showCounsellorTypeSelection ? (
+                <CardDescription>
+                    Are you an on-campus or external counsellor?
+                </CardDescription>
            ) : (
                 <CardDescription>
-                    Logging in as a <span className="font-bold capitalize">{selectedRole.replace('-', ' ')}</span>.
+                    Logging in as a <span className="font-bold capitalize">{counsellorTypeSelection ? `${counsellorTypeSelection.replace('-', ' ')} ${selectedRole}` : selectedRole.replace('-', ' ')}</span>.
                 </CardDescription>
            )}
         </CardHeader>
@@ -138,6 +147,17 @@ export default function LoginPage() {
                     )
                 })}
             </CardContent>
+        ) : showCounsellorTypeSelection ? (
+             <CardContent className="grid grid-cols-2 gap-4">
+                 <Button variant="outline" className="flex flex-col h-24" onClick={() => setCounsellorTypeSelection('on-campus')}>
+                    <Building className="w-8 h-8 mb-2" />
+                    <span>On-Campus</span>
+                 </Button>
+                 <Button variant="outline" className="flex flex-col h-24" onClick={() => setCounsellorTypeSelection('external')}>
+                    <Globe className="w-8 h-8 mb-2" />
+                    <span>External</span>
+                </Button>
+             </CardContent>
         ) : (
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -179,7 +199,7 @@ export default function LoginPage() {
                         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Login
                       </Button>
-                      <Button variant="link" size="sm" onClick={handleBackToRoleSelection}>
+                      <Button type="button" variant="link" size="sm" onClick={handleBackToRoleSelection}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to role selection
                       </Button>
@@ -187,7 +207,7 @@ export default function LoginPage() {
                 </form>
             </Form>
         )}
-        <CardFooter className={cn("flex-col pt-6 border-t", !selectedRole ? "flex" : "hidden")}>
+        <CardFooter className={cn("flex-col pt-6 border-t", !showLoginForm ? "flex" : "hidden")}>
              <p className="text-xs text-center text-muted-foreground">
                 Don't have an account?{" "}
                 <Link href="/register" className="underline hover:text-primary">
