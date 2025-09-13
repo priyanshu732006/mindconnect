@@ -16,16 +16,16 @@ export default function AppRootPage() {
             return; // Wait until auth state is determined
         }
 
-        if (user && role) {
-            // If user and role are present, redirect to the correct dashboard
-            setNavItemsByRole(role);
-            router.push(`/${role}/dashboard`);
-        } else if (!user) {
+        if (user) {
+            // User is logged in, but role might still be loading.
+            // The AuthGuard on the target page will handle role-specific redirection.
+            const targetRole = role || sessionStorage.getItem('userRole') || 'student';
+            setNavItemsByRole(targetRole as any);
+            router.push(`/${targetRole}/dashboard`);
+        } else {
             // If there's no user, redirect to the landing page
             router.push('/landing');
         }
-        // If there's a user but no role yet, we wait. 
-        // The auth provider is likely still fetching it. The effect will re-run when `role` updates.
         
     }, [user, role, loading, router, setNavItemsByRole]);
     

@@ -32,9 +32,9 @@ export default function AuthGuard({ children, role: requiredRole }: { children: 
     if (userRole && userRole !== requiredRole) {
       router.push(`/${userRole}/dashboard`);
     } else if (!userRole) {
-      // If loading is done and there's still no role, they need to select one.
-      // This is a fallback; ideally, this state should not be reached in a normal flow.
-      router.push('/landing'); 
+      // If loading is done and there's still no role, it might be fetching.
+      // We wait instead of redirecting immediately to /landing.
+      // The onAuthStateChanged listener in AuthProvider will trigger a re-render when the role arrives.
     }
     
   }, [user, userRole, loading, requiredRole, router]);
