@@ -97,6 +97,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if(role === UserRole.student && details?.studentDetails) {
         userData.studentDetails = details.studentDetails;
+        // Create initial empty record for the student in studentData path
+        const studentDataRef = ref(db, `studentData/${user.uid}`);
+        await set(studentDataRef, {
+            messages: [],
+            assessmentResults: {"phq-9": null, "gad-7": null, "ghq-12": null},
+            dailyCheckinData: null,
+            coins: 15,
+            streak: 0,
+        });
       }
       
       if(role === UserRole['peer-buddy'] && details?.peerBuddyDetails) {
@@ -167,5 +176,3 @@ export function useAuth() {
   }
   return context;
 }
-
-    
