@@ -5,10 +5,13 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { aiCompanionInitialPrompt } from '@/ai/flows/ai-companion-initial-prompt';
 import { calculateWellbeingScore, CalculateWellbeingScoreInput } from '@/ai/flows/calculate-wellbeing-score';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, Post } from '@/lib/types';
 import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial-analysis';
 import { analyzeVoice, VoiceAnalysisOutput } from '@/ai/flows/voice-analysis';
 import twilio from 'twilio';
+import { moderatePost } from '@/ai/flows/moderate-community-posts';
+import { addPost } from '@/lib/db';
+import { revalidatePath } from 'next/cache';
 
 
 export async function getAIResponse(
@@ -102,4 +105,70 @@ export async function sendSmsAction(to: string, body: string): Promise<{ success
         const errorMessage = error.message || 'An unknown error occurred while sending SMS.';
         return { success: false, error: `Failed to send SMS: ${errorMessage}` };
     }
+}
+
+
+const createPostSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'Title is required.')
+    .max(200, 'Title is too long.'),
+  content: z
+    .string()
+    .min(1, 'Content is required.')
+    .max(10000, 'Content is too long.'),
+  category: z.string().min(1, 'Category is required.'),
+});
+
+type State = {
+  success: boolean;
+  message?: string;
+  error?: string;
+};
+
+export async function handleCreatePost(
+  formData: FormData
+): Promise<State> {
+  const rawFormData = {
+    title: formData.get('title'),
+    content: formData.get('content'),
+    category: formData.get('category'),
+  };
+
+  const parsed = createPostSchema.safeParse(rawFormData);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.errors.map((e) => e.message).join(', '),
+    };
+  }
+
+  try {
+    const moderationResult = await moderatePost({
+      postContent: parsed.data.content,
+      topicCategory: parsed.data.category,
+    });
+
+    if (!moderationResult.isAppropriate) {
+      return {
+        success: false,
+        error: `Post flagged: ${
+          moderationResult.flagReason || 'Content violates community guidelines.'
+        }`,
+      };
+    }
+
+    await addPost(parsed.data as Omit<Post, 'id' | 'author' | 'upvotes' | 'comments' | 'timestamp'>);
+    
+    revalidatePath('/peer-buddy/community');
+
+    return { success: true, message: 'Post created successfully!' };
+  } catch (e) {
+    console.error(e);
+    return {
+      success: false,
+      error: 'An unexpected error occurred. Please try again.',
+    };
+  }
 }

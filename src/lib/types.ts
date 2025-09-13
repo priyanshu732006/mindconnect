@@ -94,7 +94,11 @@ export type AssessmentResult = {
     date: string;
 };
 
-export type AssessmentResults = Record<AssessmentId, AssessmentResult | null>;
+export type AssessmentResults = {
+    "phq-9": AssessmentResult | null;
+    "gad-7": AssessmentResult | null;
+    "ghq-12": AssessmentResult | null;
+};
 
 
 // Peer Buddy Types
@@ -111,3 +115,29 @@ export type ChatMessage = {
     text: string;
     timestamp: string;
 }
+
+// Community Types
+export type User = {
+    id: string;
+    alias: string;
+    role: 'student' | 'peer-buddy';
+};
+  
+export type Comment = {
+    id: string;
+    author: User;
+    content: string;
+    timestamp: string;
+    upvotes: number;
+};
+
+export type Post = {
+    id: string;
+    author: User;
+    title: string;
+    content: string;
+    category: string;
+    timestamp: string;
+    upvotes: number;
+    comments: Comment[];
+};
