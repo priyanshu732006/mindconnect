@@ -37,9 +37,9 @@ export default function CounsellorLayout({
   }
 
   // If the user is an external counselor AND is on an external page, use the dedicated layout.
-  if (counsellorType === 'external' && pathname.startsWith('/counsellor/external')) {
+  if (counsellorType === 'external') {
     // AuthGuard is now inside ExternalCounsellorLayout
-    return <ExternalCounsellorLayout>{children}</ExternalCounsellorLayout>;
+    return <>{children}</>;
   }
   
   // For all other cases (e.g., on-campus counselor), use the default AppLayout.
