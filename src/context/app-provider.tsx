@@ -11,7 +11,7 @@ import { studentNavItems } from '@/lib/student-nav';
 import { adminNavItems } from '@/lib/admin-nav';
 import { counsellorNavItems } from '@/lib/counsellor-nav';
 import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
-import { get, getDatabase, ref } from 'firebase/database';
+import { get, getDatabase, ref, set, update } from 'firebase/database';
 import { sendSmsAction } from '@/app/actions';
 
 
@@ -62,7 +62,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [navItems, setNavItems] = React.useState<NavItem[]>(studentNavItems);
   
   // Gamification state
-  const [coins, setCoins] = React.useState(15); // Start with 15 for creating account
+  const [coins, setCoins] = React.useState(15);
   const [streak, setStreak] = React.useState(0);
   
   // Daily Check-in state
@@ -77,8 +77,67 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const { toast } = useToast();
-  const { user, role } = useAuth();
+  const { user, role, loading } = useAuth();
+  const db = getDatabase();
   
+  // Ref to track if initial data load is complete
+  const isDataLoaded = React.useRef(false);
+
+  // --- DATABASE SYNC ---
+  useEffect(() => {
+    async function fetchStudentData() {
+        if (user && role === 'student' && !loading) {
+            // Fetch emergency contacts from userRoles
+            const userRoleRef = ref(db, `userRoles/${user.uid}`);
+            const userRoleSnapshot = await get(userRoleRef);
+            if (userRoleSnapshot.exists()) {
+                const userData = userRoleSnapshot.val();
+                if (userData.studentDetails?.emergencyContacts) {
+                    const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+                        ...contact,
+                        id: `${user.uid}-contact-${index}`,
+                        avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+                    }));
+                    setTrustedContacts(contactsFromDb);
+                }
+            }
+
+            // Fetch main student data
+            const studentDataRef = ref(db, `studentData/${user.uid}`);
+            const studentDataSnapshot = await get(studentDataRef);
+            if (studentDataSnapshot.exists()) {
+                const data = studentDataSnapshot.val();
+                setMessages(data.messages || []);
+                setAssessmentResults(data.assessmentResults || {"phq-9": undefined, "gad-7": undefined, "ghq-12": undefined});
+                setDailyCheckinData(data.dailyCheckinData || null);
+                setCoins(data.coins || 15);
+                setStreak(data.streak || 0);
+            }
+            isDataLoaded.current = true;
+        }
+    }
+    fetchStudentData();
+  }, [user, role, loading, db]);
+  
+  const writeStudentData = useCallback(() => {
+    if (user && role === 'student' && isDataLoaded.current) {
+        const studentDataRef = ref(db, `studentData/${user.uid}`);
+        set(studentDataRef, {
+            messages,
+            assessmentResults,
+            dailyCheckinData,
+            coins,
+            streak,
+        });
+    }
+  }, [user, role, db, messages, assessmentResults, dailyCheckinData, coins, streak]);
+
+  useEffect(() => {
+    writeStudentData();
+  }, [writeStudentData]);
+  // --- END DATABASE SYNC ---
+
+
   const setNavItemsByRole = useCallback((role: UserRole | null) => {
     switch (role) {
       case 'admin':
@@ -138,26 +197,40 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [user, messages, facialAnalysis, voiceAnalysis, dailyCheckinData, assessmentResults]);
 
 
-   const addContact = (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
-    const newId = (trustedContacts.length + 1).toString() + Date.now().toString();
-    setTrustedContacts(prev => [
-      ...prev,
-      { 
-        ...contact, 
-        id: newId,
-        avatar: `https://picsum.photos/seed/${newId}/100/100`
-      },
-    ]);
+   const addContact = async (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
+      if(!user) return;
+      const newContacts = [...trustedContacts.map(c => ({name: c.name, relation: c.relation, phone: c.phone})), contact];
+      const userRoleRef = ref(db, `userRoles/${user.uid}/studentDetails/emergencyContacts`);
+      await set(userRoleRef, newContacts);
+      // Re-fetch to update IDs and avatars correctly
+      const newId = `${user.uid}-contact-${trustedContacts.length}`;
+      setTrustedContacts(prev => [...prev, { ...contact, id: newId, avatar: `https://picsum.photos/seed/${newId}/100/100` }]);
   };
 
-  const updateContact = (updatedContact: TrustedContact) => {
-    setTrustedContacts(prev =>
-      prev.map(c => (c.id === updatedContact.id ? updatedContact : c))
-    );
+  const updateContact = async (updatedContact: TrustedContact) => {
+      if(!user) return;
+      const indexToUpdate = trustedContacts.findIndex(c => c.id === updatedContact.id);
+      if (indexToUpdate === -1) return;
+      
+      const newContacts = trustedContacts.map(c => ({name: c.name, relation: c.relation, phone: c.phone}));
+      newContacts[indexToUpdate] = { name: updatedContact.name, relation: updatedContact.relation, phone: updatedContact.phone };
+      
+      const userRoleRef = ref(db, `userRoles/${user.uid}/studentDetails/emergencyContacts`);
+      await set(userRoleRef, newContacts);
+
+      setTrustedContacts(prev => prev.map(c => (c.id === updatedContact.id ? updatedContact : c)));
   };
 
-  const deleteContact = (contactId: string) => {
-    setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
+  const deleteContact = async (contactId: string) => {
+      if(!user) return;
+      const newContactsForDb = trustedContacts
+        .filter(c => c.id !== contactId)
+        .map(c => ({ name: c.name, relation: c.relation, phone: c.phone }));
+      
+      const userRoleRef = ref(db, `userRoles/${user.uid}/studentDetails/emergencyContacts`);
+      await set(userRoleRef, newContactsForDb);
+
+      setTrustedContacts(prev => prev.filter(c => c.id !== contactId));
   };
   
   const addJournalEntry = (data: DailyCheckinData) => {
@@ -185,31 +258,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // Trigger analysis with the newest results immediately
     analyzeCurrentState(newResults);
   };
-
-  useEffect(() => {
-    async function fetchStudentData() {
-      if (user && role === 'student') {
-        const db = getDatabase();
-        const userRoleRef = ref(db, `userRoles/${user.uid}`);
-        const snapshot = await get(userRoleRef);
-        if (snapshot.exists()) {
-          const userData = snapshot.val();
-          if (userData.studentDetails?.emergencyContacts) {
-            const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
-              ...contact,
-              id: `${user.uid}-contact-${index}`, // a unique ID
-              avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
-            }));
-            setTrustedContacts(contactsFromDb);
-          }
-        }
-      }
-    }
-    fetchStudentData();
-  }, [user, role]);
   
   React.useEffect(() => {
-    analyzeCurrentState();
+    if(isDataLoaded.current) {
+        analyzeCurrentState();
+    }
   }, [messages, facialAnalysis, voiceAnalysis, dailyCheckinData, analyzeCurrentState]);
   
   const triggerCrisisAlerts = React.useCallback(async (currentContacts: TrustedContact[], isSelfHarmRisk: boolean) => {
