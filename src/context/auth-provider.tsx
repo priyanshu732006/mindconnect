@@ -15,7 +15,7 @@ type AuthContextType = {
   role: UserRole | null;
   counsellorType: CounsellorType | null;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
-  register: (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any }) => Promise<void>;
+  register: (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any }) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -76,7 +76,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const register = async (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any }) => {
+  const register = async (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any }) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     if (user) {
@@ -86,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const db = getDatabase();
       const userRoleRef = ref(db, `userRoles/${user.uid}`);
-      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any } = { 
+      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any } = { 
         role, 
         fullName
       };
@@ -97,6 +97,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if(role === UserRole.student && details?.studentDetails) {
         userData.studentDetails = details.studentDetails;
+      }
+      
+      if(role === UserRole['peer-buddy'] && details?.peerBuddyDetails) {
+        userData.peerBuddyDetails = details.peerBuddyDetails;
       }
       
       await set(userRoleRef, userData);
@@ -163,3 +167,5 @@ export function useAuth() {
   }
   return context;
 }
+
+    

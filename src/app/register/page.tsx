@@ -20,7 +20,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserRole } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
+import { Checkbox } from "@/components/ui/checkbox";
 
+const specializationItems = [
+    { id: 'exam-stress', label: 'Exam Stress' },
+    { id: 'anxiety', label: 'Anxiety' },
+    { id: 'study-pressure', label: 'Study Pressure' },
+    { id: 'motivation', label: 'Motivation' },
+    { id: 'relationships', label: 'Relationships' },
+    { id: 'homesickness', label: 'Homesickness' },
+] as const;
 
 const baseSchema = z.object({
     fullName: z.string().min(1, "Full name is required."),
@@ -47,11 +56,20 @@ const counsellorSchema = baseSchema.extend({
      counsellorType: z.enum(['on-campus', 'external'], { required_error: "Please select counsellor type" }),
 });
 
+const peerBuddySchema = baseSchema.extend({
+    role: z.literal(UserRole['peer-buddy']),
+    collegeName: z.string().min(1, "College name is required for verification."),
+    collegePhone: z.string().min(1, "College phone number is required for verification."),
+    specializations: z.array(z.string()).refine(value => value.some(item => item), {
+        message: "You have to select at least one specialization.",
+    }),
+});
+
 const registerSchema = z.discriminatedUnion("role", [
     studentSchema,
     counsellorSchema,
-    baseSchema.extend({ role: z.literal(UserRole.admin) }),
-    baseSchema.extend({ role: z.literal(UserRole['peer-buddy']) })
+    peerBuddySchema,
+    baseSchema.extend({ role: z.literal(UserRole.admin) })
 ]);
 
 
@@ -78,6 +96,7 @@ export default function RegisterPage() {
       emergencyContactPhone: "",
       sleepHours: "",
       screenTimeHours: "",
+      specializations: [],
     },
   });
 
@@ -86,6 +105,7 @@ export default function RegisterPage() {
       try {
         let studentDetails;
         let counsellorType;
+        let peerBuddyDetails;
 
         if (values.role === UserRole.student) {
           studentDetails = {
@@ -105,9 +125,15 @@ export default function RegisterPage() {
           };
         } else if (values.role === UserRole.counsellor) {
           counsellorType = values.counsellorType;
+        } else if (values.role === UserRole['peer-buddy']) {
+          peerBuddyDetails = {
+            collegeName: values.collegeName,
+            collegePhone: values.collegePhone,
+            specializations: values.specializations,
+          };
         }
 
-        await register(values.email, values.password, values.fullName, values.role, { counsellorType, studentDetails });
+        await register(values.email, values.password, values.fullName, values.role, { counsellorType, studentDetails, peerBuddyDetails });
         
         toast({
             title: "Registration Successful",
@@ -146,6 +172,8 @@ export default function RegisterPage() {
   }, [user, router]);
 
   const watchedRole = form.watch("role");
+  const emailLabel = watchedRole === UserRole.student || watchedRole === UserRole['peer-buddy'] ? 'College Email' : 'Email';
+  const emailPlaceholder = watchedRole === UserRole.student || watchedRole === UserRole['peer-buddy'] ? 'user@college.edu' : 'user@example.com';
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -201,9 +229,9 @@ export default function RegisterPage() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>{watchedRole === UserRole.student ? 'College Email' : 'Email'}</FormLabel>
+                                <FormLabel>{emailLabel}</FormLabel>
                                 <FormControl>
-                                    <Input placeholder={watchedRole === UserRole.student ? "user@college.edu" : "user@example.com"} {...field} />
+                                    <Input placeholder={emailPlaceholder} {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -342,6 +370,86 @@ export default function RegisterPage() {
                         </>
                     )}
                     
+                    {watchedRole === UserRole['peer-buddy'] && (
+                        <>
+                             <Separator className="my-6" />
+                             <p className="text-sm font-medium text-muted-foreground">Peer Buddy Verification</p>
+                             <FormField
+                                control={form.control}
+                                name="collegeName"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>College Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="University of Example" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                             <FormField
+                                control={form.control}
+                                name="collegePhone"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>College Phone Number</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="+91XXXXXXXXXX" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Separator className="my-6" />
+                            <FormField
+                                control={form.control}
+                                name="specializations"
+                                render={() => (
+                                    <FormItem>
+                                        <div className="mb-4">
+                                            <FormLabel className="text-base">Areas of Specialization</FormLabel>
+                                            <FormMessage />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                        {specializationItems.map((item) => (
+                                            <FormField
+                                            key={item.id}
+                                            control={form.control}
+                                            name="specializations"
+                                            render={({ field }) => {
+                                                return (
+                                                <FormItem
+                                                    key={item.id}
+                                                    className="flex flex-row items-start space-x-3 space-y-0"
+                                                >
+                                                    <FormControl>
+                                                    <Checkbox
+                                                        checked={field.value?.includes(item.label)}
+                                                        onCheckedChange={(checked) => {
+                                                        return checked
+                                                            ? field.onChange([...(field.value || []), item.label])
+                                                            : field.onChange(
+                                                                field.value?.filter(
+                                                                (value) => value !== item.label
+                                                                )
+                                                            )
+                                                        }}
+                                                    />
+                                                    </FormControl>
+                                                    <FormLabel className="font-normal">
+                                                    {item.label}
+                                                    </FormLabel>
+                                                </FormItem>
+                                                )
+                                            }}
+                                            />
+                                        ))}
+                                        </div>
+                                    </FormItem>
+                                )}
+                                />
+                        </>
+                    )}
 
                     {watchedRole === UserRole.counsellor && (
                          <FormField
@@ -399,3 +507,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+    
