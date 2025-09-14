@@ -13,13 +13,24 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { Info, CheckCircle, Users, AlertTriangle } from 'lucide-react';
+import { Info, CheckCircle, Users, AlertTriangle, X } from 'lucide-react';
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, AreaChart, Area } from 'recharts';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 
 const peerImpactData = [
     { buddy: 'Rohan J.', students: 45 },
@@ -48,6 +59,36 @@ const engagementData = [
   { day: 'Sun', rate: 85 },
 ];
 
+const openIssuesData = [
+  {
+    id: 'IS-001',
+    raisedBy: 'Dr. Evans',
+    raiserRole: 'Counselor',
+    raisedAgainst: 'John Doe',
+    againstRole: 'Student',
+    description: 'Missed three consecutive counseling sessions without notice.',
+    status: 'Open',
+  },
+  {
+    id: 'IS-002',
+    raisedBy: 'Priya Sharma',
+    raiserRole: 'Peer Buddy',
+    raisedAgainst: 'Anika Verma',
+    againstRole: 'Student',
+    description: 'Student is showing signs of severe distress during chats.',
+    status: 'Open',
+  },
+   {
+    id: 'IS-003',
+    raisedBy: 'Admin System',
+    raiserRole: 'System',
+    raisedAgainst: 'Rohan Joshi',
+    againstRole: 'Peer Buddy',
+    description: 'Peer buddy has not responded to 5 consecutive requests.',
+    status: 'Open',
+  },
+];
+
 
 const peerImpactChartConfig = {
   students: {
@@ -72,6 +113,7 @@ const engagementChartConfig = {
 
 
 export default function AdminDashboardPage() {
+  const [showOpenIssues, setShowOpenIssues] = useState(false);
   return (
     <div className="space-y-8">
       <header>
@@ -111,7 +153,7 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">Unchanged</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setShowOpenIssues(!showOpenIssues)}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
             <Info className="h-4 w-4 text-muted-foreground" />
@@ -122,6 +164,54 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+        {showOpenIssues && (
+            <Card className="animate-in fade-in-50">
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Open Issues</CardTitle>
+                        <CardDescription>A list of all open issues in the system.</CardDescription>
+                    </div>
+                     <Button variant="ghost" size="icon" onClick={() => setShowOpenIssues(false)}>
+                        <X className="h-4 w-4" />
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Issue ID</TableHead>
+                                <TableHead>Raised By</TableHead>
+                                <TableHead>Raiser Role</TableHead>
+                                <TableHead>Raised Against</TableHead>
+                                <TableHead>Against Role</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Action</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {openIssuesData.map((issue) => (
+                                <TableRow key={issue.id}>
+                                    <TableCell className="font-mono">{issue.id}</TableCell>
+                                    <TableCell className="font-medium text-primary">{issue.raisedBy}</TableCell>
+                                    <TableCell>{issue.raiserRole}</TableCell>
+                                    <TableCell className="font-medium text-primary">{issue.raisedAgainst}</TableCell>
+                                    <TableCell>{issue.againstRole}</TableCell>
+                                    <TableCell className="max-w-[250px]">{issue.description}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="destructive">{issue.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="outline" size="sm">Resolve</Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
