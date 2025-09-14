@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { LiveUserCounter } from '@/components/live-user-counter';
 import Image from 'next/image';
 import { useLocale } from '@/context/locale-provider';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function LandingPage() {
   const { t } = useLocale();
@@ -16,6 +17,7 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Logo />
         <nav className="flex items-center gap-4">
+          <LanguageSwitcher />
           <Button variant="ghost" asChild>
             <Link href="/login">{t.login}</Link>
           </Button>
