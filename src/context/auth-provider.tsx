@@ -14,6 +14,7 @@ type AuthContextType = {
   loading: boolean;
   role: UserRole | null;
   counsellorType: CounsellorType | null;
+  studentDetails: any | null;
   login: (email: string, password: string, role: UserRole, counsellorType?: CounsellorType) => Promise<{ role: UserRole, counsellorType: CounsellorType | null }>;
   register: (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any }) => Promise<void>;
   logout: () => Promise<void>;
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<UserRole | null>(null);
   const [counsellorType, setCounsellorType] = useState<CounsellorType | null>(null);
+  const [studentDetails, setStudentDetails] = useState<any | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -48,6 +50,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               setCounsellorType(null);
               sessionStorage.removeItem('counsellorType');
             }
+
+            if (userData.studentDetails) {
+                setStudentDetails(userData.studentDetails);
+            } else {
+                setStudentDetails(null);
+            }
+
           } else {
              // User exists in Auth but not in DB (edge case)
             setUser(user);
@@ -59,6 +68,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(user); // Keep user logged in but without role
           setRole(null);
           setCounsellorType(null);
+          setStudentDetails(null);
         } finally {
           setLoading(false);
         }
@@ -67,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         setRole(null);
         setCounsellorType(null);
+        setStudentDetails(null);
         sessionStorage.removeItem('userRole');
         sessionStorage.removeItem('counsellorType');
         setLoading(false);
@@ -145,6 +156,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Manually set state and session storage here to ensure it's available immediately for redirection
             setRole(dbRole);
             setCounsellorType(dbCounsellorType);
+            if (userData.studentDetails) {
+                setStudentDetails(userData.studentDetails);
+            }
             sessionStorage.setItem('userRole', dbRole);
             if(dbCounsellorType) {
               sessionStorage.setItem('counsellorType', dbCounsellorType);
@@ -174,6 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loading,
     role,
     counsellorType,
+    studentDetails,
     login,
     register,
     logout,

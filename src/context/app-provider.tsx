@@ -77,7 +77,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   });
 
   const { toast } = useToast();
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, studentDetails } = useAuth();
   const db = getDatabase();
   
   // Ref to track if initial data load is complete
@@ -91,22 +91,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             return;
         }
         
-        // This is the critical fix: Only attempt to fetch student data if the role is 'student'.
         if (role === 'student') {
             try {
-                // Fetch emergency contacts from userRoles
-                const userRoleRef = ref(db, `userRoles/${user.uid}`);
-                const userRoleSnapshot = await get(userRoleRef);
-                if (userRoleSnapshot.exists()) {
-                    const userData = userRoleSnapshot.val();
-                    if (userData.studentDetails?.emergencyContacts) {
-                        const contactsFromDb = userData.studentDetails.emergencyContacts.map((contact: any, index: number) => ({
-                            ...contact,
-                            id: `${user.uid}-contact-${index}`,
-                            avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
-                        }));
-                        setTrustedContacts(contactsFromDb);
-                    }
+                if (studentDetails?.emergencyContacts) {
+                    const contactsFromDb = studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+                        ...contact,
+                        id: `${user.uid}-contact-${index}`,
+                        avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+                    }));
+                    setTrustedContacts(contactsFromDb);
                 }
 
                 // Fetch main student data
@@ -151,7 +144,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } else {
       isDataLoaded.current = false;
     }
-  }, [user, role, loading, db, toast]);
+  }, [user, role, loading, db, toast, studentDetails]);
   
   const writeStudentData = useCallback(() => {
     if (user && role === 'student' && isDataLoaded.current) {
