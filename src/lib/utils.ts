@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export type WellbeingCategory = {
-  name: 'Low Concern' | 'Moderate Concern' | 'High Concern' | 'Crisis';
+  name: 'Low Concern' | 'Moderate Concern' | 'High Concern' | 'Crisis' | 'Unknown';
   colorClass: string;
   backgroundColorClass: string;
   ringColorClass: string;
@@ -15,6 +15,15 @@ export type WellbeingCategory = {
 };
 
 export function getWellbeingCategory(score: number): WellbeingCategory {
+  if (score === 0) {
+    return {
+        name: 'Unknown',
+        colorClass: 'text-muted-foreground',
+        backgroundColorClass: 'bg-muted',
+        ringColorClass: 'ring-muted',
+        rechartsColor: 'hsl(var(--muted))',
+    };
+  }
   if (score > 75) {
     return {
       name: 'Low Concern',
@@ -50,4 +59,3 @@ export function getWellbeingCategory(score: number): WellbeingCategory {
     rechartsColor: 'hsl(var(--chart-4))',
   };
 }
-
