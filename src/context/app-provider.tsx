@@ -2,8 +2,8 @@
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
-import { UserRole } from '@/lib/types';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
+import { UserRole, NavItem } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
@@ -87,7 +87,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function fetchStudentData() {
         if (!user) return; // Should not happen if role is student, but for safety.
-
+        isDataLoaded.current = false;
         try {
             // Set trusted contacts from the already-fetched studentDetails
             if (studentDetails?.emergencyContacts) {
@@ -119,15 +119,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                  setCoins(15);
                  setStreak(0);
             }
-            isDataLoaded.current = true;
         } catch (error) {
             console.error("Error fetching student data:", error);
-            isDataLoaded.current = true; // Allow app to function even if data load fails
             toast({
                 variant: 'destructive',
                 title: 'Data Load Error',
                 description: 'Could not load your saved data. Please try refreshing.'
             });
+        } finally {
+            isDataLoaded.current = true; // Mark as loaded
         }
     }
     
@@ -256,7 +256,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   useEffect(() => {
     const analyzeCurrentState = async () => {
-        if (!user || !isDataLoaded.current) return;
+        // Only run analysis if data has been loaded and user is a student
+        if (!isDataLoaded.current || !user) return;
         
         const conversation = messages.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n');
         const completedAssessments = Object.values(assessmentResults).filter(Boolean) as AssessmentResult[];
@@ -398,5 +399,3 @@ export function useApp() {
   }
   return context;
 }
-
-    
