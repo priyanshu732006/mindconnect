@@ -31,7 +31,7 @@ const loginSchema = z.object({
 export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
-  const { login, user, loading } = useAuth();
+  const { login, user, loading, role: authRole } = useAuth();
   const { setNavItemsByRole } = useApp();
   const router = useRouter();
   const [counsellorTypeSelection, setCounsellorTypeSelection] = useState<CounsellorType | null>(null);
@@ -67,7 +67,7 @@ export default function LoginPage() {
       try {
         const { role, counsellorType } = await login(values.email, values.password, values.role, values.counsellorType);
         
-        setNavItemsByRole(role);
+        setNavItemsByRole(role, counsellorType);
 
         if (role === UserRole.counsellor && counsellorType === 'external') {
             router.push('/counsellor/external/dashboard');
@@ -113,25 +113,21 @@ export default function LoginPage() {
   useEffect(() => {
     // This effect redirects logged-in users away from the login page.
     // It should NOT run while a login transition is in progress.
-    if (!loading && user && !isPending) {
-      const targetRole = sessionStorage.getItem('userRole') as UserRole;
+    if (!loading && user && authRole && !isPending) {
+      const targetRole = authRole;
       const targetCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType;
-      if (targetRole) {
-          if (targetRole === UserRole.counsellor && targetCounsellorType === 'external') {
-              router.replace('/counsellor/external/dashboard');
-          } else if (targetRole === UserRole.student) {
-              router.replace('/student/dashboard');
-          } else if (targetRole === UserRole['peer-buddy']) {
-              router.replace('/peer-buddy/dashboard');
-          } else {
-              router.replace(`/${targetRole}/dashboard`);
-          }
+      
+      if (targetRole === UserRole.counsellor && targetCounsellorType === 'external') {
+          router.replace('/counsellor/external/dashboard');
+      } else if (targetRole === UserRole.student) {
+          router.replace('/student/dashboard');
+      } else if (targetRole === UserRole['peer-buddy']) {
+          router.replace('/peer-buddy/dashboard');
       } else {
-          // Fallback if role isn't in session storage for some reason
-          router.replace('/landing');
+          router.replace(`/${targetRole}/dashboard`);
       }
     }
-  }, [user, loading, router, isPending]);
+  }, [user, authRole, loading, router, isPending]);
   
   const roleConfig = {
       [UserRole.student]: { icon: User, label: "Student" },
@@ -143,7 +139,7 @@ export default function LoginPage() {
   const showCounsellorTypeSelection = selectedRole === UserRole.counsellor && !counsellorTypeSelection;
   const showLoginForm = selectedRole && (!showCounsellorTypeSelection);
   
-  if (loading || (user && !isPending)) { // Keep showing loader if we are loading or about to redirect
+  if (loading || (user && !isPending && authRole)) { // Keep showing loader if we are loading or about to redirect
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -269,5 +265,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
