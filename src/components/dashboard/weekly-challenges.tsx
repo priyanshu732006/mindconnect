@@ -2,15 +2,27 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useApp } from "@/context/app-provider";
 import { CheckCircle2, Circle } from "lucide-react";
 
-const challenges = [
-    { text: 'Write 3 journal entries', completed: true },
-    { text: 'Complete 1 assessment', completed: true },
-    { text: 'Maintain a 3-day streak', completed: false },
-];
-
 export function WeeklyChallenges() {
+    const { assessmentResults, messages, streak } = useApp();
+
+    const hasCompletedAllAssessments = 
+        !!assessmentResults['phq-9'] && 
+        !!assessmentResults['gad-7'] && 
+        !!assessmentResults['ghq-12'];
+    
+    const hasWrittenThreeJournalEntries = messages.length >= 3;
+    const hasThreeDayStreak = streak >= 3;
+
+    const challenges = [
+        { text: 'Write 3 journal entries', completed: hasWrittenThreeJournalEntries },
+        { text: 'Complete all assessments', completed: hasCompletedAllAssessments },
+        { text: 'Maintain a 3-day streak', completed: hasThreeDayStreak },
+    ];
+
+
     return (
         <Card>
             <CardHeader>
