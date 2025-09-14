@@ -54,7 +54,7 @@ export function DailyCheckinDialog({
   isOpen,
   setIsOpen,
 }: DailyCheckinDialogProps) {
-  const { addJournalEntry, streak } = useApp();
+  const { addJournalEntry } = useApp();
   const form = useForm<z.infer<typeof checkinSchema>>({
     resolver: zodResolver(checkinSchema),
     defaultValues: {
@@ -76,7 +76,6 @@ export function DailyCheckinDialog({
     addJournalEntry(values as DailyCheckinData);
     form.reset();
     setIsOpen(false);
-    setCheckinTimestamp();
   };
   
   const handleClose = (open: boolean) => {
