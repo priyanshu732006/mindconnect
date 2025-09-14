@@ -108,8 +108,9 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    if (!loading && user) {
-      // If user is already logged in, redirect them away from the login page
+    // This effect redirects logged-in users away from the login page.
+    // It should NOT run while a login transition is in progress.
+    if (!loading && user && !isPending) {
       const targetRole = sessionStorage.getItem('userRole') as UserRole;
       const targetCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType;
       if (targetRole) {
@@ -123,7 +124,7 @@ export default function LoginPage() {
           router.replace('/landing');
       }
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isPending]);
   
   const roleConfig = {
       [UserRole.student]: { icon: User, label: "Student" },
@@ -135,7 +136,7 @@ export default function LoginPage() {
   const showCounsellorTypeSelection = selectedRole === UserRole.counsellor && !counsellorTypeSelection;
   const showLoginForm = selectedRole && (!showCounsellorTypeSelection);
   
-  if (loading || user) { // Keep showing loader if we are loading or about to redirect
+  if (loading || (user && !isPending)) { // Keep showing loader if we are loading or about to redirect
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
