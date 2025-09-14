@@ -30,6 +30,7 @@ const AssessmentResultSchema = z.object({
     score: z.number(),
     interpretation: z.string(),
     date: z.string(),
+    answers: z.array(z.any()),
 });
 
 const CalculateWellbeingScoreInputSchema = z.object({
