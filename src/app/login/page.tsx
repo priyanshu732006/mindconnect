@@ -116,6 +116,8 @@ export default function LoginPage() {
       if (targetRole) {
           if (targetRole === UserRole.counsellor && targetCounsellorType === 'external') {
               router.replace('/counsellor/external/dashboard');
+          } else if (targetRole === UserRole.student) {
+              router.replace('/student/dashboard');
           } else {
               router.replace(`/${targetRole}/dashboard`);
           }
