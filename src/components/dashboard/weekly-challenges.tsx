@@ -13,7 +13,7 @@ export function WeeklyChallenges() {
         !!assessmentResults['gad-7'] && 
         !!assessmentResults['ghq-12'];
     
-    const hasWrittenThreeJournalEntries = messages.length >= 3;
+    const hasWrittenThreeJournalEntries = messages.filter(m => m.role === 'user').length >= 3;
     const hasThreeDayStreak = streak >= 3;
 
     const challenges = [
