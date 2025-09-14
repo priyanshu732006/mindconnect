@@ -89,7 +89,7 @@ export async function sendSmsAction(to: string, body: string): Promise<{ success
     }
 
     const phoneRegex = new RegExp(
-      /^\\+91[6-9]\d{9}$/
+      /^\+91[6-9]\d{9}$/
     );
 
     if(!phoneRegex.test(to)){
