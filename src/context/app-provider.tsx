@@ -146,8 +146,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, role, loading, db, toast, studentDetails]);
   
-  const writeStudentData = useCallback(() => {
-    if (user && role === 'student' && isDataLoaded.current) {
+  useEffect(() => {
+    // This effect ensures data is written back to DB whenever it changes, but only after initial load.
+    if (isDataLoaded.current && user && role === 'student') {
         const studentDataRef = ref(db, `studentData/${user.uid}`);
         set(studentDataRef, {
             messages,
@@ -160,13 +161,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         });
     }
   }, [user, role, db, messages, assessmentResults, dailyCheckinData, coins, streak]);
-
-  useEffect(() => {
-    // This effect ensures data is written back to DB whenever it changes, but only after initial load.
-    if (isDataLoaded.current) {
-        writeStudentData();
-    }
-  }, [writeStudentData]);
   // --- END DATABASE SYNC ---
 
 
@@ -178,7 +172,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       case 'counsellor':
         setNavItems(counsellorNavItems);
         break;
-      case 'peer-buddy':
+      case UserRole['peer-buddy']:
         setNavItems(peerBuddyNavItems);
         break;
       case 'student':
@@ -403,3 +397,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
