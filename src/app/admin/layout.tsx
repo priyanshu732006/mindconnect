@@ -40,7 +40,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               key={item.href}
               href={item.href}
               className={cn(
-                'transition-colors hover:text-foreground',
+                'transition-colors hover:text-foreground whitespace-nowrap',
                 pathname === item.href
                   ? 'text-foreground'
                   : 'text-muted-foreground'
