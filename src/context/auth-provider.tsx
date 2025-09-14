@@ -30,6 +30,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [studentDetails, setStudentDetails] = useState<any | null>(null);
 
   useEffect(() => {
+    // This runs only on the client side
+    const savedRole = sessionStorage.getItem('userRole') as UserRole | null;
+    const savedCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType | null;
+    const savedStudentDetails = sessionStorage.getItem('studentDetails');
+    
+    if (savedRole) setRole(savedRole);
+    if (savedCounsellorType) setCounsellorType(savedCounsellorType);
+    if (savedStudentDetails) {
+        try {
+            setStudentDetails(JSON.parse(savedStudentDetails));
+        } catch (e) {
+            console.error("Failed to parse studentDetails from sessionStorage", e);
+        }
+    }
+  }, []);
+
+  useEffect(() => {
+    setLoading(true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const db = getDatabase();
@@ -52,12 +70,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
             if (userData.studentDetails) {
                 setStudentDetails(userData.studentDetails);
+                sessionStorage.setItem('studentDetails', JSON.stringify(userData.studentDetails));
             } else {
                 setStudentDetails(null);
+                sessionStorage.removeItem('studentDetails');
             }
 
           } else {
              // User exists in Auth but not in DB (edge case)
+            console.warn("User exists in Auth but not in DB");
             setUser(user);
             setRole(null);
             sessionStorage.removeItem('userRole');
@@ -79,6 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setStudentDetails(null);
         sessionStorage.removeItem('userRole');
         sessionStorage.removeItem('counsellorType');
+        sessionStorage.removeItem('studentDetails');
         setLoading(false);
       }
     });
@@ -154,15 +176,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             
             // Manually set state and session storage here to ensure it's available immediately for redirection
             setRole(dbRole);
-            setCounsellorType(dbCounsellorType);
-            if (userData.studentDetails) {
-                setStudentDetails(userData.studentDetails);
-            }
             sessionStorage.setItem('userRole', dbRole);
+            
+            setCounsellorType(dbCounsellorType);
             if(dbCounsellorType) {
               sessionStorage.setItem('counsellorType', dbCounsellorType);
             } else {
               sessionStorage.removeItem('counsellorType');
+            }
+
+            if (userData.studentDetails) {
+                setStudentDetails(userData.studentDetails);
+                sessionStorage.setItem('studentDetails', JSON.stringify(userData.studentDetails));
+            } else {
+                setStudentDetails(null);
+                sessionStorage.removeItem('studentDetails');
             }
 
 
