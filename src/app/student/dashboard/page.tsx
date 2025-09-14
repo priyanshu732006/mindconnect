@@ -26,7 +26,7 @@ export default function DashboardPage() {
     }
     // If no record or it was a previous day, open the dialog.
     setCheckinOpen(true);
-  }, [setCheckinOpen, dailyCheckinData]);
+  }, [dailyCheckinData]);
 
 
   return (
