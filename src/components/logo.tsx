@@ -20,7 +20,7 @@ const Logo = ({ className, iconOnly = false }: { className?: string; iconOnly?: 
         <path d="M2 17l10 5 10-5" />
         <path d="M2 12l10 5 10-5" />
       </svg>
-      {!iconOnly && <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary-foreground">दिव्यManas</span>}
+      {!iconOnly && <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary-foreground [text-shadow:1px_1px_2px_var(--tw-shadow-color)] shadow-black/20">दिव्यManas</span>}
     </div>
   );
 };
