@@ -30,7 +30,7 @@ type ResolveIssueDialogProps = {
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
     issue: Issue;
-    onIssueResolved: (issueId: string) => void;
+    onIssueResolved: (issueId: string, resolution: string) => void;
 }
 
 export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }: ResolveIssueDialogProps) {
@@ -55,17 +55,12 @@ export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }
         }
 
         if (issue) {
-            console.log({
-                issueId: issue.id,
-                resolution: action,
-            });
-            
             toast({
                 title: 'Issue Resolved',
                 description: `The issue (${issue.id}) has been marked as resolved.`,
             });
             
-            onIssueResolved(issue.id);
+            onIssueResolved(issue.id, action);
             setIsOpen(false);
         }
     };

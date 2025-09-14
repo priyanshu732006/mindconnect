@@ -61,15 +61,6 @@ const engagementData = [
 
 const initialOpenIssuesData = [
   {
-    id: 'IS-001',
-    raisedBy: 'Dr. Evans',
-    raiserRole: 'Counselor',
-    raisedAgainst: 'John Doe',
-    againstRole: 'Student',
-    description: 'Missed three consecutive counseling sessions without notice.',
-    status: 'Open',
-  },
-  {
     id: 'IS-002',
     raisedBy: 'Priya Sharma',
     raiserRole: 'Peer Buddy',
@@ -88,6 +79,19 @@ const initialOpenIssuesData = [
     status: 'Open',
   },
 ];
+
+const initialResolvedIssuesData = [
+    {
+        id: 'IS-001',
+        raisedBy: 'Dr. Evans',
+        raiserRole: 'Counselor',
+        raisedAgainst: 'John Doe',
+        againstRole: 'Student',
+        description: 'Missed three consecutive counseling sessions without notice.',
+        status: 'Resolved',
+        resolution: 'Called the student and notified his parents.',
+    }
+]
 
 
 const peerImpactChartConfig = {
@@ -115,6 +119,7 @@ const engagementChartConfig = {
 export default function AdminDashboardPage() {
   const [showOpenIssues, setShowOpenIssues] = useState(false);
   const [openIssuesData, setOpenIssuesData] = useState(initialOpenIssuesData);
+  const [resolvedIssuesData, setResolvedIssuesData] = useState(initialResolvedIssuesData);
   const [isResolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<(typeof openIssuesData)[0] | null>(null);
 
@@ -123,7 +128,11 @@ export default function AdminDashboardPage() {
     setResolveDialogOpen(true);
   }
 
-  const handleIssueResolved = (issueId: string) => {
+  const handleIssueResolved = (issueId: string, resolution: string) => {
+    const issueToResolve = openIssuesData.find(issue => issue.id === issueId);
+    if(issueToResolve) {
+        setResolvedIssuesData(prev => [{...issueToResolve, status: 'Resolved', resolution}, ...prev]);
+    }
     setOpenIssuesData(prev => prev.filter(issue => issue.id !== issueId));
   }
 
@@ -232,6 +241,48 @@ export default function AdminDashboardPage() {
                 </CardContent>
             </Card>
         )}
+        
+         {showOpenIssues && resolvedIssuesData.length > 0 && (
+            <Card className="animate-in fade-in-50">
+                <CardHeader>
+                    <CardTitle>Resolved Issues</CardTitle>
+                    <CardDescription>A log of all resolved issues.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Issue ID</TableHead>
+                                <TableHead>Raised By</TableHead>
+                                <TableHead>Raiser Role</TableHead>
+                                <TableHead>Raised Against</TableHead>
+                                <TableHead>Against Role</TableHead>
+                                <TableHead>Description</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Resolution</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {resolvedIssuesData.map((issue) => (
+                                <TableRow key={issue.id}>
+                                    <TableCell className="font-mono">{issue.id}</TableCell>
+                                    <TableCell className="font-medium text-primary">{issue.raisedBy}</TableCell>
+                                    <TableCell>{issue.raiserRole}</TableCell>
+                                    <TableCell className="font-medium text-primary">{issue.raisedAgainst}</TableCell>
+                                    <TableCell>{issue.againstRole}</TableCell>
+                                    <TableCell className="max-w-[250px]">{issue.description}</TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary" className="bg-primary/10 text-primary">{issue.status}</Badge>
+                                    </TableCell>
+                                    <TableCell className="max-w-[250px]">{issue.resolution}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        )}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
