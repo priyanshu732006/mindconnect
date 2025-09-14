@@ -52,6 +52,7 @@ export type NavItem = {
 }
 
 export type DailyCheckinData = {
+    date: string;
     mood: string;
     journalEntry?: string;
     sleepHours: number;

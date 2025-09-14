@@ -54,7 +54,7 @@ export function DailyCheckinDialog({
   isOpen,
   setIsOpen,
 }: DailyCheckinDialogProps) {
-  const { addJournalEntry } = useApp();
+  const { addJournalEntry, setDailyCheckinData } = useApp();
   const form = useForm<z.infer<typeof checkinSchema>>({
     resolver: zodResolver(checkinSchema),
     defaultValues: {
@@ -69,17 +69,20 @@ export function DailyCheckinDialog({
   const screenTimeHours = form.watch('screenTimeHours');
   
   const setCheckinTimestamp = () => {
-    localStorage.setItem('lastDailyCheckin', new Date().toISOString());
+    setDailyCheckinData(prev => ({
+        ...prev,
+        date: new Date().toISOString(),
+    } as DailyCheckinData));
   }
 
   const onSubmit = (values: z.infer<typeof checkinSchema>) => {
-    addJournalEntry(values as DailyCheckinData);
+    addJournalEntry({ ...values, date: new Date().toISOString() });
     form.reset();
     setIsOpen(false);
   };
   
   const handleClose = (open: boolean) => {
-      if (!open) {
+      if (!open && !form.formState.isSubmitted) {
           // If user closes dialog without submitting, mark as checked in to prevent it from popping up again today
           setCheckinTimestamp();
       }

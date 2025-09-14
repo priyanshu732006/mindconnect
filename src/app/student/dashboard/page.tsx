@@ -14,12 +14,11 @@ import { useEffect } from 'react';
 
 
 export default function DashboardPage() {
-  const { isCheckinOpen, setCheckinOpen } = useApp();
+  const { isCheckinOpen, setCheckinOpen, dailyCheckinData } = useApp();
   
   useEffect(() => {
-    const lastCheckin = localStorage.getItem('lastDailyCheckin');
-    if (lastCheckin) {
-        const lastCheckinDate = new Date(lastCheckin);
+    if (dailyCheckinData?.date) {
+        const lastCheckinDate = new Date(dailyCheckinData.date);
         const today = new Date();
         if (lastCheckinDate.toDateString() === today.toDateString()) {
             return; // Already checked in today
@@ -27,7 +26,7 @@ export default function DashboardPage() {
     }
     // If no record or it was a previous day, open the dialog.
     setCheckinOpen(true);
-  }, [setCheckinOpen]);
+  }, [setCheckinOpen, dailyCheckinData]);
 
 
   return (
