@@ -6,8 +6,10 @@ import en from '@/locales/en.json';
 import hi from '@/locales/hi.json';
 import es from '@/locales/es.json';
 import fr from '@/locales/fr.json';
+import ur from '@/locales/ur.json';
+import doi from '@/locales/doi.json';
 
-type Locale = 'en' | 'hi' | 'es' | 'fr';
+type Locale = 'en' | 'hi' | 'es' | 'fr' | 'ur' | 'doi';
 
 type Translations = typeof en;
 
@@ -17,7 +19,7 @@ type LocaleContextType = {
   t: Translations;
 };
 
-const translations = { en, hi, es, fr };
+const translations = { en, hi, es, fr, ur, doi };
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 

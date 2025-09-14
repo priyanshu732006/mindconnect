@@ -35,6 +35,12 @@ export function LanguageSwitcher() {
         <DropdownMenuItem onClick={() => setLocale('fr')}>
           Français (French)
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLocale('ur')}>
+          اردو (Urdu)
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLocale('doi')}>
+          डोगरी (Dogri)
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
