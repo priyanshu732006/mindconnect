@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription
 } from '@/components/ui/card';
 import {
   Table,
@@ -50,20 +53,22 @@ export default function CompletedAppointmentsPage() {
 
 
   return (
-    <div>
+    <div className="space-y-8">
       <ComplaintDialog 
         isOpen={isComplaintDialogOpen}
         setIsOpen={setComplaintDialogOpen}
         appointment={selectedAppointment}
       />
-      <h1 className="text-3xl font-bold text-gray-800">
-        Completed Appointments
-      </h1>
-      <p className="mt-2 text-gray-500">
-        A list of all your past sessions.
-      </p>
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">
+          Completed Appointments
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          A list of all your past sessions.
+        </p>
+      </header>
 
-      <Card className="mt-8">
+      <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -87,9 +92,9 @@ export default function CompletedAppointmentsPage() {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          Student {appt.studentId} from {appt.university}
+                          Student {appt.studentId}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {appt.university}
                         </p>
                       </div>

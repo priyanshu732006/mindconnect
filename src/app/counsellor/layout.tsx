@@ -8,7 +8,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import AuthGuard from '@/components/auth-guard';
 import { UserRole } from '@/lib/types';
-import ExternalCounsellorLayout from './external/layout';
 
 export default function CounsellorLayout({
   children,
@@ -20,10 +19,13 @@ export default function CounsellorLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && counsellorType === 'external') {
-        if(!pathname.startsWith('/counsellor/external')) {
-            router.replace('/counsellor/external/dashboard');
-        }
+    // This effect ensures that on-campus counselors are not accessing external pages and vice-versa.
+    if (!loading) {
+      if (counsellorType === 'external' && !pathname.startsWith('/counsellor/external')) {
+        router.replace('/counsellor/external/dashboard');
+      } else if (counsellorType === 'on-campus' && pathname.startsWith('/counsellor/external')) {
+        router.replace('/counsellor/dashboard');
+      }
     }
   }, [counsellorType, loading, router, pathname]);
 
@@ -35,14 +37,7 @@ export default function CounsellorLayout({
       </div>
     );
   }
-
-  // If the user is an external counselor AND is on an external page, use the dedicated layout.
-  if (counsellorType === 'external') {
-    // AuthGuard is now inside ExternalCounsellorLayout
-    return <>{children}</>;
-  }
   
-  // For all other cases (e.g., on-campus counselor), use the default AppLayout.
   return (
     <AuthGuard role={UserRole.counsellor}>
         <AppLayout>{children}</AppLayout>

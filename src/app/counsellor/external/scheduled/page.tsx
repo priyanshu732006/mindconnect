@@ -6,9 +6,6 @@ import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   Table,
@@ -46,15 +43,17 @@ const scheduledAppointments = [
 
 export default function ScheduledAppointmentsPage() {
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-gray-800">
-        Scheduled Appointments
-      </h1>
-      <p className="mt-2 text-gray-500">
-        A list of all your upcoming sessions.
-      </p>
+    <div className="space-y-8">
+      <header>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">
+          Scheduled Appointments
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          A list of all your upcoming sessions.
+        </p>
+      </header>
 
-      <Card className="mt-8">
+      <Card>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
@@ -77,9 +76,9 @@ export default function ScheduledAppointmentsPage() {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          Student {appt.studentId} from {appt.university}
+                          Student {appt.studentId}
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {appt.university}
                         </p>
                       </div>
