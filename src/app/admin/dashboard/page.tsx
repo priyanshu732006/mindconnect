@@ -1,4 +1,5 @@
 
+'use client';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Users, AlertTriangle, Heart, Info, TrendingUp } from "lucide-react";
