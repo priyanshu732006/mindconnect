@@ -17,12 +17,16 @@ export default function DashboardPage() {
   const { isCheckinOpen, setCheckinOpen } = useApp();
   
   useEffect(() => {
-    // This simulates opening the dialog once per day.
-    // In a real app, you'd use localStorage to track if it's been shown today.
-    const hasCheckedInToday = sessionStorage.getItem('hasCheckedInToday');
-    if (!hasCheckedInToday) {
-      setCheckinOpen(true);
+    const lastCheckin = localStorage.getItem('lastDailyCheckin');
+    if (lastCheckin) {
+        const lastCheckinDate = new Date(lastCheckin);
+        const today = new Date();
+        if (lastCheckinDate.toDateString() === today.toDateString()) {
+            return; // Already checked in today
+        }
     }
+    // If no record or it was a previous day, open the dialog.
+    setCheckinOpen(true);
   }, [setCheckinOpen]);
 
 
