@@ -68,7 +68,7 @@ export default function LoginPage() {
         
         setNavItemsByRole(role);
 
-        if (role === 'counsellor' && counsellorType === 'external') {
+        if (role === UserRole.counsellor && counsellorType === 'external') {
             router.push('/counsellor/external/dashboard');
         } else {
             router.push(`/${role}/dashboard`);
@@ -113,7 +113,7 @@ export default function LoginPage() {
       const targetRole = sessionStorage.getItem('userRole') as UserRole;
       const targetCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType;
       if (targetRole) {
-          if (targetRole === 'counsellor' && targetCounsellorType === 'external') {
+          if (targetRole === UserRole.counsellor && targetCounsellorType === 'external') {
               router.replace('/counsellor/external/dashboard');
           } else {
               router.replace(`/${targetRole}/dashboard`);
@@ -183,11 +183,11 @@ export default function LoginPage() {
             </CardContent>
         ) : showCounsellorTypeSelection ? (
              <CardContent className="grid grid-cols-2 gap-4">
-                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect('on-campus')}>
+                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect(CounsellorType['on-campus'])}>
                     <Building className="w-8 h-8 mb-2" />
                     <span>On-Campus</span>
                  </Button>
-                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect('external')}>
+                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect(CounsellorType.external)}>
                     <Globe className="w-8 h-8 mb-2" />
                     <span>External</span>
                 </Button>

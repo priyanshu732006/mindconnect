@@ -205,10 +205,10 @@ export default function RegisterPage() {
                                     </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="student">Student</SelectItem>
-                                        <SelectItem value="counsellor">Counsellor</SelectItem>
-                                        <SelectItem value="peer-buddy">Peer Buddy</SelectItem>
-                                        <SelectItem value="admin">Admin</SelectItem>
+                                        <SelectItem value={UserRole.student}>Student</SelectItem>
+                                        <SelectItem value={UserRole.counsellor}>Counsellor</SelectItem>
+                                        <SelectItem value={UserRole['peer-buddy']}>Peer Buddy</SelectItem>
+                                        <SelectItem value={UserRole.admin}>Admin</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -470,7 +470,7 @@ export default function RegisterPage() {
                                     >
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl>
-                                        <RadioGroupItem value="on-campus" />
+                                        <RadioGroupItem value={CounsellorType['on-campus']} />
                                         </FormControl>
                                         <FormLabel className="font-normal">
                                         On-Campus Counsellor
@@ -478,7 +478,7 @@ export default function RegisterPage() {
                                     </FormItem>
                                     <FormItem className="flex items-center space-x-3 space-y-0">
                                         <FormControl>
-                                        <RadioGroupItem value="external" />
+                                        <RadioGroupItem value={CounsellorType.external} />
                                         </FormControl>
                                         <FormLabel className="font-normal">
                                         External Counsellor
