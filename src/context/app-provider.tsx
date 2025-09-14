@@ -81,75 +81,80 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user, role, loading, studentDetails } = useAuth();
   const db = getDatabase();
   
-  // Ref to track if initial data load is complete
   const isDataLoaded = useRef(false);
 
   // --- DATABASE SYNC ---
   useEffect(() => {
     async function fetchStudentData() {
-        if (loading || !user) {
-            isDataLoaded.current = false;
-            return;
-        }
-        
-        if (role === 'student') {
-            try {
-                if (studentDetails?.emergencyContacts) {
-                    const contactsFromDb = studentDetails.emergencyContacts.map((contact: any, index: number) => ({
-                        ...contact,
-                        id: `${user.uid}-contact-${index}`,
-                        avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
-                    }));
-                    setTrustedContacts(contactsFromDb);
-                }
+        if (!user) return; // Should not happen if role is student, but for safety.
 
-                // Fetch main student data
-                const studentDataRef = ref(db, `studentData/${user.uid}`);
-                const studentDataSnapshot = await get(studentDataRef);
-                if (studentDataSnapshot.exists()) {
-                    const data = studentDataSnapshot.val();
-                    setMessages(data.messages || []);
-                    setAssessmentResults(data.assessmentResults || {"phq-9": null, "gad-7": null, "ghq-12": null});
-                    setDailyCheckinData(data.dailyCheckinData || null);
-                    setCoins(data.coins ?? 15);
-                    setStreak(data.streak ?? 0);
-                } else {
-                     setMessages([]);
-                     setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
-                     setDailyCheckinData(null);
-                     setCoins(15);
-                     setStreak(0);
-                }
-                isDataLoaded.current = true;
-            } catch (error) {
-                console.error("Error fetching student data:", error);
-                isDataLoaded.current = true; // Still allow the app to function even if data load fails
-                toast({
-                    variant: 'destructive',
-                    title: 'Data Load Error',
-                    description: 'Could not load your saved data. Please try refreshing.'
-                });
+        try {
+            // Set trusted contacts from the already-fetched studentDetails
+            if (studentDetails?.emergencyContacts) {
+                const contactsFromDb = studentDetails.emergencyContacts.map((contact: any, index: number) => ({
+                    ...contact,
+                    id: `${user.uid}-contact-${index}`,
+                    avatar: `https://picsum.photos/seed/${user.uid}-${index}/100/100`,
+                }));
+                setTrustedContacts(contactsFromDb);
+            } else {
+                setTrustedContacts([]);
             }
-        } else {
-            // For non-student roles, ensure student-specific state is cleared and mark as loaded.
+
+            // Fetch other student data from the dedicated /studentData path
+            const studentDataRef = ref(db, `studentData/${user.uid}`);
+            const studentDataSnapshot = await get(studentDataRef);
+            if (studentDataSnapshot.exists()) {
+                const data = studentDataSnapshot.val();
+                setMessages(data.messages || []);
+                setAssessmentResults(data.assessmentResults || {"phq-9": null, "gad-7": null, "ghq-12": null});
+                setDailyCheckinData(data.dailyCheckinData || null);
+                setCoins(data.coins ?? 15);
+                setStreak(data.streak ?? 0);
+            } else {
+                 // If no data exists, initialize with defaults
+                 setMessages([]);
+                 setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
+                 setDailyCheckinData(null);
+                 setCoins(15);
+                 setStreak(0);
+            }
             isDataLoaded.current = true;
-            setMessages([]);
-            setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
-            setDailyCheckinData(null);
-            setTrustedContacts([]);
+        } catch (error) {
+            console.error("Error fetching student data:", error);
+            isDataLoaded.current = true; // Allow app to function even if data load fails
+            toast({
+                variant: 'destructive',
+                title: 'Data Load Error',
+                description: 'Could not load your saved data. Please try refreshing.'
+            });
         }
+    }
+    
+    function clearStudentData() {
+        isDataLoaded.current = false;
+        setMessages([]);
+        setTrustedContacts([]);
+        setAssessmentResults({"phq-9": null, "gad-7": null, "ghq-12": null});
+        setDailyCheckinData(null);
+        setWellbeingData(null);
+        setCoins(15);
+        setStreak(0);
     }
 
     if (!loading) {
-      fetchStudentData();
-    } else {
-      isDataLoaded.current = false;
+      if (user && role === UserRole.student) {
+        fetchStudentData();
+      } else {
+        clearStudentData();
+      }
     }
+
   }, [user, role, loading, db, toast, studentDetails]);
   
   useEffect(() => {
-    // This effect ensures data is written back to DB whenever it changes, but only after initial load.
-    if (isDataLoaded.current && user && role === 'student') {
+    // This effect writes data back to DB only when it changes and after the initial load.
+    if (isDataLoaded.current && user && role === UserRole.student) {
         const studentDataRef = ref(db, `studentData/${user.uid}`);
         set(studentDataRef, {
             messages,
@@ -158,6 +163,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             coins,
             streak,
         }).catch(error => {
+            // Avoid spamming toasts, just log the error.
             console.error("Error writing student data:", error);
         });
     }
@@ -165,18 +171,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // --- END DATABASE SYNC ---
 
 
-  const setNavItemsByRole = useCallback((role: UserRole | null) => {
-    switch (role) {
-      case 'admin':
+  const setNavItemsByRole = useCallback((currentRole: UserRole | null) => {
+    switch (currentRole) {
+      case UserRole.admin:
         setNavItems(adminNavItems);
         break;
-      case 'counsellor':
+      case UserRole.counsellor:
         setNavItems(counsellorNavItems);
         break;
       case UserRole['peer-buddy']:
         setNavItems(peerBuddyNavItems);
         break;
-      case 'student':
+      case UserRole.student:
       default:
         setNavItems(studentNavItems);
         break;
@@ -249,12 +255,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
   
   useEffect(() => {
-    const analyzeCurrentState = async (currentAssessmentResults?: AssessmentResults) => {
-        if (!user) return;
+    const analyzeCurrentState = async () => {
+        if (!user || !isDataLoaded.current) return;
         
         const conversation = messages.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n');
-        const resultsToAnalyze = currentAssessmentResults || assessmentResults;
-        const completedAssessments = Object.values(resultsToAnalyze).filter(Boolean) as AssessmentResult[];
+        const completedAssessments = Object.values(assessmentResults).filter(Boolean) as AssessmentResult[];
 
         if (messages.length === 0 && !facialAnalysis && !voiceAnalysis && !dailyCheckinData && completedAssessments.length === 0) {
           setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
@@ -283,9 +288,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
     };
     
-    if (isDataLoaded.current) {
-        analyzeCurrentState();
-    }
+    analyzeCurrentState();
+    
   }, [user, messages, facialAnalysis, voiceAnalysis, dailyCheckinData, assessmentResults]);
   
   const triggerCrisisAlerts = React.useCallback(async (currentContacts: TrustedContact[], isSelfHarmRisk: boolean) => {
@@ -394,3 +398,5 @@ export function useApp() {
   }
   return context;
 }
+
+    
