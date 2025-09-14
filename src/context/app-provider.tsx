@@ -2,7 +2,8 @@
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
-import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, UserRole, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
+import { UserRole } from '@/lib/types';
+import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, NavItem, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
 import React, { useCallback, useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
@@ -208,7 +209,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         voiceAnalysis: voiceAnalysis || undefined,
         mood: dailyCheckinData?.mood,
         journalEntry: dailyCheckinData?.journalEntry,
-        sleepHours: dailyCheckinData?.sleepHours,
+        sleepHours: dailyCheckinData?.sleepTimeHours,
         screenTimeHours: dailyCheckinData?.screenTimeHours,
         assessmentResults: completedAssessments.length > 0 ? completedAssessments : undefined,
       });
@@ -397,5 +398,7 @@ export function useApp() {
   }
   return context;
 }
+
+    
 
     
