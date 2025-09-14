@@ -2,9 +2,9 @@
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
-import { UserRole, NavItem } from '@/lib/types';
+import { NavItem, UserRole } from '@/lib/types';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
@@ -81,10 +81,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const { user, role, loading, studentDetails } = useAuth();
   const db = getDatabase();
   
-  const isDataLoaded = useRef(false);
+  const isDataLoaded = React.useRef(false);
 
   // --- DATABASE SYNC ---
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchStudentData() {
         if (!user) return; // Should not happen if role is student, but for safety.
         isDataLoaded.current = false;
@@ -152,7 +152,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   }, [user, role, loading, db, toast, studentDetails]);
   
-  useEffect(() => {
+  React.useEffect(() => {
     // This effect writes data back to DB only when it changes and after the initial load.
     if (isDataLoaded.current && user && role === UserRole.student) {
         const studentDataRef = ref(db, `studentData/${user.uid}`);
@@ -171,7 +171,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // --- END DATABASE SYNC ---
 
 
-  const setNavItemsByRole = useCallback((currentRole: UserRole | null) => {
+  const setNavItemsByRole = React.useCallback((currentRole: UserRole | null) => {
     switch (currentRole) {
       case UserRole.admin:
         setNavItems(adminNavItems);
@@ -254,7 +254,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
   };
   
-  useEffect(() => {
+  React.useEffect(() => {
     const analyzeCurrentState = async () => {
         // Only run analysis if data has been loaded and user is a student
         if (!isDataLoaded.current || !user) return;
