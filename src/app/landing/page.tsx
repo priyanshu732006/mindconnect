@@ -11,7 +11,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useEffect, useState } from 'react';
-import { AnimatedHero } from '@/components/landing/animated-hero';
 
 const AIContactIcon = () => (
     <div className="relative w-10 h-10">
@@ -69,7 +68,26 @@ export default function LandingPage() {
       </header>
       
       <main className="flex-1">
-        <AnimatedHero />
+        <section className="relative w-full h-[60vh] flex flex-col items-center justify-center p-8 overflow-hidden text-center">
+            <h1 className="text-4xl md:text-6xl font-extrabold mb-4 text-gray-100">
+                A Safe Space for Student Minds
+            </h1>
+            <p className="text-lg md:text-xl text-gray-400">
+                AI-driven partner for mental health support.
+            </p>
+            <div className="flex flex-wrap justify-center space-x-4 mt-8">
+                <Link href="/demo" legacyBehavior>
+                    <a className="button-pulse bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                       Try a Demo
+                    </a>
+                </Link>
+                 <Link href="/register" legacyBehavior>
+                    <a className="button-pulse bg-gray-800 text-gray-300 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                       Register Now
+                    </a>
+                </Link>
+            </div>
+        </section>
 
         <section id="contact-form-container" className={`py-16 transition-opacity duration-1000 ${showContactForm ? 'opacity-100' : 'opacity-0'}`}>
              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
