@@ -29,6 +29,12 @@ export function LanguageSwitcher() {
         <DropdownMenuItem onClick={() => setLocale('hi')}>
           हिन्दी (Hindi)
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLocale('es')}>
+          Español (Spanish)
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLocale('fr')}>
+          Français (French)
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

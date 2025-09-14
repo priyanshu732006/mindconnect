@@ -4,8 +4,10 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import en from '@/locales/en.json';
 import hi from '@/locales/hi.json';
+import es from '@/locales/es.json';
+import fr from '@/locales/fr.json';
 
-type Locale = 'en' | 'hi';
+type Locale = 'en' | 'hi' | 'es' | 'fr';
 
 type Translations = typeof en;
 
@@ -15,7 +17,7 @@ type LocaleContextType = {
   t: Translations;
 };
 
-const translations = { en, hi };
+const translations = { en, hi, es, fr };
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
@@ -24,7 +26,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedLocale = localStorage.getItem('locale') as Locale | null;
-    if (savedLocale && (savedLocale === 'en' || savedLocale === 'hi')) {
+    if (savedLocale && (savedLocale in translations)) {
       setLocale(savedLocale);
     }
   }, []);
