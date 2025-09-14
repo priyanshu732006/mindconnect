@@ -76,15 +76,11 @@ export default function LandingPage() {
                 AI-driven partner for mental health support.
             </p>
             <div className="flex flex-wrap justify-center space-x-4 mt-8">
-                <Link href="/demo" legacyBehavior>
-                    <a className="button-pulse bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
-                       Try a Demo
-                    </a>
+                <Link href="/demo" className="button-pulse bg-violet-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                   Try a Demo
                 </Link>
-                 <Link href="/register" legacyBehavior>
-                    <a className="button-pulse bg-gray-800 text-gray-300 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
-                       Register Now
-                    </a>
+                 <Link href="/register" className="button-pulse bg-gray-800 text-gray-300 font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105">
+                   Register Now
                 </Link>
             </div>
         </section>
