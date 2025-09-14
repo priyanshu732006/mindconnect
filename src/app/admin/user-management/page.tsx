@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
   Card,
   CardContent,
@@ -25,6 +27,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { UserRole } from '@/lib/types';
+import { useLocale } from '@/context/locale-provider';
 
 // Placeholder data - in a real app, this would come from your database
 const users = [
@@ -37,33 +40,39 @@ const users = [
 ];
 
 export default function UserManagementPage() {
+    const { t } = useLocale();
+
+    const getRoleLabel = (role: UserRole) => {
+        const key = role.replace('-', '') as keyof typeof t;
+        return t[key] || role;
+    }
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          User Management
+          {t.userManagement}
         </h1>
         <p className="text-muted-foreground mt-2">
-          View, manage, and track activity for all users across the platform.
+          {t.userManagementDesc}
         </p>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Users</CardTitle>
-          <CardDescription>A list of all registered users.</CardDescription>
+          <CardTitle>{t.allUsers}</CardTitle>
+          <CardDescription>{t.allUsersDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Last Login</TableHead>
-                <TableHead>Metrics</TableHead>
+                <TableHead>{t.name}</TableHead>
+                <TableHead>{t.role}</TableHead>
+                <TableHead>{t.email}</TableHead>
+                <TableHead>{t.lastLogin}</TableHead>
+                <TableHead>{t.metrics}</TableHead>
                 <TableHead>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t.actions}</span>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -72,29 +81,29 @@ export default function UserManagementPage() {
                 <TableRow key={user.id}>
                   <TableCell className="font-medium">{user.name}</TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="capitalize">{user.role.replace('-', ' ')}</Badge>
+                    <Badge variant="outline" className="capitalize">{getRoleLabel(user.role)}</Badge>
                   </TableCell>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.lastLogin}</TableCell>
                   <TableCell>
-                    {user.role === UserRole.student && `Engagement: ${user.engagement}`}
-                    {user.role === UserRole.counsellor && `Bookings: ${user.bookings}`}
-                    {user.role === UserRole['peer-buddy'] && `Students Supported: ${user.supported}`}
-                    {user.role === UserRole.admin && `Activity: ${user.engagement}`}
+                    {user.role === UserRole.student && `${t.engagement}: ${t[user.engagement.toLowerCase() as keyof typeof t] || user.engagement}`}
+                    {user.role === UserRole.counsellor && `${t.bookings}: ${user.bookings}`}
+                    {user.role === UserRole['peer-buddy'] && `${t.studentsSupported}: ${user.supported}`}
+                    {user.role === UserRole.admin && `${t.activity}: ${t[user.engagement.toLowerCase() as keyof typeof t] || user.engagement}`}
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button aria-haspopup="true" size="icon" variant="ghost">
                           <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">Toggle menu</span>
+                          <span className="sr-only">{t.toggleMenu}</span>
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem>View Details</DropdownMenuItem>
-                        <DropdownMenuItem>Edit User</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Suspend User</DropdownMenuItem>
+                        <DropdownMenuLabel>{t.actions}</DropdownMenuLabel>
+                        <DropdownMenuItem>{t.viewDetails}</DropdownMenuItem>
+                        <DropdownMenuItem>{t.editUser}</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">{t.suspendUser}</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>

@@ -12,11 +12,12 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useLocale } from '@/context/locale-provider';
 
 const stats = [
-  { title: 'New Requests', value: '4', description: 'Pending your review' },
-  { title: 'Scheduled', value: '3', description: 'Upcoming appointments' },
-  { title: 'Waitlisted', value: '6', description: 'Awaiting open slots' },
+  { title: 'New Requests', value: '4', description: 'Pending your review', titleKey: 'newRequests', descKey: 'pendingYourReview' },
+  { title: 'Scheduled', value: '3', description: 'Upcoming appointments', titleKey: 'scheduled', descKey: 'upcomingAppointments' },
+  { title: 'Waitlisted', value: '6', description: 'Awaiting open slots', titleKey: 'waitlisted', descKey: 'awaitingOpenSlots' },
 ];
 
 const requests = [
@@ -53,23 +54,25 @@ const priorityStyles = {
 };
 
 export default function ExternalCounsellorDashboard() {
+    const { t } = useLocale();
+
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold tracking-tight font-headline">External Counselor Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight font-headline">{t.externalCounselorDashboard}</h1>
       </header>
       
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {stats.map(stat => (
           <Card key={stat.title}>
             <CardHeader className='pb-2'>
-              <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+              <CardTitle className="text-sm font-medium">{t[stat.titleKey as keyof typeof t] || stat.title}</CardTitle>
             </CardHeader>
             <CardContent>
                 <p className="text-3xl font-bold">
                 {stat.value}
                 </p>
-                <p className="mt-1 text-xs text-muted-foreground">{stat.description}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{t[stat.descKey as keyof typeof t] || stat.description}</p>
             </CardContent>
           </Card>
         ))}
@@ -79,7 +82,7 @@ export default function ExternalCounsellorDashboard() {
         <div className="lg:col-span-2">
             <Card>
                 <CardHeader>
-                    <CardTitle>Incoming Requests</CardTitle>
+                    <CardTitle>{t.incomingRequests}</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     {requests.map(request => (
@@ -90,7 +93,7 @@ export default function ExternalCounsellorDashboard() {
                         <div className="flex items-start justify-between">
                         <div>
                             <p className="font-bold">
-                            Student {request.studentId}
+                                {t.studentId.replace('{id}', request.studentId)}
                             </p>
                             <p className="text-sm text-muted-foreground">{request.university}</p>
                         </div>
@@ -101,25 +104,25 @@ export default function ExternalCounsellorDashboard() {
                             ]
                             }`}
                         >
-                            {request.priority}
+                            {t[request.priority.toLowerCase() as keyof typeof t] || request.priority}
                         </span>
                         </div>
                         <div className="mt-4 flex items-center text-sm text-muted-foreground">
                         <Clock className="mr-2 h-4 w-4" />
-                        <span>Requested {request.time}</span>
+                        <span>{t.requestedTime.replace('{time}', request.time)}</span>
                         </div>
                         <div className="mt-5 grid grid-cols-3 gap-2 text-sm">
                         <Button variant="outline" size="sm">
                             <X className="h-4 w-4" />
-                            Reject
+                            {t.reject}
                         </Button>
                         <Button variant="secondary" size="sm">
                             <Clock className="h-4 w-4" />
-                            Waitlist
+                            {t.waitlist}
                         </Button>
                         <Button size="sm">
                             <Check className="h-4 w-4" />
-                            Accept
+                            {t.accept}
                         </Button>
                         </div>
                     </Card>
@@ -132,26 +135,21 @@ export default function ExternalCounsellorDashboard() {
             <Card className="bg-primary/10 border-primary/20">
                 <CardHeader>
                     <CardTitle className="flex items-center justify-between">
-                    <span>Adaptive Scheduling Assistant</span>
+                    <span>{t.adaptiveSchedulingAssistant}</span>
                     <Sparkles className="h-5 w-5 text-primary" />
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm">
-                    <p className="font-semibold">Recommendation:</p>
+                    <p className="font-semibold">{t.recommendation}:</p>
                     <p>
-                        Based on the <span className="font-bold">high urgency</span> and
-                        your open slot this afternoon, it is recommended to{' '}
-                        <span className="font-bold">
-                        accept the request from Stanford University
-                        </span>
-                        .
+                        {t.recommendationDesc}
                     </p>
                     <div className="mt-5 flex items-center gap-3">
                         <Button size="sm" className="flex-1">
-                            Accept Recommendation
+                            {t.acceptRecommendation}
                         </Button>
                         <Button size="sm" variant="ghost">
-                            Dismiss
+                            {t.dismiss}
                         </Button>
                     </div>
                 </CardContent>

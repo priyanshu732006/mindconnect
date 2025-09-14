@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -18,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/context/locale-provider';
 
 // Placeholder data for crisis alerts
 const crisisAlertsData = [
@@ -46,18 +48,19 @@ const crisisAlertsData = [
 
 export default function CrisisAlertsPage() {
   const { toast } = useToast();
+  const { t } = useLocale();
 
   const handleActionTaken = (studentName: string) => {
     toast({
-      title: 'Action Logged',
-      description: `Action has been logged for ${studentName}.`,
+      title: t.actionLogged,
+      description: t.actionLoggedDesc.replace('{studentName}', studentName),
     });
   };
 
   const handleContact = (studentName: string) => {
     toast({
-        title: 'Contacting Student',
-        description: `You are now being connected with ${studentName}. (Demo action)`,
+        title: t.contactingStudent,
+        description: t.contactingStudentDesc.replace('{studentName}', studentName),
     });
   };
 
@@ -66,18 +69,17 @@ export default function CrisisAlertsPage() {
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Crisis Alerts
+          {t.crisisAlerts}
         </h1>
       </header>
       <Card className="border-destructive/50 bg-destructive/5">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-destructive">
             <AlertTriangle />
-            Crisis Alerts
+            {t.crisisAlerts}
           </CardTitle>
           <CardDescription className="!text-destructive/80">
-            The following students have been identified by AI as being at high
-            risk. Immediate attention and intervention are required.
+            {t.crisisAlertsDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,10 +87,10 @@ export default function CrisisAlertsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[150px]">Student</TableHead>
-                  <TableHead className="w-[150px]">Wellbeing Score</TableHead>
-                  <TableHead>Reason for Alert</TableHead>
-                  <TableHead className="text-right w-[250px]">Actions</TableHead>
+                  <TableHead className="w-[150px]">{t.student}</TableHead>
+                  <TableHead className="w-[150px]">{t.wellbeingScore}</TableHead>
+                  <TableHead>{t.reasonForAlert}</TableHead>
+                  <TableHead className="text-right w-[250px]">{t.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -104,14 +106,14 @@ export default function CrisisAlertsPage() {
                     <TableCell className="text-right space-x-2">
                       <Button variant="destructive" size="sm" onClick={() => handleContact(alert.studentName)}>
                         <Phone className="mr-2 h-4 w-4" />
-                        Contact
+                        {t.contact}
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleActionTaken(alert.studentName)}
                       >
-                        Action Taken
+                        {t.actionTaken}
                       </Button>
                     </TableCell>
                   </TableRow>

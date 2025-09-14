@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -14,12 +15,14 @@ import { Button } from '@/components/ui/button';
 import { Heart, MessageSquare, Share2, User } from 'lucide-react';
 import type { Post } from '@/lib/types';
 import Link from 'next/link';
+import { useLocale } from '@/context/locale-provider';
 
 type PostCardProps = {
   post: Post;
 };
 
 export function PostCard({ post }: PostCardProps) {
+    const { t } = useLocale();
   return (
     <Card className="max-w-3xl mx-auto">
       <CardHeader className="pb-4">
@@ -38,7 +41,7 @@ export function PostCard({ post }: PostCardProps) {
             </div>
           </div>
            <Link href="#">
-            <Badge variant="outline" className="capitalize cursor-pointer hover:bg-accent">{post.category}</Badge>
+            <Badge variant="outline" className="capitalize cursor-pointer hover:bg-accent">{t[post.category.toLowerCase().replace(' ', '') as keyof typeof t] || post.category}</Badge>
            </Link>
         </div>
       </CardHeader>
@@ -55,11 +58,11 @@ export function PostCard({ post }: PostCardProps) {
         </div>
         <div className="flex items-center gap-1">
           <MessageSquare className="h-4 w-4" />
-          <span>{post.comments.length} Comments</span>
+          <span>{t.commentsCount.replace('{count}', String(post.comments.length))}</span>
         </div>
         <div className="flex items-center gap-1 cursor-pointer hover:text-primary">
           <Share2 className="h-4 w-4" />
-          <span>Share</span>
+          <span>{t.share}</span>
         </div>
       </CardFooter>
     </Card>

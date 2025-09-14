@@ -13,9 +13,11 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/context/auth-provider';
 import Link from 'next/link';
+import { useLocale } from '@/context/locale-provider';
 
 export default function CounsellorProfilePage() {
   const { user } = useAuth();
+  const { t } = useLocale();
   
   const counsellorName = user?.displayName || 'Jane Doe';
   const counsellorEmail = user?.email || 'jane.doe@university.edu';
@@ -27,15 +29,15 @@ export default function CounsellorProfilePage() {
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Profile
+          {t.profile}
         </h1>
       </header>
 
       <Card>
         <CardHeader>
-          <CardTitle>My Profile</CardTitle>
+          <CardTitle>{t.myProfile}</CardTitle>
           <CardDescription>
-            This is your public profile information.
+            {t.myProfileDesc}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-8">
@@ -50,18 +52,18 @@ export default function CounsellorProfilePage() {
                 </Avatar>
                 <div>
                     <h2 className="text-2xl font-bold">{counsellorName}</h2>
-                    <p className="text-muted-foreground">{title}</p>
+                    <p className="text-muted-foreground">{t[title.toLowerCase().replace('-', '') as keyof typeof t] || title}</p>
                     <p className="text-muted-foreground text-sm">{counsellorEmail}</p>
                 </div>
             </div>
             <div>
-                <h3 className="text-lg font-semibold">About Me</h3>
+                <h3 className="text-lg font-semibold">{t.aboutMe}</h3>
                 <p className="text-muted-foreground mt-2">{aboutMeText}</p>
             </div>
         </CardContent>
          <CardFooter>
           <Button asChild>
-            <Link href="/counsellor/settings">Edit Profile</Link>
+            <Link href="/counsellor/settings">{t.editProfile}</Link>
           </Button>
         </CardFooter>
       </Card>

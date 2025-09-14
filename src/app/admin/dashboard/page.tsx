@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -31,6 +32,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ResolveIssueDialog } from '@/components/admin/resolve-issue-dialog';
+import { useLocale } from '@/context/locale-provider';
 
 const peerImpactData = [
     { buddy: 'Rohan J.', students: 45 },
@@ -122,6 +124,7 @@ export default function AdminDashboardPage() {
   const [resolvedIssuesData, setResolvedIssuesData] = useState(initialResolvedIssuesData);
   const [isResolveDialogOpen, setResolveDialogOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<(typeof openIssuesData)[0] | null>(null);
+  const { t } = useLocale();
 
   const handleOpenResolveDialog = (issue: (typeof openIssuesData)[0]) => {
     setSelectedIssue(issue);
@@ -147,49 +150,49 @@ export default function AdminDashboardPage() {
       />
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Admin Dashboard
+          {t.adminDashboard}
         </h1>
       </header>
 
        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.totalStudents}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,234</div>
-            <p className="text-xs text-muted-foreground">+5.2% from last month</p>
+            <p className="text-xs text-muted-foreground">{t.fromLastMonth.replace('{value}', '+5.2%')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Peer Buddies</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.peerBuddies}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">56</div>
-            <p className="text-xs text-muted-foreground">+2 since last month</p>
+            <p className="text-xs text-muted-foreground">{t.sinceLastMonth.replace('{value}', '+2')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">On-Campus Counselors</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.onCampusCounselors}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">8</div>
-            <p className="text-xs text-muted-foreground">Unchanged</p>
+            <p className="text-xs text-muted-foreground">{t.unchanged}</p>
           </CardContent>
         </Card>
         <Card className="cursor-pointer hover:bg-muted/50" onClick={() => setShowOpenIssues(!showOpenIssues)}>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.openIssues}</CardTitle>
             <Info className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{openIssuesData.length}</div>
-            <p className="text-xs text-muted-foreground">+1 since yesterday</p>
+            <p className="text-xs text-muted-foreground">{t.sinceYesterday.replace('{value}', '+1')}</p>
           </CardContent>
         </Card>
       </div>
@@ -198,8 +201,8 @@ export default function AdminDashboardPage() {
             <Card className="animate-in fade-in-50">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
-                        <CardTitle>Open Issues</CardTitle>
-                        <CardDescription>A list of all open issues in the system.</CardDescription>
+                        <CardTitle>{t.openIssues}</CardTitle>
+                        <CardDescription>{t.openIssuesDesc}</CardDescription>
                     </div>
                      <Button variant="ghost" size="icon" onClick={() => setShowOpenIssues(false)}>
                         <X className="h-4 w-4" />
@@ -209,14 +212,14 @@ export default function AdminDashboardPage() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Issue ID</TableHead>
-                                <TableHead>Raised By</TableHead>
-                                <TableHead>Raiser Role</TableHead>
-                                <TableHead>Raised Against</TableHead>
-                                <TableHead>Against Role</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
+                                <TableHead>{t.issueId}</TableHead>
+                                <TableHead>{t.raisedBy}</TableHead>
+                                <TableHead>{t.raiserRole}</TableHead>
+                                <TableHead>{t.raisedAgainst}</TableHead>
+                                <TableHead>{t.againstRole}</TableHead>
+                                <TableHead>{t.description}</TableHead>
+                                <TableHead>{t.status}</TableHead>
+                                <TableHead className="text-right">{t.action}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -229,10 +232,10 @@ export default function AdminDashboardPage() {
                                     <TableCell>{issue.againstRole}</TableCell>
                                     <TableCell className="max-w-[250px]">{issue.description}</TableCell>
                                     <TableCell>
-                                        <Badge variant="destructive">{issue.status}</Badge>
+                                        <Badge variant="destructive">{t[issue.status.toLowerCase() as keyof typeof t] || issue.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="outline" size="sm" onClick={() => handleOpenResolveDialog(issue)}>Resolve</Button>
+                                        <Button variant="outline" size="sm" onClick={() => handleOpenResolveDialog(issue)}>{t.resolve}</Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -245,21 +248,21 @@ export default function AdminDashboardPage() {
          {showOpenIssues && resolvedIssuesData.length > 0 && (
             <Card className="animate-in fade-in-50">
                 <CardHeader>
-                    <CardTitle>Resolved Issues</CardTitle>
-                    <CardDescription>A log of all resolved issues.</CardDescription>
+                    <CardTitle>{t.resolvedIssues}</CardTitle>
+                    <CardDescription>{t.resolvedIssuesDesc}</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Issue ID</TableHead>
-                                <TableHead>Raised By</TableHead>
-                                <TableHead>Raiser Role</TableHead>
-                                <TableHead>Raised Against</TableHead>
-                                <TableHead>Against Role</TableHead>
-                                <TableHead>Description</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Resolution</TableHead>
+                                <TableHead>{t.issueId}</TableHead>
+                                <TableHead>{t.raisedBy}</TableHead>
+                                <TableHead>{t.raiserRole}</TableHead>
+                                <TableHead>{t.raisedAgainst}</TableHead>
+                                <TableHead>{t.againstRole}</TableHead>
+                                <TableHead>{t.description}</TableHead>
+                                <TableHead>{t.status}</TableHead>
+                                <TableHead>{t.resolution}</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -272,7 +275,7 @@ export default function AdminDashboardPage() {
                                     <TableCell>{issue.againstRole}</TableCell>
                                     <TableCell className="max-w-[250px]">{issue.description}</TableCell>
                                     <TableCell>
-                                        <Badge variant="secondary" className="bg-primary/10 text-primary">{issue.status}</Badge>
+                                        <Badge variant="secondary" className="bg-primary/10 text-primary">{t[issue.status.toLowerCase() as keyof typeof t] || issue.status}</Badge>
                                     </TableCell>
                                     <TableCell className="max-w-[250px]">{issue.resolution}</TableCell>
                                 </TableRow>
@@ -287,8 +290,8 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
             <CardHeader>
-                <CardTitle>Crisis Monitoring</CardTitle>
-                <CardDescription>Real-time alerts for students in need of support.</CardDescription>
+                <CardTitle>{t.crisisMonitoring}</CardTitle>
+                <CardDescription>{t.crisisMonitoringRealTimeDesc}</CardDescription>
             </CardHeader>
             <CardContent>
                 <Accordion type="multiple" defaultValue={['item-1']}>
@@ -297,8 +300,8 @@ export default function AdminDashboardPage() {
                         <div className="flex items-center gap-3">
                         <AlertTriangle className="text-destructive" />
                         <div>
-                            <p>High Risk</p>
-                            <p className="text-xs text-muted-foreground">2 students</p>
+                            <p>{t.highRisk}</p>
+                            <p className="text-xs text-muted-foreground">{t.studentsCount.replace('{count}', '2')}</p>
                         </div>
                         </div>
                     </AccordionTrigger>
@@ -312,8 +315,8 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
             <CardHeader>
-                <CardTitle>Platform Engagement</CardTitle>
-                <CardDescription>Weekly average user engagement rate.</CardDescription>
+                <CardTitle>{t.platformEngagement}</CardTitle>
+                <CardDescription>{t.platformEngagementDesc}</CardDescription>
             </CardHeader>
             <CardContent>
                  <ChartContainer config={engagementChartConfig} className="h-[250px] w-full">
@@ -340,8 +343,8 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
             <CardHeader>
-                <CardTitle>Peer Buddy Impact</CardTitle>
-                <CardDescription>Number of students supported by each peer buddy.</CardDescription>
+                <CardTitle>{t.peerBuddyImpact}</CardTitle>
+                <CardDescription>{t.peerBuddyImpactDesc}</CardDescription>
             </CardHeader>
             <CardContent>
                 <ChartContainer config={peerImpactChartConfig} className="h-[250px] w-full">
@@ -356,8 +359,8 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
             <CardHeader>
-                <CardTitle>Counselor Utilization</CardTitle>
-                <CardDescription>Student bookings and attendance for each counselor.</CardDescription>
+                <CardTitle>{t.counselorUtilization}</CardTitle>
+                <CardDescription>{t.counselorUtilizationDesc}</CardDescription>
             </CardHeader>
             <CardContent>
                  <ChartContainer config={counselorUtilChartConfig} className="h-[250px] w-full">

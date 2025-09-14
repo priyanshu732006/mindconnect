@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateSessionSummaryAction } from '@/app/actions';
 import { GenerateSessionSummaryOutput } from '@/ai/flows/generate-session-summary';
 import { Separator } from '@/components/ui/separator';
+import { useLocale } from '@/context/locale-provider';
 
 export default function SessionSummaryPage() {
   const [studentName, setStudentName] = useState('');
@@ -27,13 +28,14 @@ export default function SessionSummaryPage() {
   const [summaryResult, setSummaryResult] =
     useState<GenerateSessionSummaryOutput | null>(null);
   const { toast } = useToast();
+  const { t } = useLocale();
 
   const handleGenerateSummary = async () => {
     if (!studentName.trim() || !sessionNotes.trim()) {
       toast({
         variant: 'destructive',
-        title: 'Missing Information',
-        description: 'Please enter both a student name and session notes.',
+        title: t.missingInformation,
+        description: t.missingInformationDesc,
       });
       return;
     }
@@ -49,9 +51,9 @@ export default function SessionSummaryPage() {
       if (result) {
         setSummaryResult(result);
         toast({
-          title: 'Summary Generated',
+          title: t.summaryGenerated,
           description:
-            'The AI-powered session summary has been successfully created.',
+            t.summaryGeneratedDesc,
         });
       } else {
         throw new Error('The summary generation returned no result.');
@@ -60,9 +62,9 @@ export default function SessionSummaryPage() {
       console.error(error);
       toast({
         variant: 'destructive',
-        title: 'Generation Failed',
+        title: t.generationFailed,
         description:
-          'An error occurred while generating the summary. Please try again.',
+          t.generationFailedDesc,
       });
     } finally {
       setIsLoading(false);
@@ -72,8 +74,8 @@ export default function SessionSummaryPage() {
   const handleSendEmail = () => {
      if (!summaryResult) return;
      toast({
-        title: 'Email Sent (Simulated)',
-        description: `An email has been sent to the student with the session summary.`
+        title: t.emailSent,
+        description: t.emailSentDesc,
      })
   }
 
@@ -81,35 +83,35 @@ export default function SessionSummaryPage() {
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Session Summary Generator
+          {t.sessionSummaryGenerator}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Enter session notes to generate a summary and actionable advice for students.
+          {t.sessionSummaryGeneratorDesc}
         </p>
       </header>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
             <CardHeader>
-                <CardTitle>Session Details</CardTitle>
-                <CardDescription>Enter notes to generate a summary and action plan.</CardDescription>
+                <CardTitle>{t.sessionDetails}</CardTitle>
+                <CardDescription>{t.sessionDetailsDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                    <Label htmlFor="student-name">Student Name</Label>
+                    <Label htmlFor="student-name">{t.studentName}</Label>
                     <Input
                     id="student-name"
-                    placeholder="Enter student's name"
+                    placeholder={t.studentNamePlaceholder}
                     value={studentName}
                     onChange={e => setStudentName(e.target.value)}
                     disabled={isLoading}
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="session-notes">Session Notes</Label>
+                    <Label htmlFor="session-notes">{t.sessionNotes}</Label>
                     <Textarea
                     id="session-notes"
-                    placeholder="Enter detailed notes from the counseling session..."
+                    placeholder={t.sessionNotesPlaceholder}
                     value={sessionNotes}
                     onChange={e => setSessionNotes(e.target.value)}
                     rows={8}
@@ -124,15 +126,15 @@ export default function SessionSummaryPage() {
                     ) : (
                     <Sparkles className="mr-2 h-4 w-4" />
                     )}
-                    Generate Summary
+                    {t.generateSummary}
                 </Button>
             </CardFooter>
         </Card>
 
         <Card>
              <CardHeader>
-                <CardTitle>AI Generated Output</CardTitle>
-                <CardDescription>Review the generated summary and advice before sending.</CardDescription>
+                <CardTitle>{t.aiGeneratedOutput}</CardTitle>
+                <CardDescription>{t.aiGeneratedOutputDesc}</CardDescription>
             </CardHeader>
              <CardContent className="space-y-6">
                 {(isLoading || summaryResult) ? (
@@ -140,20 +142,20 @@ export default function SessionSummaryPage() {
                         {isLoading && !summaryResult && (
                             <div className="flex items-center justify-center py-8">
                                 <Loader2 className="mr-2 h-6 w-6 animate-spin" />
-                                <p className="text-muted-foreground">Generating summary...</p>
+                                <p className="text-muted-foreground">{t.generatingSummary}...</p>
                             </div>
                         )}
                         {summaryResult && (
                             <>
                                 <div>
-                                    <h3 className="font-semibold text-lg mb-2">Generated Summary</h3>
+                                    <h3 className="font-semibold text-lg mb-2">{t.generatedSummary}</h3>
                                     <p className="text-muted-foreground">
                                         {summaryResult.summary}
                                     </p>
                                 </div>
                                 <Separator />
                                 <div>
-                                    <h3 className="font-semibold text-lg mb-2">Actionable Advice</h3>
+                                    <h3 className="font-semibold text-lg mb-2">{t.actionableAdvice}</h3>
                                     <ul className="list-disc list-inside text-muted-foreground space-y-1">
                                         {summaryResult.actionableAdvice.map((advice, index) => (
                                             <li key={index}>{advice}</li>
@@ -165,7 +167,7 @@ export default function SessionSummaryPage() {
                     </>
                 ) : (
                     <div className="flex items-center justify-center h-48 border-2 border-dashed rounded-lg">
-                        <p className="text-muted-foreground">Output will appear here</p>
+                        <p className="text-muted-foreground">{t.outputWillAppearHere}</p>
                     </div>
                 )}
              </CardContent>
@@ -173,7 +175,7 @@ export default function SessionSummaryPage() {
                 <CardFooter>
                      <Button onClick={handleSendEmail} variant="secondary">
                         <Send className="mr-2 h-4 w-4" />
-                        Send to Student
+                        {t.sendToStudent}
                     </Button>
                 </CardFooter>
              )}

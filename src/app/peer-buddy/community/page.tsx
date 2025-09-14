@@ -1,3 +1,4 @@
+
 'use client';
 import * as React from 'react';
 import { getPosts } from '@/lib/db';
@@ -6,6 +7,7 @@ import { PostCard } from '@/components/community/post-card';
 import type { Post } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
+import { useLocale } from '@/context/locale-provider';
 
 const categories = [
   'General',
@@ -20,6 +22,7 @@ export default function CommunityPage() {
   const [posts, setPosts] = React.useState<Post[]>([]);
   const [activeCategory, setActiveCategory] = React.useState('General');
   const [showCreateForm, setShowCreateForm] = React.useState(false);
+  const { t } = useLocale();
 
   React.useEffect(() => {
     getPosts().then(setPosts);
@@ -33,10 +36,10 @@ export default function CommunityPage() {
     <div className="space-y-8">
       <header className="text-center">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Community Discussions
+          {t.communityDiscussions}
         </h1>
         <p className="text-muted-foreground mt-2">
-          Connect with others in a safe, supportive environment.
+          {t.communityDiscussionsDesc}
         </p>
       </header>
       
@@ -48,12 +51,12 @@ export default function CommunityPage() {
               variant={activeCategory === category ? 'default' : 'outline'}
               onClick={() => setActiveCategory(category)}
             >
-              {category}
+              {t[category.toLowerCase().replace(' ', '') as keyof typeof t] || category}
             </Button>
           ))}
         </div>
         <Button onClick={() => setShowCreateForm(!showCreateForm)} className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20">
-          <PlusCircle className="mr-2" /> New Discussion
+          <PlusCircle className="mr-2" /> {t.newDiscussion}
         </Button>
       </div>
 

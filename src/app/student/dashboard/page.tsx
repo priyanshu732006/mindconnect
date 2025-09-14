@@ -11,10 +11,12 @@ import { WeeklyChallenges } from '@/components/dashboard/weekly-challenges';
 import { DailyCheckinDialog } from '@/components/dashboard/daily-checkin-dialog';
 import { useApp } from '@/context/app-provider';
 import { useEffect } from 'react';
+import { useLocale } from '@/context/locale-provider';
 
 
 export default function DashboardPage() {
   const { isCheckinOpen, setCheckinOpen, dailyCheckinData } = useApp();
+  const { t } = useLocale();
   
   useEffect(() => {
     if (dailyCheckinData?.date) {
@@ -34,7 +36,7 @@ export default function DashboardPage() {
        <DailyCheckinDialog isOpen={isCheckinOpen} setIsOpen={setCheckinOpen} />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Student Dashboard
+          {t.studentDashboard}
         </h1>
         <GamificationStats />
       </div>
@@ -57,7 +59,7 @@ export default function DashboardPage() {
       
       <div>
         <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">
-          Explore
+          {t.explore}
         </h2>
         <QuickLinks />
       </div>

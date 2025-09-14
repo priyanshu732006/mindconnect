@@ -15,6 +15,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useLocale } from '@/context/locale-provider';
 import { Video } from 'lucide-react';
 
 const scheduledAppointments = [
@@ -42,14 +43,15 @@ const scheduledAppointments = [
 ];
 
 export default function ScheduledAppointmentsPage() {
+    const { t } = useLocale();
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Scheduled Appointments
+          {t.scheduledAppointments}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          A list of all your upcoming sessions.
+          {t.scheduledAppointmentsDesc}
         </p>
       </header>
 
@@ -58,9 +60,9 @@ export default function ScheduledAppointmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/2">Student</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-1/2">{t.student}</TableHead>
+                <TableHead>{t.dateTime}</TableHead>
+                <TableHead className="text-right">{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -76,7 +78,7 @@ export default function ScheduledAppointmentsPage() {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          Student {appt.studentId}
+                          {t.studentId.replace('{id}', appt.studentId)}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {appt.university}
@@ -88,7 +90,7 @@ export default function ScheduledAppointmentsPage() {
                   <TableCell className="text-right">
                     <Button>
                       <Video className="mr-2 h-4 w-4" />
-                      Start Meeting
+                      {t.startMeeting}
                     </Button>
                   </TableCell>
                 </TableRow>

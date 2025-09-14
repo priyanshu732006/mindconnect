@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/context/locale-provider';
 
 // Placeholder Data
 const upcomingAppointments = [
@@ -44,52 +45,53 @@ const completedAppointments = [
 
 export default function AppointmentsPage() {
     const { toast } = useToast();
+    const { t } = useLocale();
 
     const handleAccept = (studentName: string) => {
-        toast({ title: 'Appointment Accepted', description: `Appointment with ${studentName} has been confirmed.` });
+        toast({ title: t.appointmentAccepted, description: t.appointmentAcceptedDesc.replace('{studentName}', studentName) });
     };
     
     const handleWaitlist = (studentName: string) => {
-        toast({ title: 'Added to Waitlist', description: `${studentName} has been added to the waiting list.` });
+        toast({ title: t.addedToWaitlist, description: t.addedToWaitlistDesc.replace('{studentName}', studentName) });
     };
 
     const handleMarkAsCompleted = (studentName: string) => {
-        toast({ title: 'Marked as Completed', description: `Appointment with ${studentName} is now complete.` });
+        toast({ title: t.markedAsCompleted, description: t.markedAsCompletedDesc.replace('{studentName}', studentName) });
     };
     
     const handleMoveToPending = (studentName: string) => {
-        toast({ title: 'Moved to Pending', description: `${studentName} has been moved to pending physical meets.` });
+        toast({ title: t.movedToPending, description: t.movedToPendingDesc.replace('{studentName}', studentName) });
     };
 
     const handleDelete = (studentName: string) => {
-        toast({ title: 'Appointment Archived', description: `The completed appointment with ${studentName} has been archived.` });
+        toast({ title: t.appointmentArchived, description: t.appointmentArchivedDesc.replace('{studentName}', studentName) });
     };
 
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Appointments
+          {t.appointments}
         </h1>
       </header>
 
       {/* Upcoming Appointments */}
       <Card>
         <CardHeader>
-          <CardTitle>Upcoming Appointments</CardTitle>
+          <CardTitle>{t.upcomingAppointments}</CardTitle>
           <CardDescription>
-            These appointments are awaiting your confirmation.
+            {t.upcomingAppointmentsDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t.student}</TableHead>
+                <TableHead>{t.date}</TableHead>
+                <TableHead>{t.time}</TableHead>
+                <TableHead>{t.status}</TableHead>
+                <TableHead className="text-right">{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -99,11 +101,11 @@ export default function AppointmentsPage() {
                   <TableCell>{appt.date}</TableCell>
                   <TableCell>{appt.time}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{appt.status}</Badge>
+                    <Badge variant="outline">{t[appt.status.toLowerCase() as keyof typeof t] || appt.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button size="sm" onClick={() => handleAccept(appt.student)}>Accept</Button>
-                    <Button variant="secondary" size="sm" onClick={() => handleWaitlist(appt.student)}>Add to waiting list</Button>
+                    <Button size="sm" onClick={() => handleAccept(appt.student)}>{t.accept}</Button>
+                    <Button variant="secondary" size="sm" onClick={() => handleWaitlist(appt.student)}>{t.addToWaitingList}</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -115,21 +117,21 @@ export default function AppointmentsPage() {
       {/* Pending Physical Meet */}
       <Card>
         <CardHeader>
-          <CardTitle>Pending Physical Meet</CardTitle>
+          <CardTitle>{t.pendingPhysicalMeet}</CardTitle>
           <CardDescription>
-            These appointments have been accepted and are scheduled for a physical meeting.
+            {t.pendingPhysicalMeetDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t.student}</TableHead>
+                <TableHead>{t.date}</TableHead>
+                <TableHead>{t.time}</TableHead>
+                <TableHead>{t.status}</TableHead>
+                <TableHead>{t.message}</TableHead>
+                <TableHead className="text-right">{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -139,11 +141,11 @@ export default function AppointmentsPage() {
                   <TableCell>{appt.date}</TableCell>
                   <TableCell>{appt.time}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="text-blue-600 border-blue-200 bg-blue-50">{appt.status}</Badge>
+                    <Badge variant="secondary" className="text-blue-600 border-blue-200 bg-blue-50">{t[appt.status.toLowerCase().replace(' ', '') as keyof typeof t] || appt.status}</Badge>
                   </TableCell>
                   <TableCell>{appt.message}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => handleMarkAsCompleted(appt.student)}>Mark as Completed</Button>
+                    <Button variant="outline" size="sm" onClick={() => handleMarkAsCompleted(appt.student)}>{t.markAsCompleted}</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -155,21 +157,21 @@ export default function AppointmentsPage() {
       {/* Waitlisted Appointments */}
       <Card>
         <CardHeader>
-          <CardTitle>Waitlisted Appointments</CardTitle>
+          <CardTitle>{t.waitlistedAppointments}</CardTitle>
           <CardDescription>
-            These students are on the waiting list for an appointment.
+            {t.waitlistedAppointmentsDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Original Date</TableHead>
-                <TableHead>Original Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t.student}</TableHead>
+                <TableHead>{t.originalDate}</TableHead>
+                <TableHead>{t.originalTime}</TableHead>
+                <TableHead>{t.status}</TableHead>
+                <TableHead>{t.message}</TableHead>
+                <TableHead className="text-right">{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -179,11 +181,11 @@ export default function AppointmentsPage() {
                   <TableCell>{appt.date}</TableCell>
                   <TableCell>{appt.time}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="text-yellow-600 border-yellow-200 bg-yellow-50">{appt.status}</Badge>
+                    <Badge variant="secondary" className="text-yellow-600 border-yellow-200 bg-yellow-50">{t[appt.status.toLowerCase() as keyof typeof t] || appt.status}</Badge>
                   </TableCell>
                   <TableCell>{appt.message}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => handleMoveToPending(appt.student)}>Move to Pending Meet</Button>
+                    <Button variant="outline" size="sm" onClick={() => handleMoveToPending(appt.student)}>{t.moveToPendingMeet}</Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -195,21 +197,21 @@ export default function AppointmentsPage() {
       {/* Completed Appointments */}
        <Card>
         <CardHeader>
-          <CardTitle>Completed Appointments</CardTitle>
+          <CardTitle>{t.completedAppointments}</CardTitle>
           <CardDescription>
-            A log of all completed appointments.
+            {t.completedAppointmentsDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Message</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{t.student}</TableHead>
+                <TableHead>{t.date}</TableHead>
+                <TableHead>{t.time}</TableHead>
+                <TableHead>{t.status}</TableHead>
+                <TableHead>{t.message}</TableHead>
+                <TableHead className="text-right">{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -219,7 +221,7 @@ export default function AppointmentsPage() {
                   <TableCell>{appt.date}</TableCell>
                   <TableCell>{appt.time}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="text-green-600 border-green-200 bg-green-50">{appt.status}</Badge>
+                    <Badge variant="secondary" className="text-green-600 border-green-200 bg-green-50">{t[appt.status.toLowerCase() as keyof typeof t] || appt.status}</Badge>
                   </TableCell>
                   <TableCell>{appt.message}</TableCell>
                   <TableCell className="text-right">

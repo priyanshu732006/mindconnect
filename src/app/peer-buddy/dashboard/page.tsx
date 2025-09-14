@@ -33,6 +33,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { useAuth } from '@/context/auth-provider';
+import { useLocale } from '@/context/locale-provider';
 
 // Placeholder data
 const supportRequestData = [
@@ -88,15 +89,16 @@ const pieChartConfig = {
 
 export default function PeerBuddyDashboardPage() {
   const { user } = useAuth();
+  const { t } = useLocale();
 
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Peer Buddy Dashboard
+          {t.peerBuddyDashboard}
         </h1>
          <p className="text-muted-foreground mt-1">
-          An overview of your impact and community trends.
+          {t.peerBuddyDashboardDesc}
         </p>
       </header>
 
@@ -104,50 +106,50 @@ export default function PeerBuddyDashboardPage() {
         <Card className="bg-green-50/50 border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Support Requests
+              {t.totalSupportRequests}
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">4,281</div>
             <p className="text-xs text-muted-foreground">
-              +20.1% from last month
+              {t.fromLastMonth.replace('{value}', '+20.1%')}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
-              Active Peer Buddies
+              {t.activePeerBuddies}
             </CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">73</div>
             <p className="text-xs text-muted-foreground">
-              +5 since last month
+              {t.sinceLastMonth.replace('{value}', '+5')}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Community Posts</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.communityPosts}</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,204</div>
-            <p className="text-xs text-muted-foreground">+180 this month</p>
+            <p className="text-xs text-muted-foreground">{t.thisMonth.replace('{value}', '+180')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Top Concern</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.topConcern}</CardTitle>
             <BarChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Academics</div>
+            <div className="text-2xl font-bold">{t.academics}</div>
             <p className="text-xs text-muted-foreground">
-              Based on community posts
+              {t.topConcernDesc}
             </p>
           </CardContent>
         </Card>
@@ -156,9 +158,9 @@ export default function PeerBuddyDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Support Request Trends</CardTitle>
+            <CardTitle>{t.supportRequestTrends}</CardTitle>
             <CardDescription>
-              Monthly volume of student support requests.
+              {t.supportRequestTrendsDesc}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -183,9 +185,9 @@ export default function PeerBuddyDashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Top Concerns</CardTitle>
+            <CardTitle>{t.topConcerns}</CardTitle>
             <CardDescription>
-              Breakdown of topics discussed in the community.
+              {t.topConcernsDesc}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex items-center justify-center">

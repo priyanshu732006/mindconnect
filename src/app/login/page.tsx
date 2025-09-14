@@ -20,6 +20,7 @@ import { UserRole, CounsellorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/app-provider";
 import { Separator } from "@/components/ui/separator";
+import { useLocale } from "@/context/locale-provider";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
@@ -35,6 +36,7 @@ export default function LoginPage() {
   const { setNavItemsByRole } = useApp();
   const router = useRouter();
   const [counsellorTypeSelection, setCounsellorTypeSelection] = useState<CounsellorType | null>(null);
+  const { t } = useLocale();
   
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -78,24 +80,24 @@ export default function LoginPage() {
         }
 
         toast({
-          title: "Login Successful",
-          description: "Welcome back!",
+          title: t.loginSuccessful,
+          description: t.welcomeBack.replace('{name}', ''),
         });
 
       } catch (error) {
-        let description = "An unexpected error occurred. Please try again.";
+        let description = t.loginErrorUnexpected;
         if (error instanceof FirebaseError) {
             switch(error.code) {
                 case 'auth/user-not-found':
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':
-                    description = "Invalid email or password."
+                    description = t.loginErrorInvalid;
                     break;
                 case 'auth/custom-error':
                     description = (error as any).customData?._tokenResponse?.error?.message || error.message;
                     break;
                 default:
-                    description = `An error occurred during login: ${error.message}`
+                    description = `${t.loginError}: ${error.message}`
             }
         } else if (error instanceof Error) {
             description = error.message;
@@ -103,7 +105,7 @@ export default function LoginPage() {
 
         toast({
           variant: "destructive",
-          title: "Login Failed",
+          title: t.loginFailed,
           description: description,
         });
       }
@@ -111,8 +113,6 @@ export default function LoginPage() {
   };
 
   useEffect(() => {
-    // This effect redirects logged-in users away from the login page.
-    // It should NOT run while a login transition is in progress.
     if (!loading && user && authRole && !isPending) {
       const targetRole = authRole;
       const targetCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType;
@@ -130,16 +130,16 @@ export default function LoginPage() {
   }, [user, authRole, loading, router, isPending]);
   
   const roleConfig = {
-      [UserRole.student]: { icon: User, label: "Student" },
-      [UserRole.counsellor]: { icon: Briefcase, label: "Counsellor" },
-      [UserRole['peer-buddy']]: { icon: Users, label: "Peer Buddy" },
-      [UserRole.admin]: { icon: UserCog, label: "Admin" },
+      [UserRole.student]: { icon: User, label: t.student },
+      [UserRole.counsellor]: { icon: Briefcase, label: t.counsellor },
+      [UserRole['peer-buddy']]: { icon: Users, label: t.peerbuddy },
+      [UserRole.admin]: { icon: UserCog, label: t.admin },
   }
 
   const showCounsellorTypeSelection = selectedRole === UserRole.counsellor && !counsellorTypeSelection;
   const showLoginForm = selectedRole && (!showCounsellorTypeSelection);
   
-  if (loading || (user && !isPending && authRole)) { // Keep showing loader if we are loading or about to redirect
+  if (loading || (user && !isPending && authRole)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -152,18 +152,18 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <Logo className="justify-center mb-2" />
-          <CardTitle>Login to Your Account</CardTitle>
+          <CardTitle>{t.loginToYourAccount}</CardTitle>
            {!selectedRole ? (
                 <CardDescription>
-                    Please select your role to continue.
+                    {t.selectRoleToContinue}
                 </CardDescription>
            ) : showCounsellorTypeSelection ? (
                 <CardDescription>
-                    Are you an on-campus or external counsellor?
+                    {t.selectCounselorType}
                 </CardDescription>
            ) : (
                 <CardDescription>
-                    Logging in as a <span className="font-bold capitalize">{counsellorTypeSelection ? `${counsellorTypeSelection.replace('-', ' ')} ${selectedRole}` : selectedRole.replace('-', ' ')}</span>.
+                    {t.loggingInAs.replace('{role}', counsellorTypeSelection ? `${t[counsellorTypeSelection.replace('-', '') as keyof typeof t] || counsellorTypeSelection} ${t[selectedRole]}` : t[selectedRole])}
                 </CardDescription>
            )}
         </CardHeader>
@@ -171,7 +171,7 @@ export default function LoginPage() {
         {!selectedRole ? (
             <CardContent className="grid grid-cols-2 gap-4">
                 {Object.values(UserRole).map(role => {
-                    const Icon = roleConfig[role].icon;
+                    const RoleIcon = roleConfig[role].icon;
                     return (
                         <Button 
                             key={role}
@@ -179,8 +179,8 @@ export default function LoginPage() {
                             className="flex flex-col h-24"
                             onClick={() => handleRoleSelect(role)}
                         >
-                            <Icon className="w-8 h-8 mb-2" />
-                            <span className="capitalize">{role.replace('-', ' ')}</span>
+                            <RoleIcon className="w-8 h-8 mb-2" />
+                            <span className="capitalize">{roleConfig[role].label}</span>
                         </Button>
                     )
                 })}
@@ -189,11 +189,11 @@ export default function LoginPage() {
              <CardContent className="grid grid-cols-2 gap-4">
                  <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect(CounsellorType['on-campus'])}>
                     <Building className="w-8 h-8 mb-2" />
-                    <span>On-Campus</span>
+                    <span>{t.oncampus}</span>
                  </Button>
                  <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect(CounsellorType.external)}>
                     <Globe className="w-8 h-8 mb-2" />
-                    <span>External</span>
+                    <span>{t.external}</span>
                 </Button>
              </CardContent>
         ) : (
@@ -205,7 +205,7 @@ export default function LoginPage() {
                             name="email"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Email</FormLabel>
+                                    <FormLabel>{t.email}</FormLabel>
                                     <FormControl>
                                         <Input placeholder="user@university.edu" {...field} />
                                     </FormControl>
@@ -218,7 +218,7 @@ export default function LoginPage() {
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <FormLabel>{t.password}</FormLabel>
                                     <FormControl>
                                         <Input type="password" {...field} />
                                     </FormControl>
@@ -235,11 +235,11 @@ export default function LoginPage() {
                     <CardFooter className="flex flex-col gap-4">
                       <Button type="submit" className="w-full" disabled={isPending}>
                         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Login
+                        {t.login}
                       </Button>
                       <Button type="button" variant="link" size="sm" onClick={handleBackToRoleSelection}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to role selection
+                        {t.backToRoleSelection}
                       </Button>
                     </CardFooter>
                 </form>
@@ -250,13 +250,13 @@ export default function LoginPage() {
                  <Button variant="outline" className="w-full" asChild>
                     <Link href="/">
                         <Home className="mr-2 h-4 w-4" />
-                        Back to Home
+                        {t.backToHome}
                     </Link>
                 </Button>
                  <p className="text-xs text-center text-muted-foreground pt-2">
-                    Don't have an account?{" "}
+                    {t.dontHaveAccount}{" "}
                     <Link href="/register" className="underline hover:text-primary">
-                    Register here
+                    {t.registerHere}
                     </Link>
                 </p>
             </div>

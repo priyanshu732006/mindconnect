@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/context/locale-provider';
 
 const profileSchema = z.object({
   title: z.string().min(1, 'Title is required.'),
@@ -30,6 +31,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export default function CounsellorSettingsPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { t } = useLocale();
 
   const counsellorName = user?.displayName || 'Jane Doe';
   const counsellorEmail = user?.email || 'jane.doe@university.edu';
@@ -48,8 +50,8 @@ export default function CounsellorSettingsPage() {
 
   const onSubmit: SubmitHandler<ProfileFormValues> = data => {
     toast({
-      title: 'Profile Updated',
-      description: 'Your profile information has been saved.',
+      title: t.profileUpdated,
+      description: t.profileUpdatedDesc,
     });
   };
 
@@ -57,16 +59,16 @@ export default function CounsellorSettingsPage() {
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Settings
+          {t.settings}
         </h1>
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <Card>
           <CardHeader>
-            <CardTitle>Profile Settings</CardTitle>
+            <CardTitle>{t.profileSettings}</CardTitle>
             <CardDescription>
-              This is how others will see you on the site.
+              {t.profileSettingsDesc}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -80,35 +82,35 @@ export default function CounsellorSettingsPage() {
                 <AvatarFallback>{counsellorName.charAt(0)}</AvatarFallback>
               </Avatar>
               <Button type="button" variant="outline">
-                Change Photo
+                {t.changePhoto}
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t.name}</Label>
               <Input id="name" value={counsellorName} disabled />
               <p className="text-sm text-muted-foreground">
-                Your name cannot be changed.
+                {t.nameCannotBeChanged}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t.email}</Label>
               <Input id="email" value={counsellorEmail} disabled />
               <p className="text-sm text-muted-foreground">
-                Your college email address cannot be changed.
+                {t.emailCannotBeChanged}
               </p>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="title">Title</Label>
+              <Label htmlFor="title">{t.title}</Label>
               <Input
                 id="title"
                 {...register('title')}
-                placeholder="e.g., On-Campus Counselor"
+                placeholder={t.titlePlaceholder}
               />
               <p className="text-sm text-muted-foreground">
-                Your title, e.g., "On-Campus Counselor", "Peer Support Lead".
+                {t.titleDesc}
               </p>
               {errors.title && (
                 <p className="text-sm text-destructive">{errors.title.message}</p>
@@ -116,15 +118,15 @@ export default function CounsellorSettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="bio">Bio</Label>
+              <Label htmlFor="bio">{t.bio}</Label>
               <Textarea
                 id="bio"
                 {...register('bio')}
                 rows={4}
-                placeholder="A brief bio that will be displayed on your public profile."
+                placeholder={t.bioPlaceholder}
               />
                <p className="text-sm text-muted-foreground">
-                A brief bio that will be displayed on your public profile.
+                {t.bioDesc}
               </p>
               {errors.bio && (
                 <p className="text-sm text-destructive">{errors.bio.message}</p>
@@ -132,7 +134,7 @@ export default function CounsellorSettingsPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit">Update Profile</Button>
+            <Button type="submit">{t.updateProfile}</Button>
           </CardFooter>
         </Card>
       </form>

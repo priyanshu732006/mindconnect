@@ -22,6 +22,7 @@ import {
 import { Shield } from 'lucide-react';
 import { useState } from 'react';
 import { ComplaintDialog } from '@/components/counsellor/external/complaint-dialog';
+import { useLocale } from '@/context/locale-provider';
 
 const completedAppointments = [
   {
@@ -45,6 +46,7 @@ export type Appointment = typeof completedAppointments[0];
 export default function CompletedAppointmentsPage() {
   const [isComplaintDialogOpen, setComplaintDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const { t } = useLocale();
 
   const handleOpenComplaintDialog = (appt: Appointment) => {
     setSelectedAppointment(appt);
@@ -61,10 +63,10 @@ export default function CompletedAppointmentsPage() {
       />
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Completed Appointments
+          {t.completedAppointments}
         </h1>
         <p className="mt-2 text-muted-foreground">
-          A list of all your past sessions.
+          {t.completedAppointmentsDescExternal}
         </p>
       </header>
 
@@ -73,10 +75,10 @@ export default function CompletedAppointmentsPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/2">Student</TableHead>
-                <TableHead>Date & Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-1/2">{t.student}</TableHead>
+                <TableHead>{t.dateTime}</TableHead>
+                <TableHead>{t.status}</TableHead>
+                <TableHead className="text-right">{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -92,7 +94,7 @@ export default function CompletedAppointmentsPage() {
                       </Avatar>
                       <div>
                         <p className="font-medium">
-                          Student {appt.studentId}
+                          {t.studentId.replace('{id}', appt.studentId)}
                         </p>
                         <p className="text-sm text-muted-foreground">
                           {appt.university}
@@ -102,12 +104,12 @@ export default function CompletedAppointmentsPage() {
                   </TableCell>
                   <TableCell>{appt.dateTime}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">Completed</Badge>
+                    <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">{t.completed}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="outline" size="sm" onClick={() => handleOpenComplaintDialog(appt)}>
                       <Shield className="mr-2 h-4 w-4" />
-                      Complaint
+                      {t.complaint}
                     </Button>
                   </TableCell>
                 </TableRow>

@@ -1,4 +1,6 @@
 
+'use client';
+
 import {
   Card,
   CardContent,
@@ -18,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { getWellbeingCategory } from '@/lib/utils';
 import Link from 'next/link';
+import { useLocale } from '@/context/locale-provider';
 
 // Placeholder data
 const crisisAlerts = [
@@ -27,32 +30,33 @@ const crisisAlerts = [
 ];
 
 export default function CrisisMonitoringPage() {
+    const { t } = useLocale();
   return (
     <div className="space-y-8">
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
-          Crisis Monitoring
+          {t.crisisMonitoring}
         </h1>
         <p className="text-muted-foreground mt-2">
-          Review and manage real-time crisis alerts for students.
+          {t.crisisMonitoringDesc}
         </p>
       </header>
       <Card>
         <CardHeader>
-          <CardTitle>Active Alerts</CardTitle>
+          <CardTitle>{t.activeAlerts}</CardTitle>
           <CardDescription>
-            Students flagged as being in a crisis state.
+            {t.activeAlertsDesc}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Well-being Score</TableHead>
-                <TableHead>Time</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>{t.student}</TableHead>
+                <TableHead>{t.wellbeingScore}</TableHead>
+                <TableHead>{t.time}</TableHead>
+                <TableHead>{t.status}</TableHead>
+                <TableHead>{t.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -62,17 +66,17 @@ export default function CrisisMonitoringPage() {
                      <TableRow key={alert.id} className={alert.status === 'New' ? 'bg-destructive/10' : ''}>
                         <TableCell className="font-medium">{alert.studentName}</TableCell>
                         <TableCell>
-                            <span className={`font-bold ${category.colorClass}`}>{alert.score} ({category.name})</span>
+                            <span className={`font-bold ${category.colorClass}`}>{alert.score} ({t[category.name.toLowerCase().replace(' ', '') as keyof typeof t] || category.name})</span>
                         </TableCell>
                         <TableCell>{alert.time}</TableCell>
                         <TableCell>
                             <Badge variant={alert.status === 'New' ? 'destructive' : 'outline'}>
-                                {alert.status}
+                                {t[alert.status.toLowerCase() as keyof typeof t] || alert.status}
                             </Badge>
                         </TableCell>
                         <TableCell>
                             <Button variant="outline" size="sm" asChild>
-                                <Link href={`/admin/user-management/${alert.id}`}>View Details</Link>
+                                <Link href={`/admin/user-management/${alert.id}`}>{t.viewDetails}</Link>
                             </Button>
                         </TableCell>
                     </TableRow>

@@ -13,6 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { Assessment, Answer } from '@/lib/types';
 import { useApp } from '@/context/app-provider';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '@/context/locale-provider';
 
 type AssessmentFormProps = {
   assessment: Assessment;
@@ -22,14 +23,13 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const { addAssessmentResult } = useApp();
   const router = useRouter();
+  const { t } = useLocale();
 
-
-  // Dynamically create a Zod schema based on the number of questions
   const schema = z.object(
     Object.fromEntries(
       assessment.questions.map((_, index) => [
         `q${index}`,
-        z.string({ required_error: 'Please select an option.' }),
+        z.string({ required_error: t.pleaseSelectOption }),
       ])
     )
   );
@@ -81,7 +81,6 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
         date: new Date().toISOString()
     });
 
-    // Redirect to the specific report page for this assessment
     router.push(`/student/assessment/${assessment.id}/report`);
   };
 
@@ -90,7 +89,7 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
       <form>
         <Card>
           <CardHeader>
-            <CardTitle>Question {currentStep + 1} of {totalSteps}</CardTitle>
+            <CardTitle>{t.questionOf.replace('{current}', String(currentStep + 1)).replace('{total}', String(totalSteps))}</CardTitle>
             <Progress value={progress} className="mt-2" />
           </CardHeader>
           <CardContent>
@@ -130,10 +129,10 @@ export function AssessmentForm({ assessment }: AssessmentFormProps) {
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button type="button" variant="outline" onClick={handleBack} disabled={currentStep === 0}>
-              Back
+              {t.back}
             </Button>
             <Button type="button" onClick={handleNext}>
-              {currentStep === totalSteps - 1 ? 'Finish & View Report' : 'Next'}
+              {currentStep === totalSteps - 1 ? t.finishAndViewReport : t.next}
             </Button>
           </CardFooter>
         </Card>

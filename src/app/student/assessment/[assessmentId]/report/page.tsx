@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
@@ -9,6 +10,7 @@ import Link from 'next/link';
 import { AssessmentId, AssessmentResult } from '@/lib/types';
 import { Loader2, AlertTriangle } from 'lucide-react';
 import { useAuth } from '@/context/auth-provider';
+import { useLocale } from '@/context/locale-provider';
 
 export default function SingleReportPage() {
   const params = useParams();
@@ -16,6 +18,7 @@ export default function SingleReportPage() {
   const { assessmentResults } = useApp();
   const { user } = useAuth();
   const router = useRouter();
+  const { t } = useLocale();
 
   const result = assessmentResults[assessmentId];
 
@@ -27,12 +30,12 @@ export default function SingleReportPage() {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive"/> Report Not Found</CardTitle>
-          <CardDescription>You have not completed this assessment yet, or the results could not be found.</CardDescription>
+          <CardTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive"/> {t.reportNotFound}</CardTitle>
+          <CardDescription>{t.reportNotFoundDesc}</CardDescription>
         </CardHeader>
         <CardContent>
             <Button asChild>
-                <Link href={`/student/assessment/${assessmentId}`}>Take Assessment</Link>
+                <Link href={`/student/assessment/${assessmentId}`}>{t.takeAssessment}</Link>
             </Button>
         </CardContent>
       </Card>

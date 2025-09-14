@@ -3,6 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useLocale } from '@/context/locale-provider';
 import { Calendar } from 'lucide-react';
 
 const waitlistedStudents = [
@@ -37,15 +38,15 @@ const waitlistedStudents = [
 ];
 
 export default function WaitlistedPage() {
+    const { t } = useLocale();
   return (
     <div className="space-y-8">
        <header>
             <h1 className="text-3xl font-bold tracking-tight font-headline">
-                Waitlisted Appointments
+                {t.waitlistedAppointments}
             </h1>
             <p className="mt-2 text-muted-foreground">
-                Students who are waiting for an available slot. Appointments are
-                automatically removed after one week.
+                {t.waitlistedAppointmentsDescExternal}
             </p>
        </header>
 
@@ -55,7 +56,7 @@ export default function WaitlistedPage() {
             <CardContent className="p-6 flex items-center justify-between">
               <div>
                 <h3 className="text-lg font-bold">
-                  Student {student.studentId}
+                  {t.studentId.replace('{id}', student.studentId)}
                 </h3>
                 <p className="text-sm text-muted-foreground">{student.university}</p>
                 <p className="mt-4 text-muted-foreground italic">"{student.note}"</p>
@@ -64,7 +65,7 @@ export default function WaitlistedPage() {
                  <p className="text-xs text-muted-foreground">{student.timestamp}</p>
                  <Button>
                   <Calendar className="mr-2 h-4 w-4" />
-                  Schedule
+                  {t.schedule}
                 </Button>
               </div>
             </CardContent>

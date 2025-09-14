@@ -11,6 +11,7 @@ import { AssessmentId } from '@/lib/types';
 import { ArrowLeft } from 'lucide-react';
 import { useApp } from '@/context/app-provider';
 import { useEffect } from 'react';
+import { useLocale } from '@/context/locale-provider';
 
 export default function AssessmentPage() {
   const router = useRouter();
@@ -18,6 +19,7 @@ export default function AssessmentPage() {
   const assessmentId = params.assessmentId as AssessmentId;
   const currentAssessment = assessmentData[assessmentId];
   const { assessmentResults } = useApp();
+  const { t } = useLocale();
 
   useEffect(() => {
     // If the assessment has already been taken, redirect to the dashboard.
@@ -34,17 +36,17 @@ export default function AssessmentPage() {
                 <Link href="/student/dashboard"><ArrowLeft/></Link>
             </Button>
             <h1 className="text-3xl font-bold tracking-tight font-headline">
-            Assessment Not Found
+            {t.assessmentNotFound}
             </h1>
         </header>
         <Card>
             <CardHeader>
-                <CardTitle>Error</CardTitle>
-                <CardDescription>The assessment you are looking for does not exist.</CardDescription>
+                <CardTitle>{t.error}</CardTitle>
+                <CardDescription>{t.assessmentNotFoundDesc}</CardDescription>
             </CardHeader>
             <CardContent>
                 <Button asChild>
-                    <Link href="/student/dashboard">Return to Dashboard</Link>
+                    <Link href="/student/dashboard">{t.returnToDashboard}</Link>
                 </Button>
             </CardContent>
         </Card>
@@ -68,7 +70,7 @@ export default function AssessmentPage() {
                 {currentAssessment.name}
             </h1>
             <p className="text-muted-foreground mt-2">
-                Over the last 2 weeks, how often have you been bothered by any of the following problems?
+                {t.assessmentPrompt}
             </p>
         </div>
       </header>

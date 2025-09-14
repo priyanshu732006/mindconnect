@@ -12,15 +12,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { Award } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLocale } from '@/context/locale-provider';
 
 export default function CertificationPage() {
   const { toast } = useToast();
+  const { t } = useLocale();
 
   const handleRequest = () => {
     toast({
-      title: 'Request Sent!',
+      title: t.requestSent,
       description:
-        'Your request for a certificate of contribution has been sent to the administration.',
+        t.requestSentDesc,
     });
   };
 
@@ -31,23 +33,19 @@ export default function CertificationPage() {
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 mb-4">
               <Award className="h-8 w-8 text-primary" />
           </div>
-          <CardTitle>Peer Buddy Certification</CardTitle>
+          <CardTitle>{t.peerBuddyCertification}</CardTitle>
           <CardDescription className="pt-2">
-            Claim your official certificate of contribution for your valuable
-            service.
+            {t.peerBuddyCertificationClaim}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">
-            When you complete your role or graduate, you can request an
-            official certificate from the college to acknowledge your
-            contribution to the community. This certificate is a valuable
-            addition to your resume and portfolio.
+            {t.peerBuddyCertificationDesc}
           </p>
         </CardContent>
         <CardFooter className="justify-center">
           <Button onClick={handleRequest}>
-            Request Certificate of Contribution
+            {t.requestCertificate}
           </Button>
         </CardFooter>
       </Card>
