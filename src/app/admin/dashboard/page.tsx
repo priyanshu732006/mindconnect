@@ -1,4 +1,3 @@
-
 'use client';
 import {
   Card,
@@ -31,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ResolveIssueDialog } from '@/components/admin/resolve-issue-dialog';
 
 const peerImpactData = [
     { buddy: 'Rohan J.', students: 45 },
@@ -59,7 +59,7 @@ const engagementData = [
   { day: 'Sun', rate: 85 },
 ];
 
-const openIssuesData = [
+const initialOpenIssuesData = [
   {
     id: 'IS-001',
     raisedBy: 'Dr. Evans',
@@ -114,8 +114,28 @@ const engagementChartConfig = {
 
 export default function AdminDashboardPage() {
   const [showOpenIssues, setShowOpenIssues] = useState(false);
+  const [openIssuesData, setOpenIssuesData] = useState(initialOpenIssuesData);
+  const [isResolveDialogOpen, setResolveDialogOpen] = useState(false);
+  const [selectedIssue, setSelectedIssue] = useState<(typeof openIssuesData)[0] | null>(null);
+
+  const handleOpenResolveDialog = (issue: (typeof openIssuesData)[0]) => {
+    setSelectedIssue(issue);
+    setResolveDialogOpen(true);
+  }
+
+  const handleIssueResolved = (issueId: string) => {
+    setOpenIssuesData(prev => prev.filter(issue => issue.id !== issueId));
+  }
+
+
   return (
     <div className="space-y-8">
+      <ResolveIssueDialog 
+        isOpen={isResolveDialogOpen}
+        setIsOpen={setResolveDialogOpen}
+        issue={selectedIssue}
+        onIssueResolved={handleIssueResolved}
+      />
       <header>
         <h1 className="text-3xl font-bold tracking-tight font-headline">
           Admin Dashboard
@@ -159,7 +179,7 @@ export default function AdminDashboardPage() {
             <Info className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">{openIssuesData.length}</div>
             <p className="text-xs text-muted-foreground">+1 since yesterday</p>
           </CardContent>
         </Card>
@@ -203,7 +223,7 @@ export default function AdminDashboardPage() {
                                         <Badge variant="destructive">{issue.status}</Badge>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button variant="outline" size="sm">Resolve</Button>
+                                        <Button variant="outline" size="sm" onClick={() => handleOpenResolveDialog(issue)}>Resolve</Button>
                                     </TableCell>
                                 </TableRow>
                             ))}
