@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AppProvider } from '@/context/app-provider';
 import { AuthProvider } from '@/context/auth-provider';
+import { LocaleProvider } from '@/context/locale-provider';
 
 export const metadata: Metadata = {
   title: 'दिव्यManas',
@@ -28,8 +29,10 @@ export default function RootLayout({
       <body className="font-body antialiased bg-background text-foreground">
         <AuthProvider>
           <AppProvider>
-            {children}
-            <Toaster />
+            <LocaleProvider>
+              {children}
+              <Toaster />
+            </LocaleProvider>
           </AppProvider>
         </AuthProvider>
       </body>

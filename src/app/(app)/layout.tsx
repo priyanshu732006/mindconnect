@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { useApp } from '@/context/app-provider';
 import { VisuallyHidden } from '@/components/ui/visually-hidden';
 import { Badge } from '@/components/ui/badge';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -106,6 +107,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Right Section - User Menu */}
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
              <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0" variant="destructive">3</Badge>
