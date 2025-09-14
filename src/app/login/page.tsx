@@ -163,7 +163,7 @@ export default function LoginPage() {
                 </CardDescription>
            ) : (
                 <CardDescription>
-                    {t.loggingInAs.replace('{role}', counsellorTypeSelection ? `${t[counsellorTypeSelection.replace('-', '') as keyof typeof t] || counsellorTypeSelection} ${t[selectedRole]}` : t[selectedRole])}
+                    {t.loggingInAs?.replace('{role}', counsellorTypeSelection ? `${t[counsellorTypeSelection.replace('-', '') as keyof typeof t] || counsellorTypeSelection} ${t[selectedRole]}` : t[selectedRole]) || `Logging in as ${selectedRole}`}
                 </CardDescription>
            )}
         </CardHeader>
