@@ -56,7 +56,7 @@ const topConcernsData = [
 const lineChartConfig = {
   requests: {
     label: 'Requests',
-    color: 'hsl(var(--chart-1))',
+    color: 'hsl(140 60% 50%)',
   },
 };
 
@@ -95,15 +95,18 @@ export default function PeerBuddyDashboardPage() {
         <h1 className="text-3xl font-bold tracking-tight font-headline">
           Peer Buddy Dashboard
         </h1>
+         <p className="text-muted-foreground mt-1">
+          An overview of your impact and community trends.
+        </p>
       </header>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="bg-green-50/50 border-green-100">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">
               Total Support Requests
             </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">4,281</div>
@@ -171,8 +174,8 @@ export default function PeerBuddyDashboardPage() {
                   dataKey="requests"
                   type="monotone"
                   stroke="var(--color-requests)"
-                  strokeWidth={2}
-                  dot={{ r: 4, fill: 'var(--color-requests)' }}
+                  strokeWidth={3}
+                  dot={{ r: 5, fill: 'var(--color-requests)' }}
                 />
               </LineChart>
             </ChartContainer>

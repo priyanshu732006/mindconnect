@@ -52,7 +52,7 @@ export default function CommunityPage() {
             </Button>
           ))}
         </div>
-        <Button onClick={() => setShowCreateForm(!showCreateForm)} className="bg-green-600 hover:bg-green-700 text-white">
+        <Button onClick={() => setShowCreateForm(!showCreateForm)} className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20">
           <PlusCircle className="mr-2" /> New Discussion
         </Button>
       </div>
