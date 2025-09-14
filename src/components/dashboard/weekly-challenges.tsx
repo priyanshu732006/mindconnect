@@ -6,14 +6,14 @@ import { useApp } from "@/context/app-provider";
 import { CheckCircle2, Circle } from "lucide-react";
 
 export function WeeklyChallenges() {
-    const { assessmentResults, messages, streak } = useApp();
+    const { assessmentResults, journalEntries, streak } = useApp();
 
     const hasCompletedAllAssessments = 
         !!assessmentResults['phq-9'] && 
         !!assessmentResults['gad-7'] && 
         !!assessmentResults['ghq-12'];
     
-    const hasWrittenThreeJournalEntries = messages.filter(m => m.role === 'user').length >= 3;
+    const hasWrittenThreeJournalEntries = journalEntries.length >= 3;
     const hasThreeDayStreak = streak >= 3;
 
     const challenges = [

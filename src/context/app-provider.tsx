@@ -39,6 +39,7 @@ type AppContextType = {
   streak: number;
   setStreak: React.Dispatch<React.SetStateAction<number>>;
   addJournalEntry: (data: DailyCheckinData) => void;
+  journalEntries: DailyCheckinData[];
   
   // Daily Check-in
   isCheckinOpen: boolean;
@@ -65,6 +66,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // Gamification state
   const [coins, setCoins] = React.useState(15);
   const [streak, setStreak] = React.useState(0);
+  const [journalEntries, setJournalEntries] = React.useState<DailyCheckinData[]>([]);
+
   
   // Daily Check-in state
   const [isCheckinOpen, setCheckinOpen] = React.useState(false);
@@ -89,6 +92,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTrustedContacts([]);
     setAssessmentResults({ "phq-9": null, "gad-7": null, "ghq-12": null });
     setDailyCheckinData(null);
+    setJournalEntries([]);
     setWellbeingData(null);
     setFacialAnalysis(null);
     setVoiceAnalysis(null);
@@ -120,6 +124,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setMessages(data.messages || []);
           setAssessmentResults(data.assessmentResults || { "phq-9": null, "gad-7": null, "ghq-12": null });
           setDailyCheckinData(data.dailyCheckinData || null);
+          setJournalEntries(data.journalEntries || []);
           setCoins(data.coins ?? 15);
           setStreak(data.streak ?? 0);
         } else {
@@ -127,6 +132,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           setMessages([]);
           setAssessmentResults({ "phq-9": null, "gad-7": null, "ghq-12": null });
           setDailyCheckinData(null);
+          setJournalEntries([]);
           setCoins(15);
           setStreak(0);
         }
@@ -159,13 +165,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         messages,
         assessmentResults,
         dailyCheckinData,
+        journalEntries,
         coins,
         streak,
       }).catch(error => {
         console.error("Error writing student data:", error);
       });
     }
-  }, [user, role, db, messages, assessmentResults, dailyCheckinData, coins, streak]);
+  }, [user, role, db, messages, assessmentResults, dailyCheckinData, journalEntries, coins, streak]);
 
   const setNavItemsByRole = React.useCallback((currentRole: UserRole | null) => {
     switch (currentRole) {
@@ -226,6 +233,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   
   const addJournalEntry = (data: DailyCheckinData) => {
     setDailyCheckinData(data);
+    if (data.journalEntry && data.journalEntry.trim() !== '') {
+        setJournalEntries(prev => [...prev, data]);
+    }
     setCoins(c => c + 2);
     setStreak(s => s + 1);
     toast({
@@ -358,6 +368,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     streak,
     setStreak,
     addJournalEntry,
+    journalEntries,
     isCheckinOpen,
     setCheckinOpen,
     dailyCheckinData,
