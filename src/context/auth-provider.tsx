@@ -31,23 +31,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // This runs only on the client side
-    const savedRole = sessionStorage.getItem('userRole') as UserRole | null;
-    const savedCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType | null;
-    const savedStudentDetails = sessionStorage.getItem('studentDetails');
-    
-    if (savedRole) setRole(savedRole);
-    if (savedCounsellorType) setCounsellorType(savedCounsellorType);
-    if (savedStudentDetails) {
-        try {
-            setStudentDetails(JSON.parse(savedStudentDetails));
-        } catch (e) {
-            console.error("Failed to parse studentDetails from sessionStorage", e);
+    if (typeof window !== 'undefined') {
+        const savedRole = sessionStorage.getItem('userRole') as UserRole | null;
+        const savedCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType | null;
+        const savedStudentDetails = sessionStorage.getItem('studentDetails');
+        
+        if (savedRole) setRole(savedRole);
+        if (savedCounsellorType) setCounsellorType(savedCounsellorType);
+        if (savedStudentDetails) {
+            try {
+                setStudentDetails(JSON.parse(savedStudentDetails));
+            } catch (e) {
+                console.error("Failed to parse studentDetails from sessionStorage", e);
+            }
         }
     }
-  }, []);
 
-  useEffect(() => {
-    setLoading(true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         const db = getDatabase();
