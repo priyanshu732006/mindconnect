@@ -188,42 +188,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setMessages(prev => [...prev, { id: Date.now().toString(), role, content }]);
   };
 
-  const analyzeCurrentState = React.useCallback(async (currentAssessmentResults?: AssessmentResults) => {
-    if (!user) return; // Don't analyze if there's no user
-    
-    const conversation = messages.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n');
-    const resultsToAnalyze = currentAssessmentResults || assessmentResults;
-    const completedAssessments = Object.values(resultsToAnalyze).filter(Boolean) as AssessmentResult[];
-
-
-    if (messages.length === 0 && !facialAnalysis && !voiceAnalysis && !dailyCheckinData && completedAssessments.length === 0) {
-      setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
-      return;
-    }
-
-    setIsAnalyzing(true);
-    try {
-      const data = await analyzeWellbeing({
-        conversation: conversation.length > 0 ? conversation : undefined,
-        facialAnalysis: facialAnalysis || undefined,
-        voiceAnalysis: voiceAnalysis || undefined,
-        mood: dailyCheckinData?.mood,
-        journalEntry: dailyCheckinData?.journalEntry,
-        sleepHours: dailyCheckinData?.sleepTimeHours,
-        screenTimeHours: dailyCheckinData?.screenTimeHours,
-        assessmentResults: completedAssessments.length > 0 ? completedAssessments : undefined,
-      });
-      if (data) {
-        setWellbeingData(data);
-      }
-    } catch (error) {
-      console.error('Failed to analyze wellbeing:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  }, [user, messages, facialAnalysis, voiceAnalysis, dailyCheckinData, assessmentResults]);
-
-
    const addContact = async (contact: Omit<TrustedContact, 'id' | 'avatar'>) => {
       if(!user) return;
       const newContacts = [...trustedContacts.map(c => ({name: c.name, relation: c.relation, phone: c.phone})), contact];
@@ -282,15 +246,47 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         title: `${result.name} Completed!`,
         description: `You've earned 5 coins. Your score is being updated.`
     });
-    // Trigger analysis with the newest results immediately
-    analyzeCurrentState(newResults);
   };
   
-  React.useEffect(() => {
-    if(isDataLoaded.current) {
+  useEffect(() => {
+    const analyzeCurrentState = async (currentAssessmentResults?: AssessmentResults) => {
+        if (!user) return;
+        
+        const conversation = messages.map(m => `${m.role === 'user' ? 'Student' : 'AI'}: ${m.content}`).join('\n\n');
+        const resultsToAnalyze = currentAssessmentResults || assessmentResults;
+        const completedAssessments = Object.values(resultsToAnalyze).filter(Boolean) as AssessmentResult[];
+
+        if (messages.length === 0 && !facialAnalysis && !voiceAnalysis && !dailyCheckinData && completedAssessments.length === 0) {
+          setWellbeingData({ wellbeingScore: 0, summary: "Start a conversation or use the analysis tools to get your well-being score.", selfHarmRisk: false });
+          return;
+        }
+
+        setIsAnalyzing(true);
+        try {
+          const data = await analyzeWellbeing({
+            conversation: conversation.length > 0 ? conversation : undefined,
+            facialAnalysis: facialAnalysis || undefined,
+            voiceAnalysis: voiceAnalysis || undefined,
+            mood: dailyCheckinData?.mood,
+            journalEntry: dailyCheckinData?.journalEntry,
+            sleepHours: dailyCheckinData?.sleepHours,
+            screenTimeHours: dailyCheckinData?.screenTimeHours,
+            assessmentResults: completedAssessments.length > 0 ? completedAssessments : undefined,
+          });
+          if (data) {
+            setWellbeingData(data);
+          }
+        } catch (error) {
+          console.error('Failed to analyze wellbeing:', error);
+        } finally {
+          setIsAnalyzing(false);
+        }
+    };
+    
+    if (isDataLoaded.current) {
         analyzeCurrentState();
     }
-  }, [messages, facialAnalysis, voiceAnalysis, dailyCheckinData, analyzeCurrentState]);
+  }, [user, messages, facialAnalysis, voiceAnalysis, dailyCheckinData, assessmentResults]);
   
   const triggerCrisisAlerts = React.useCallback(async (currentContacts: TrustedContact[], isSelfHarmRisk: boolean) => {
     if (!user || !user.displayName) {
@@ -398,7 +394,3 @@ export function useApp() {
   }
   return context;
 }
-
-    
-
-    
