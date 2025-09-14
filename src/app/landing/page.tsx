@@ -10,8 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AnimatedHero } from '@/components/landing/animated-hero';
 import { useEffect, useState } from 'react';
+import { AnimatedHero } from '@/components/landing/animated-hero';
 
 const AIContactIcon = () => (
     <div className="relative w-10 h-10">

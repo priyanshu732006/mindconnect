@@ -1,0 +1,151 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0d0d1b;
+      color: #e0e0f0;
+      overflow-x: hidden;
+  }
+}
+
+.typing-animation::after {
+    content: '|';
+    animation: blink-caret .75s step-end infinite;
+}
+
+@keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: white }
+}
+
+.neural-glow {
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 10px #a3e635, 0 0 20px #a3e635; }
+    to { text-shadow: 0 0 20px #a3e635, 0 0 30px #a3e635; }
+}
+
+.button-pulse {
+    position: relative;
+    z-index: 1;
+}
+
+.button-pulse::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #8b5cf6, #ec4899, #10b981, #3b82f6);
+    border-radius: 14px; /* Slightly larger than button's rounded-xl */
+    background-size: 400%;
+    z-index: -1;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+    animation: pulse-gradient 3s infinite;
+}
+
+.button-pulse:hover::before {
+    opacity: 1;
+}
+
+@keyframes pulse-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+
+body {
+  font-family: 'PT Sans', sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 240 17% 95%;
+    --foreground: 240 6% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 6% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 6% 10%;
+    --primary: 244 34% 62%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 241 44% 81%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 90%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 28 100% 86%;
+    --accent-foreground: 25 95% 25%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 6% 85%;
+    --input: 240 6% 88%;
+    --ring: 244 34% 62%;
+    --chart-1: 130 60% 50%;
+    --chart-2: 45 80% 60%;
+    --chart-3: 30 90% 60%;
+    --chart-4: 0 84.2% 60.2%;
+    --chart-5: 27 87% 67%;
+    --radius: 0.8rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 240 6% 10%;
+    --sidebar-primary: 244 34% 62%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 17% 95%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 240 6% 85%;
+    --sidebar-ring: 244 34% 62%;
+  }
+  .dark {
+    --background: 240 6% 10%;
+    --foreground: 0 0% 98%;
+    --card: 240 6% 10%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 241 44% 81%;
+    --primary-foreground: 240 6% 10%;
+    --secondary: 244 34% 62%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 28 100% 86%;
+    --accent-foreground: 25 95% 25%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 241 44% 81%;
+    --chart-1: 130 60% 50%;
+    --chart-2: 45 80% 60%;
+    --chart-3: 30 90% 60%;
+    --chart-4: 0 70% 50%;
+    --chart-5: 27 87% 67%;
+    --sidebar-background: 240 6% 10%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 241 44% 81%;
+    --sidebar-primary-foreground: 240 6% 10%;
+    --sidebar-accent: 240 4% 16%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 241 44% 81%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
