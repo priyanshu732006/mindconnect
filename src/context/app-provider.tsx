@@ -4,7 +4,7 @@
 import { analyzeWellbeing } from '@/app/actions';
 import { NavItem, UserRole } from '@/lib/types';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getWellbeingCategory } from '@/lib/utils';
 import { useAuth } from './auth-provider';
@@ -97,7 +97,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // --- DATABASE SYNC: LOAD & CLEAR DATA ---
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchStudentData = async () => {
       if (!user) return;
       isDataLoaded.current = false;
@@ -141,9 +141,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isDataLoaded.current = true;
       }
     };
-
+    
     if (!loading) {
-      if (user && role === UserRole.student) {
+      if (user && role === 'student') {
         fetchStudentData();
       } else {
         clearStudentData();
@@ -152,7 +152,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [user, role, loading, db, toast, studentDetails, clearStudentData]);
 
   // --- DATABASE SYNC: SAVE DATA ON CHANGE ---
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDataLoaded.current && user && role === UserRole.student) {
       const studentDataRef = ref(db, `studentData/${user.uid}`);
       set(studentDataRef, {
