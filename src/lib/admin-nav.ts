@@ -1,10 +1,9 @@
 
-import { BarChart2, ShieldAlert, Users } from "lucide-react";
+import { LayoutGrid, Users, BarChart2 } from "lucide-react";
 import { NavItem } from "./types";
 
 export const adminNavItems: NavItem[] = [
-    { href: '/admin/dashboard', icon: BarChart2, label: 'Dashboard' },
-    { href: '/admin/user-management', icon: Users, label: 'User Management' },
-    { href: '/admin/crisis-monitoring', icon: ShieldAlert, label: 'Crisis Monitoring' },
+    { href: '/admin/dashboard', icon: LayoutGrid, label: 'Dashboard' },
+    { href: '/admin/user-management', icon: Users, label: 'Users' },
     { href: '/admin/reports', icon: BarChart2, label: 'Reports' },
 ];
