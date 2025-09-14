@@ -2,7 +2,7 @@
 'use client';
 
 import { analyzeWellbeing } from '@/app/actions';
-import { NavItem, UserRole } from '@/lib/types';
+import { CounsellorType, NavItem, UserRole } from '@/lib/types';
 import type { Message, WellbeingData, TrustedContact, FacialAnalysisData, VoiceAnalysisData, DailyCheckinData, AssessmentId, AssessmentResult, AssessmentResults } from '@/lib/types';
 import React, { useRef, useCallback, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import { counsellorNavItems } from '@/lib/counsellor-nav';
 import { peerBuddyNavItems } from '@/lib/peer-buddy-nav';
 import { getDatabase, ref, set, get } from 'firebase/database';
 import { sendSmsAction } from '@/app/actions';
+import { externalCounsellorNavItems } from '@/lib/external-counsellor-nav';
 
 
 type AppContextType = {
@@ -31,7 +32,7 @@ type AppContextType = {
   voiceAnalysis: VoiceAnalysisData | null;
   setVoiceAnalysis: React.Dispatch<React.SetStateAction<VoiceAnalysisData | null>>;
   navItems: NavItem[];
-  setNavItemsByRole: (role: UserRole | null) => void;
+  setNavItemsByRole: (role: UserRole | null, counsellorType?: CounsellorType | null) => void;
 
   // Gamification
   coins: number;
@@ -174,13 +175,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, role, db, messages, assessmentResults, dailyCheckinData, journalEntries, coins, streak]);
 
-  const setNavItemsByRole = React.useCallback((currentRole: UserRole | null) => {
+  const setNavItemsByRole = React.useCallback((currentRole: UserRole | null, counsellorType: CounsellorType | null) => {
     switch (currentRole) {
       case UserRole.admin:
         setNavItems(adminNavItems);
         break;
       case UserRole.counsellor:
-        setNavItems(counsellorNavItems);
+        if (counsellorType === 'external') {
+            setNavItems(externalCounsellorNavItems);
+        } else {
+            setNavItems(counsellorNavItems);
+        }
         break;
       case UserRole['peer-buddy']:
         setNavItems(peerBuddyNavItems);
@@ -242,7 +247,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       title: "Daily Check-in Complete!",
       description: `You've earned 2 coins and extended your streak to ${streak + 1} days! Your Well-being Score is being updated.`,
     });
-    sessionStorage.setItem('hasCheckedInToday', 'true');
+    localStorage.setItem('lastDailyCheckin', new Date().toISOString());
   };
 
   const addAssessmentResult = (result: AssessmentResult) => {

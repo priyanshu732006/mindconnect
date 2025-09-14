@@ -9,14 +9,14 @@ import { Loader2 } from 'lucide-react';
 import { useApp } from '@/context/app-provider';
 
 export default function AuthGuard({ children, role: requiredRole }: { children: React.ReactNode, role: UserRole }) {
-  const { user, loading, role: userRole } = useAuth();
+  const { user, loading, role: userRole, counsellorType } = useAuth();
   const { setNavItemsByRole } = useApp();
   const router = useRouter();
 
   useEffect(() => {
     // This ensures the nav items are set correctly for the current section of the app.
-    setNavItemsByRole(requiredRole);
-  }, [requiredRole, setNavItemsByRole]);
+    setNavItemsByRole(requiredRole, counsellorType);
+  }, [requiredRole, counsellorType, setNavItemsByRole]);
 
   useEffect(() => {
     if (loading) {
