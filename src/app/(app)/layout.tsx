@@ -24,6 +24,7 @@ import { useApp } from '@/context/app-provider';
 import { VisuallyHidden } from '@/components/ui/visually-hidden';
 import { Badge } from '@/components/ui/badge';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { useLocale } from '@/context/locale-provider';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -31,6 +32,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isSheetOpen, setSheetOpen] = React.useState(false);
   const { navItems } = useApp();
+  const { t } = useLocale();
 
   const handleLogout = async () => {
     await logout();
@@ -48,7 +50,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }) => (
     <nav
       className={cn('flex items-center gap-2', className)}
-      aria-label="Main navigation"
+      aria-label={t.mainNav}
     >
       {navItems.map(item => (
         <Button
@@ -81,12 +83,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 className="shrink-0 md:hidden"
               >
                 <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
+                <span className="sr-only">{t.toggleNav}</span>
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
               <VisuallyHidden>
-                <SheetTitle>Main Navigation</SheetTitle>
+                <SheetTitle>{t.mainNav}</SheetTitle>
               </VisuallyHidden>
               <Logo />
               <NavLinks
@@ -111,7 +113,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Button variant="ghost" size="icon" className="relative">
             <Bell className="h-5 w-5" />
              <Badge className="absolute -top-1 -right-1 h-4 w-4 justify-center p-0" variant="destructive">3</Badge>
-            <span className="sr-only">Notifications</span>
+            <span className="sr-only">{t.notifications}</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -125,7 +127,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                       user?.photoURL ??
                       `https://picsum.photos/seed/${role ?? 'user'}/100/100`
                     }
-                    alt="User"
+                    alt={t.userAvatar}
                     data-ai-hint={`${role} avatar`}
                   />
                   <AvatarFallback>
@@ -150,13 +152,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={`/${role}/profile`}>Profile</Link>
+                <Link href={`/${role}/profile`}>{t.profile}</Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem>{t.settings}</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>{t.logout}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

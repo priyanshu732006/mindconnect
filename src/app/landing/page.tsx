@@ -70,17 +70,17 @@ export default function LandingPage() {
       <main className="flex-1">
         <section className="relative w-full h-[60vh] flex flex-col items-center justify-center p-8 overflow-hidden text-center">
             <h1 className="text-4xl md:text-6xl font-extrabold mb-4 text-foreground">
-                A Safe Space for Student Minds
+                {t.landingTitle}
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground">
-                AI-driven partner for mental health support.
+                {t.landingSubtitleShort}
             </p>
             <div className="flex flex-wrap justify-center space-x-4 mt-8">
                 <Link href="/demo" className="bg-primary text-primary-foreground font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 inline-block">
-                   Try a Demo
+                   {t.tryDemo}
                 </Link>
                  <Link href="/register" className="bg-secondary text-secondary-foreground font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-transform transform hover:scale-105 inline-block">
-                   Register Now
+                   {t.registerNow}
                 </Link>
             </div>
         </section>
@@ -89,23 +89,23 @@ export default function LandingPage() {
              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <Card className="max-w-2xl mx-auto">
                     <CardHeader className="text-center">
-                        <CardTitle className="text-3xl font-bold tracking-tight font-headline">Contact Us</CardTitle>
-                        <CardDescription>Have questions? We'd love to hear from you.</CardDescription>
+                        <CardTitle className="text-3xl font-bold tracking-tight font-headline">{t.contactUs}</CardTitle>
+                        <CardDescription>{t.contactUsDesc}</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="name">Name</Label>
-                                <Input id="name" placeholder="Your Name" />
+                                <Label htmlFor="name">{t.name}</Label>
+                                <Input id="name" placeholder={t.yourName} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="Your Email" />
+                                <Label htmlFor="email">{t.email}</Label>
+                                <Input id="email" type="email" placeholder={t.yourEmail} />
                             </div>
                         </div>
                         <div className="relative space-y-2">
-                            <Label htmlFor="message">Message</Label>
-                            <Textarea id="message" placeholder="How can we help you?" rows={5} className="w-full pr-12" />
+                            <Label htmlFor="message">{t.message}</Label>
+                            <Textarea id="message" placeholder={t.howCanWeHelp} rows={5} className="w-full pr-12" />
                              <div className="absolute bottom-3 right-3">
                                 <AIContactIcon />
                             </div>
@@ -113,7 +113,7 @@ export default function LandingPage() {
                     </CardContent>
                     <CardFooter>
                         <Button className="w-full">
-                          Send Message
+                          {t.sendMessage}
                         </Button>
                     </CardFooter>
                 </Card>
