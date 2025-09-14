@@ -35,7 +35,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <Logo iconOnly />
+          <Logo />
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
