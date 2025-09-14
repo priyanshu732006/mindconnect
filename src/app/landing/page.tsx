@@ -27,7 +27,7 @@ export default function LandingPage() {
               A Safe Space for Student Minds
             </h1>
             <p className="mt-6 text-lg md:text-xl text-muted-foreground">
-              DivyaManas is your comprehensive, AI-driven partner for mental health support. Start your journey towards a healthier mind today.
+              दिव्यManas is your comprehensive, AI-driven partner for mental health support. Start your journey towards a healthier mind today.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild>
@@ -46,7 +46,7 @@ export default function LandingPage() {
            <div className="relative w-full aspect-[2/1] max-w-5xl mx-auto">
              <Image 
                 src="https://picsum.photos/seed/dashboardview/1200/600"
-                alt="DivyaManas Dashboard"
+                alt="दिव्यManas Dashboard"
                 layout="fill"
                 objectFit="cover"
                 className="rounded-xl shadow-2xl"
@@ -56,7 +56,7 @@ export default function LandingPage() {
         </section>
       </main>
       <footer className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-muted-foreground text-sm">
-        <p>&copy; {new Date().getFullYear()} DivyaManas. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} दिव्यManas. All rights reserved.</p>
       </footer>
     </div>
   );

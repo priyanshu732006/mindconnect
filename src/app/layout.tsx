@@ -6,7 +6,7 @@ import { AppProvider } from '@/context/app-provider';
 import { AuthProvider } from '@/context/auth-provider';
 
 export const metadata: Metadata = {
-  title: 'DivyaManas',
+  title: 'दिव्यManas',
   description: 'Your partner in mental well-being.',
 };
 
