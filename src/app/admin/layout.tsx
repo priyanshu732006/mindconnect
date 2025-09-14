@@ -21,7 +21,8 @@ import { UserRole } from '@/lib/types';
 import { adminNavItems } from '@/lib/admin-nav';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -67,6 +68,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             </Button>
           </SheetTrigger>
           <SheetContent side="left">
+            <VisuallyHidden>
+              <SheetTitle>Admin Navigation</SheetTitle>
+            </VisuallyHidden>
             <nav className="grid gap-6 text-lg font-medium">
               <Link
                 href="#"
