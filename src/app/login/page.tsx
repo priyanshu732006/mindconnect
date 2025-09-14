@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { FirebaseError } from "firebase/app";
 import { UserRole, CounsellorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useApp } from "@/context/app-provider";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
@@ -30,6 +31,7 @@ export default function LoginPage() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const { login, user, loading } = useAuth();
+  const { setNavItemsByRole } = useApp();
   const router = useRouter();
   const [counsellorTypeSelection, setCounsellorTypeSelection] = useState<CounsellorType | null>(null);
   
@@ -62,8 +64,21 @@ export default function LoginPage() {
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
       try {
-        await login(values.email, values.password, values.role, values.counsellorType);
-        router.push('/');
+        const { role, counsellorType } = await login(values.email, values.password, values.role, values.counsellorType);
+        
+        setNavItemsByRole(role);
+
+        if (role === 'counsellor' && counsellorType === 'external') {
+            router.push('/counsellor/external/dashboard');
+        } else {
+            router.push(`/${role}/dashboard`);
+        }
+
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+        });
+
       } catch (error) {
         let description = "An unexpected error occurred. Please try again.";
         if (error instanceof FirebaseError) {
@@ -94,7 +109,19 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/');
+      // If user is already logged in, redirect them away from the login page
+      const targetRole = sessionStorage.getItem('userRole') as UserRole;
+      const targetCounsellorType = sessionStorage.getItem('counsellorType') as CounsellorType;
+      if (targetRole) {
+          if (targetRole === 'counsellor' && targetCounsellorType === 'external') {
+              router.replace('/counsellor/external/dashboard');
+          } else {
+              router.replace(`/${targetRole}/dashboard`);
+          }
+      } else {
+          // Fallback if role isn't in session storage for some reason
+          router.replace('/landing');
+      }
     }
   }, [user, loading, router]);
   
@@ -108,7 +135,7 @@ export default function LoginPage() {
   const showCounsellorTypeSelection = selectedRole === UserRole.counsellor && !counsellorTypeSelection;
   const showLoginForm = selectedRole && (!showCounsellorTypeSelection);
   
-  if (loading) {
+  if (loading || user) { // Keep showing loader if we are loading or about to redirect
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />

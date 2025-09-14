@@ -14,7 +14,7 @@ type AuthContextType = {
   loading: boolean;
   role: UserRole | null;
   counsellorType: CounsellorType | null;
-  login: (email: string, password: string, role: UserRole, counsellorType?: CounsellorType) => Promise<void>;
+  login: (email: string, password: string, role: UserRole, counsellorType?: CounsellorType) => Promise<{ role: UserRole, counsellorType: CounsellorType | null }>;
   register: (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any }) => Promise<void>;
   logout: () => Promise<void>;
 };
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (email: string, password: string, loginRole: UserRole, counsellorType?: CounsellorType) => {
+  const login = async (email: string, password: string, loginRole: UserRole, loginCounsellorType?: CounsellorType) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const loggedInUser = userCredential.user;
 
@@ -128,6 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (snapshot.exists()) {
             const userData = snapshot.val();
             const dbRole = userData.role as UserRole;
+            const dbCounsellorType = (userData.counsellorType as CounsellorType) || null;
             
             if(dbRole !== loginRole) {
                 await signOut(auth);
@@ -135,20 +136,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
             if (loginRole === UserRole.counsellor) {
-                const dbCounsellorType = userData.counsellorType as CounsellorType;
-                if (dbCounsellorType !== counsellorType) {
+                if (dbCounsellorType !== loginCounsellorType) {
                     await signOut(auth);
-                    throw new Error(`Login failed. This account is registered as an ${dbCounsellorType.replace('-', ' ')} counsellor, not an ${counsellorType?.replace('-', ' ')} one.`);
+                    throw new Error(`Login failed. This account is registered as an ${dbCounsellorType?.replace('-', ' ')} counsellor, not an ${loginCounsellorType?.replace('-', ' ')} one.`);
                 }
             }
+            
+            // Manually set state and session storage here to ensure it's available immediately for redirection
+            setRole(dbRole);
+            setCounsellorType(dbCounsellorType);
+            sessionStorage.setItem('userRole', dbRole);
+            if(dbCounsellorType) {
+              sessionStorage.setItem('counsellorType', dbCounsellorType);
+            } else {
+              sessionStorage.removeItem('counsellorType');
+            }
 
-            // Roles match, proceed with setting state and session storage.
-            // onAuthStateChanged will handle the rest.
+
+            // onAuthStateChanged will also fire, but this makes the data available instantly.
+            return { role: dbRole, counsellorType: dbCounsellorType };
         } else {
             await signOut(auth);
             throw new Error("Login failed. User role not found in the database. Please register first.");
         }
     }
+    // This part should not be reached in a successful login
+    throw new Error("Login failed. Please check your credentials.");
   }
 
   const logout = async () => {

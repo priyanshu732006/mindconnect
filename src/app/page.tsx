@@ -7,43 +7,35 @@ import { Loader2 } from "lucide-react";
 import { useApp } from "@/context/app-provider";
 
 export default function AppRootPage() {
-    const { user, role, loading, counsellorType } = useAuth();
-    const { setNavItemsByRole } = useApp();
+    const { user, loading } = useAuth();
     const router = useRouter();
 
     useEffect(() => {
-        if (loading) {
-            return; // Wait until auth state is determined
-        }
-
-        if (user) {
-            // User is logged in, but role might still be loading from the hook.
-            // Use sessionStorage as a faster, more reliable fallback for immediate redirection.
-            const targetRole = role || sessionStorage.getItem('userRole');
-            const targetCounsellorType = counsellorType || sessionStorage.getItem('counsellorType');
-
-            if(targetRole) {
-                setNavItemsByRole(targetRole as any);
-
-                if (targetRole === 'counsellor' && targetCounsellorType === 'external') {
-                    router.push(`/counsellor/external/dashboard`);
+        if (!loading) {
+            if (user) {
+                // User is logged in, but their role might still be loading.
+                // The redirection logic is now handled in the login page for a better UX.
+                // This page now acts as a fallback. If a logged-in user lands here,
+                // we'll try to redirect them based on sessionStorage, or to landing.
+                const targetRole = sessionStorage.getItem('userRole');
+                if (targetRole) {
+                    const targetCounsellorType = sessionStorage.getItem('counsellorType');
+                    if (targetRole === 'counsellor' && targetCounsellorType === 'external') {
+                        router.replace(`/counsellor/external/dashboard`);
+                    } else {
+                        router.replace(`/${targetRole}/dashboard`);
+                    }
                 } else {
-                    router.push(`/${targetRole}/dashboard`);
+                     router.replace('/landing');
                 }
-
             } else {
-                // If role is still not found, it's an edge case.
-                // Redirect to landing to prevent getting stuck.
-                router.push('/landing');
+                // If there's no user, redirect to the landing page
+                router.replace('/landing');
             }
-        } else {
-            // If there's no user, redirect to the landing page
-            router.push('/landing');
         }
-        
-    }, [user, role, loading, router, setNavItemsByRole, counsellorType]);
+    }, [user, loading, router]);
     
-    // Show a loader while waiting for redirection to happen.
+    // Show a loader while waiting for auth state and redirection.
     return (
         <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin" />
