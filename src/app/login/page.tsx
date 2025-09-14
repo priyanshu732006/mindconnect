@@ -11,7 +11,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTransition, useEffect, useState } from "react";
-import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe } from "lucide-react";
+import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-provider";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import { FirebaseError } from "firebase/app";
 import { UserRole, CounsellorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/app-provider";
+import { Separator } from "@/components/ui/separator";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
@@ -70,6 +71,8 @@ export default function LoginPage() {
 
         if (role === UserRole.counsellor && counsellorType === 'external') {
             router.push('/counsellor/external/dashboard');
+        } else if (role === UserRole['peer-buddy']) {
+            router.push('/peer-buddy/dashboard');
         } else {
             router.push(`/${role}/dashboard`);
         }
@@ -118,6 +121,8 @@ export default function LoginPage() {
               router.replace('/counsellor/external/dashboard');
           } else if (targetRole === UserRole.student) {
               router.replace('/student/dashboard');
+          } else if (targetRole === UserRole['peer-buddy']) {
+              router.replace('/peer-buddy/dashboard');
           } else {
               router.replace(`/${targetRole}/dashboard`);
           }
@@ -244,15 +249,25 @@ export default function LoginPage() {
                 </form>
             </Form>
         )}
-        <CardFooter className={cn("flex-col pt-6 border-t", !showLoginForm ? "flex" : "hidden")}>
-             <p className="text-xs text-center text-muted-foreground">
-                Don't have an account?{" "}
-                <Link href="/register" className="underline hover:text-primary">
-                  Register here
-                </Link>
-              </p>
+        <CardFooter className={cn("flex-col pt-6 border-t")}>
+            <div className="flex flex-col w-full gap-2 text-center">
+                 <Button variant="outline" className="w-full" asChild>
+                    <Link href="/">
+                        <Home className="mr-2 h-4 w-4" />
+                        Back to Home
+                    </Link>
+                </Button>
+                 <p className="text-xs text-center text-muted-foreground pt-2">
+                    Don't have an account?{" "}
+                    <Link href="/register" className="underline hover:text-primary">
+                    Register here
+                    </Link>
+                </p>
+            </div>
         </CardFooter>
       </Card>
     </div>
   );
 }
+
+    
