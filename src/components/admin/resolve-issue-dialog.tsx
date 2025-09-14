@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
+import { useLocale } from '@/context/locale-provider';
 
 type Issue = {
     id: string;
@@ -36,6 +37,7 @@ type ResolveIssueDialogProps = {
 export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }: ResolveIssueDialogProps) {
     const { toast } = useToast();
     const [action, setAction] = useState('');
+    const { t } = useLocale();
 
     useEffect(() => {
         // Reset action when dialog opens for a new issue
@@ -48,16 +50,16 @@ export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }
         if (!action.trim()) {
             toast({
                 variant: 'destructive',
-                title: 'Action required',
-                description: 'Please describe the action taken.',
+                title: t.actionRequired,
+                description: t.actionRequiredDesc,
             });
             return;
         }
 
         if (issue) {
             toast({
-                title: 'Issue Resolved',
-                description: `The issue (${issue.id}) has been marked as resolved.`,
+                title: t.issueResolved,
+                description: t.issueResolvedDesc.replace('{issueId}', issue.id),
             });
             
             onIssueResolved(issue.id, action);
@@ -69,30 +71,32 @@ export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
-                    <DialogTitle>Resolve Issue</DialogTitle>
+                    <DialogTitle>{t.resolveIssue}</DialogTitle>
                     <DialogDescription>
-                       What action was taken to resolve this issue?
+                       {t.resolveIssueDesc}
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                     <div className="grid grid-cols-4 items-center gap-4">
                          <Label htmlFor="action" className="text-right">
-                            Action
+                            {t.action}
                         </Label>
                         <Textarea 
                             id="action" 
                             value={action}
                             onChange={(e) => setAction(e.target.value)}
-                            placeholder="Describe the resolution steps..."
+                            placeholder={t.resolutionStepsPlaceholder}
                             className="col-span-3"
                         />
                     </div>
                 </div>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSubmit}>Submit</Button>
+                    <Button variant="outline" onClick={() => setIsOpen(false)}>{t.cancel}</Button>
+                    <Button onClick={handleSubmit}>{t.submit}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
     )
 }
+
+    
