@@ -18,7 +18,7 @@ import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
 import { useAuth } from '@/context/auth-provider';
-import { getUsersByRole } from '@/lib/db';
+import { getPeerBuddiesAction } from '@/app/actions';
 
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -39,7 +39,7 @@ export default function SupportPage() {
       if (!user) return;
       setIsLoading(true);
       try {
-        const buddiesFromDb = await getUsersByRole('peer-buddy');
+        const buddiesFromDb = await getPeerBuddiesAction();
         const buddiesWithStatus = buddiesFromDb.map(buddy => ({
           ...buddy,
           status: Math.random() > 0.3 ? 'Available' : 'Busy',
