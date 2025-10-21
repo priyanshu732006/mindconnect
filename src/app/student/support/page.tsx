@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -15,12 +14,11 @@ import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
 import { MessageSquare, Send, Clock, Loader2 } from 'lucide-react';
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
-import type { PeerBuddy, ChatMessage } from '@/lib/types';
+import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
 import { useAuth } from '@/context/auth-provider';
 import { getUsersByRole } from '@/lib/db';
-import { UserRole } from '@/lib/types';
 
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -38,9 +36,10 @@ export default function SupportPage() {
 
   useEffect(() => {
     async function fetchPeerBuddies() {
+      if (!user) return;
       setIsLoading(true);
       try {
-        const buddiesFromDb = await getUsersByRole(UserRole['peer-buddy']);
+        const buddiesFromDb = await getUsersByRole('peer-buddy');
         const buddiesWithStatus = buddiesFromDb.map(buddy => ({
           ...buddy,
           status: Math.random() > 0.3 ? 'Available' : 'Busy',
@@ -60,7 +59,7 @@ export default function SupportPage() {
       }
     }
     fetchPeerBuddies();
-  }, [toast]);
+  }, [toast, user]);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
