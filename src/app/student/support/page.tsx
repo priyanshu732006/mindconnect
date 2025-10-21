@@ -47,18 +47,14 @@ export default function SupportPage() {
         const snapshot = await get(roleQuery);
         if (snapshot.exists()) {
             const usersData = snapshot.val();
-            const buddiesFromDb = Object.keys(usersData).map(key => ({
+            const buddiesFromDb: PeerBuddy[] = Object.keys(usersData).map(key => ({
                 id: key,
-                ...usersData[key]
+                name: usersData[key].fullName || 'Anonymous Buddy',
+                fullName: usersData[key].fullName,
+                status: Math.random() > 0.3 ? 'Available' : 'Busy',
+                specializations: usersData[key].peerBuddyDetails?.specializations || ['General Chat'],
             }));
-            const formattedBuddies: PeerBuddy[] = buddiesFromDb.map(buddy => ({
-              id: buddy.id,
-              name: buddy.fullName || 'Anonymous Buddy',
-              fullName: buddy.fullName,
-              status: Math.random() > 0.3 ? 'Available' : 'Busy',
-              specializations: buddy.peerBuddyDetails?.specializations || ['General Chat'],
-            }));
-            setAvailableBuddies(formattedBuddies);
+            setAvailableBuddies(buddiesFromDb);
         } else {
              setAvailableBuddies([]);
         }

@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "userRoles": {
+      ".read": "auth != null",
+      ".indexOn": "role",
+      "$uid": {
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "studentData": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    }
+  }
+}
