@@ -36,25 +36,3 @@ export async function addPost(
   posts.unshift(newPost);
   return newPost;
 }
-
-export async function getUsersByRole(role: string): Promise<any[]> {
-    const db = getDatabase();
-    const usersRef = ref(db, 'userRoles');
-    const roleQuery = query(usersRef, orderByChild('role'), equalTo(role));
-    try {
-        const snapshot = await get(roleQuery);
-        if (snapshot.exists()) {
-            const usersData = snapshot.val();
-            // The result from a query is an object of key-value pairs
-            return Object.keys(usersData).map(key => ({
-                id: key,
-                ...usersData[key]
-            }));
-        }
-        return []; // Return empty array if no users found for that role
-    } catch(e) {
-        console.error("Error fetching users by role", e);
-        // Re-throw the error so it can be caught by the calling component
-        throw e;
-    }
-}

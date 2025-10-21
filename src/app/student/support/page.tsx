@@ -17,8 +17,9 @@ import { MessageSquare, Send, Check, Clock, UserPlus, Loader2 } from 'lucide-rea
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { getUsersByRole } from '@/lib/db';
 import { useLocale } from '@/context/locale-provider';
+import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
+import { useAuth } from '@/context/auth-provider';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
@@ -31,22 +32,38 @@ export default function SupportPage() {
   const [isChatOpen, setChatOpen] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     async function fetchPeerBuddies() {
+      if (!user) return; // Don't fetch if user isn't logged in
+
       setIsLoading(true);
       try {
-        const buddiesFromDb = await getUsersByRole('peer-buddy');
-        const formattedBuddies: PeerBuddy[] = buddiesFromDb.map(buddy => ({
-          id: buddy.id,
-          name: buddy.fullName || 'Anonymous Buddy',
-          fullName: buddy.fullName,
-          // Randomly assign status for demo purposes
-          status: Math.random() > 0.3 ? 'Available' : 'Busy',
-          specializations: buddy.peerBuddyDetails?.specializations || ['General Chat'],
-        }));
-        setAvailableBuddies(formattedBuddies);
+        const db = getDatabase();
+        const usersRef = ref(db, 'userRoles');
+        const roleQuery = query(usersRef, orderByChild('role'), equalTo('peer-buddy'));
+
+        const snapshot = await get(roleQuery);
+        if (snapshot.exists()) {
+            const usersData = snapshot.val();
+            const buddiesFromDb = Object.keys(usersData).map(key => ({
+                id: key,
+                ...usersData[key]
+            }));
+            const formattedBuddies: PeerBuddy[] = buddiesFromDb.map(buddy => ({
+              id: buddy.id,
+              name: buddy.fullName || 'Anonymous Buddy',
+              fullName: buddy.fullName,
+              status: Math.random() > 0.3 ? 'Available' : 'Busy',
+              specializations: buddy.peerBuddyDetails?.specializations || ['General Chat'],
+            }));
+            setAvailableBuddies(formattedBuddies);
+        } else {
+             setAvailableBuddies([]);
+        }
       } catch (error) {
+        console.error("Error fetching peer buddies:", error);
         toast({
           variant: 'destructive',
           title: 'Failed to load buddies',
@@ -57,7 +74,7 @@ export default function SupportPage() {
       }
     }
     fetchPeerBuddies();
-  }, [toast]);
+  }, [toast, user]);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
