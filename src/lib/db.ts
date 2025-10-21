@@ -51,8 +51,10 @@ export async function getUsersByRole(role: string): Promise<any[]> {
                 ...usersData[key]
             }));
         }
+        return []; // Return empty array if no users found for that role
     } catch(e) {
         console.error("Error fetching users by role", e);
+        // Re-throw the error so it can be caught by the calling component
+        throw e;
     }
-    return [];
 }
