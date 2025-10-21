@@ -40,16 +40,16 @@ export async function addPost(
 export async function getUsersByRole(role: string): Promise<any[]> {
     const db = getDatabase();
     const usersRef = ref(db, 'userRoles');
+    const roleQuery = query(usersRef, orderByChild('role'), equalTo(role));
     try {
-        const snapshot = await get(usersRef);
+        const snapshot = await get(roleQuery);
         if (snapshot.exists()) {
             const usersData = snapshot.val();
-            const allUsers = Object.keys(usersData).map(key => ({
+            // The result from a query is an object of key-value pairs
+            return Object.keys(usersData).map(key => ({
                 id: key,
                 ...usersData[key]
             }));
-            // Filter by role on the client side
-            return allUsers.filter(user => user.role === role);
         }
     } catch(e) {
         console.error("Error fetching users by role", e);
