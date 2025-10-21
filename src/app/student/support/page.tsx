@@ -42,19 +42,10 @@ export default function SupportPage() {
       try {
         const buddiesFromDb = await getPeerBuddiesAction();
         
-        const buddiesWithStatus = buddiesFromDb.map((buddy: any) => {
-            // Convert specializations object to array
-            const specializationsArray = buddy.peerBuddyDetails?.specializations 
-                ? Object.values(buddy.peerBuddyDetails.specializations) 
-                : ['General Chat'];
-
-            return {
-                ...buddy,
-                name: buddy.fullName, // Ensure name is mapped from fullName
-                status: Math.random() > 0.3 ? 'Available' : 'Busy',
-                specializations: specializationsArray,
-            }
-        });
+        const buddiesWithStatus = buddiesFromDb.map((buddy: any) => ({
+            ...buddy,
+            status: 'Available', // Assuming fetched buddies are available
+        }));
         
         setAvailableBuddies(buddiesWithStatus as PeerBuddy[]);
 

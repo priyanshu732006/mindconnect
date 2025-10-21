@@ -141,6 +141,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if(role === UserRole['peer-buddy'] && details?.peerBuddyDetails) {
         userData.peerBuddyDetails = details.peerBuddyDetails;
+
+        // Add buddy entry to peerBuddies path for easy public listing
+        const buddyRef = ref(db, `peerBuddies/${user.uid}`);
+        await set(buddyRef, {
+          name: fullName,
+          email,
+          status: 'Available', // default when registered
+          specializations: details.peerBuddyDetails.specializations || ['General Chat'],
+        });
       }
       
       await set(userRoleRef, userData);
@@ -238,5 +247,3 @@ export function useAuth() {
   }
   return context;
 }
-
-    
