@@ -13,13 +13,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import { MessageSquare, Send, Check, Clock, UserPlus, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, Clock, Loader2 } from 'lucide-react';
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
-import { getDatabase, ref, query, orderByChild, equalTo, get } from 'firebase/database';
 import { useAuth } from '@/context/auth-provider';
+import { getUsersByRole } from '@/lib/db';
+import { UserRole } from '@/lib/types';
+
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
@@ -36,31 +38,16 @@ export default function SupportPage() {
 
   useEffect(() => {
     async function fetchPeerBuddies() {
-      if (!user) { // This guard prevents the query from running before authentication is ready.
-          setIsLoading(false);
-          return;
-      }
-
       setIsLoading(true);
       try {
-        const db = getDatabase();
-        const usersRef = ref(db, 'userRoles');
-        const roleQuery = query(usersRef, orderByChild('role'), equalTo('peer-buddy'));
+        const buddiesFromDb = await getUsersByRole(UserRole['peer-buddy']);
+        const buddiesWithStatus = buddiesFromDb.map(buddy => ({
+          ...buddy,
+          status: Math.random() > 0.3 ? 'Available' : 'Busy',
+          specializations: (buddy as any).peerBuddyDetails?.specializations || ['General Chat'],
+        }));
+        setAvailableBuddies(buddiesWithStatus as PeerBuddy[]);
 
-        const snapshot = await get(roleQuery);
-        if (snapshot.exists()) {
-            const usersData = snapshot.val();
-            const buddiesFromDb: PeerBuddy[] = Object.keys(usersData).map(key => ({
-                id: key,
-                name: usersData[key].fullName || 'Anonymous Buddy',
-                fullName: usersData[key].fullName,
-                status: Math.random() > 0.3 ? 'Available' : 'Busy',
-                specializations: usersData[key].peerBuddyDetails?.specializations || ['General Chat'],
-            }));
-            setAvailableBuddies(buddiesFromDb);
-        } else {
-             setAvailableBuddies([]);
-        }
       } catch (error) {
         console.error("Error fetching peer buddies:", error);
         toast({
@@ -73,7 +60,7 @@ export default function SupportPage() {
       }
     }
     fetchPeerBuddies();
-  }, [toast, user]);
+  }, [toast]);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
@@ -93,15 +80,13 @@ export default function SupportPage() {
     });
 
     // Simulate auto-acceptance for demonstration purposes
-    if (buddy.id.includes('')) { // This will apply to any buddy for demo
-      setTimeout(() => {
-        setRequestStatus(prev => ({ ...prev, [buddy.id]: 'connected' }));
-        toast({
-          title: 'Request Accepted!',
-          description: `${buddy.name} has accepted your request. You can now start a chat.`,
-        });
-      }, 3000);
-    }
+    setTimeout(() => {
+      setRequestStatus(prev => ({ ...prev, [buddy.id]: 'connected' }));
+      toast({
+        title: 'Request Accepted!',
+        description: `${buddy.name} has accepted your request. You can now start a chat.`,
+      });
+    }, 3000);
   };
 
   const handleOpenChat = (buddy: PeerBuddy) => {
@@ -190,7 +175,7 @@ export default function SupportPage() {
             <div className="flex justify-center items-center h-64">
                 <Loader2 className="h-8 w-8 animate-spin" />
             </div>
-        ) : (
+        ) : availableAndPendingBuddies.length > 0 ? (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
                 {availableAndPendingBuddies.map(buddy => {
                 const status = requestStatus[buddy.id] || 'idle';
@@ -228,6 +213,10 @@ export default function SupportPage() {
                     </Card>
                 );
                 })}
+            </div>
+        ) : (
+             <div className="flex justify-center items-center h-64">
+                <p className="text-muted-foreground">No peer buddies are available at this time.</p>
             </div>
         )}
       </div>

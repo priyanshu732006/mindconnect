@@ -2,9 +2,8 @@
 'use server';
 
 import { initialPosts, allUsers } from './data';
-import type { Post } from './types';
+import type { Post, User, UserRole } from './types';
 import { getDatabase, ref, get, query, orderByChild, equalTo } from 'firebase/database';
-
 
 // In-memory 'database' for posts
 let posts: Post[] = [...initialPosts];
@@ -36,3 +35,28 @@ export async function addPost(
   posts.unshift(newPost);
   return newPost;
 }
+
+export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
+  try {
+    const db = getDatabase();
+    const usersRef = ref(db, 'userRoles');
+    const roleQuery = query(usersRef, orderByChild('role'), equalTo(role));
+
+    const snapshot = await get(roleQuery);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      return Object.keys(data).map(id => ({
+        id,
+        ...data[id],
+        // Mocked properties for display
+        alias: data[id].fullName || `User ${id.substring(0, 4)}`,
+        avatar: `https://picsum.photos/seed/${id}/100/100`,
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error(`Error fetching users by role "${role}":`, error);
+    // Return an empty array or re-throw, depending on desired error handling
+    return [];
+  }
+};
