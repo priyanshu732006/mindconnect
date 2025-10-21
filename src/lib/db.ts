@@ -47,6 +47,7 @@ export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
       const data = snapshot.val();
       return Object.keys(data).map(id => ({
         id,
+        name: data[id].fullName, // Map fullName to name
         ...data[id],
         // Mocked properties for display
         alias: data[id].fullName || `User ${id.substring(0, 4)}`,
