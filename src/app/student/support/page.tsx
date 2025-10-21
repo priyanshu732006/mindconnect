@@ -196,7 +196,7 @@ export default function SupportPage() {
                     <CardContent className="flex-1">
                         <p className="text-sm font-medium mb-2">Specializations:</p>
                         <div className="flex flex-wrap gap-2">
-                        {buddy.specializations.map(spec => (
+                        {(buddy.peerBuddyDetails?.specializations || []).map(spec => (
                             <Badge key={spec} variant="secondary">{spec}</Badge>
                         ))}
                         </div>
