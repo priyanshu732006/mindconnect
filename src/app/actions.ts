@@ -185,6 +185,6 @@ export async function generateSessionSummaryAction(input: GenerateSessionSummary
 }
 
 export async function getPeerBuddiesAction(): Promise<User[]> {
-  const buddies = await getUsersByRole('peer-buddy' as UserRole);
+  const buddies = await getUsersByRole('peer-buddy');
   return buddies;
 }
