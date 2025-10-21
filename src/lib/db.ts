@@ -3,6 +3,8 @@
 
 import { initialPosts, allUsers } from './data';
 import type { Post } from './types';
+import { getDatabase, ref, get, query, orderByChild, equalTo } from 'firebase/database';
+
 
 // In-memory 'database' for posts
 let posts: Post[] = [...initialPosts];
@@ -33,4 +35,23 @@ export async function addPost(
   };
   posts.unshift(newPost);
   return newPost;
+}
+
+export async function getUsersByRole(role: string): Promise<any[]> {
+    const db = getDatabase();
+    const usersRef = ref(db, 'userRoles');
+    const roleQuery = query(usersRef, orderByChild('role'), equalTo(role));
+    try {
+        const snapshot = await get(roleQuery);
+        if (snapshot.exists()) {
+            const usersData = snapshot.val();
+            return Object.keys(usersData).map(key => ({
+                id: key,
+                ...usersData[key]
+            }));
+        }
+    } catch(e) {
+        console.error("Error fetching users by role", e);
+    }
+    return [];
 }

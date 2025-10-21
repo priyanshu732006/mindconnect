@@ -13,29 +13,52 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect } from 'react';
-import { MessageSquare, Send, Check, Clock, UserPlus } from 'lucide-react';
+import { MessageSquare, Send, Check, Clock, UserPlus, Loader2 } from 'lucide-react';
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
-
-// Extended placeholder data to include status and ID
-const availableBuddiesData: PeerBuddy[] = [
-  { id: 'buddy_01', name: 'Buddy 01', specializations: ['Exam Stress', 'Anxiety'], status: 'Available' },
-  { id: 'buddy_02', name: 'Buddy 02', specializations: ['Homesickness', 'Relationships'], status: 'Available' },
-  { id: 'buddy_03', name: 'Buddy 03', specializations: ['Social Anxiety', 'Motivation'], status: 'Busy' },
-  { id: 'buddy_04', name: 'Buddy 04', specializations: ['Depression', 'Coping Skills'], status: 'Available' },
-  { id: 'buddy_05', name: 'Buddy 05', specializations: ['Time Management', 'Study Pressure'], status: 'Busy' },
-  { id: 'buddy_06', name: 'Buddy 06', specializations: ['Career Doubts', 'General Chat'], status: 'Available' },
-];
+import { getUsersByRole } from '@/lib/db';
+import { useLocale } from '@/context/locale-provider';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
 export default function SupportPage() {
+  const { t } = useLocale();
   const { toast } = useToast();
+  const [availableBuddies, setAvailableBuddies] = useState<PeerBuddy[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [requestStatus, setRequestStatus] = useState<Record<string, RequestStatus>>({});
   const [isChatOpen, setChatOpen] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+
+  useEffect(() => {
+    async function fetchPeerBuddies() {
+      setIsLoading(true);
+      try {
+        const buddiesFromDb = await getUsersByRole('peer-buddy');
+        const formattedBuddies: PeerBuddy[] = buddiesFromDb.map(buddy => ({
+          id: buddy.id,
+          name: buddy.fullName || 'Anonymous Buddy',
+          fullName: buddy.fullName,
+          // Randomly assign status for demo purposes
+          status: Math.random() > 0.3 ? 'Available' : 'Busy',
+          specializations: buddy.peerBuddyDetails?.specializations || ['General Chat'],
+        }));
+        setAvailableBuddies(formattedBuddies);
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Failed to load buddies',
+          description: 'Could not fetch peer buddies from the database. Please try again later.',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchPeerBuddies();
+  }, [toast]);
+
 
   const handleSendRequest = (buddy: PeerBuddy) => {
     if (buddy.status !== 'Available') {
@@ -53,8 +76,8 @@ export default function SupportPage() {
       description: `Your request to connect with ${buddy.name} has been sent.`,
     });
 
-    // Simulate auto-acceptance for "Buddy 02" for demonstration purposes
-    if (buddy.id === 'buddy_02') {
+    // Simulate auto-acceptance for demonstration purposes
+    if (buddy.id.includes('')) { // This will apply to any buddy for demo
       setTimeout(() => {
         setRequestStatus(prev => ({ ...prev, [buddy.id]: 'connected' }));
         toast({
@@ -68,7 +91,6 @@ export default function SupportPage() {
   const handleOpenChat = (buddy: PeerBuddy) => {
     setSelectedBuddy(buddy);
     // In a real app, you would fetch existing messages for this buddy
-    // For now, we'll start with a welcome message
     setMessages([
         {
             id: '1',
@@ -91,9 +113,8 @@ export default function SupportPage() {
       setMessages(prev => [...prev, newMessage]);
   }
 
-
-  const connectedBuddies = availableBuddiesData.filter(buddy => requestStatus[buddy.id] === 'connected');
-  const availableAndPendingBuddies = availableBuddiesData.filter(buddy => requestStatus[buddy.id] !== 'connected');
+  const connectedBuddies = availableBuddies.filter(buddy => requestStatus[buddy.id] === 'connected');
+  const availableAndPendingBuddies = availableBuddies.filter(buddy => requestStatus[buddy.id] !== 'connected');
 
   return (
     <div className="space-y-8">
@@ -107,7 +128,6 @@ export default function SupportPage() {
           />
       )}
 
-      {/* Connected Buddies Section */}
       {connectedBuddies.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">Your Connected Buddies</h2>
@@ -139,7 +159,6 @@ export default function SupportPage() {
         </div>
       )}
       
-      {/* Available Buddies Section */}
       <div>
          <header>
             <h1 className="text-3xl font-bold tracking-tight font-headline">
@@ -151,44 +170,50 @@ export default function SupportPage() {
             </p>
         </header>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
-            {availableAndPendingBuddies.map(buddy => {
-            const status = requestStatus[buddy.id] || 'idle';
-            const isAvailable = buddy.status === 'Available';
+        {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+                {availableAndPendingBuddies.map(buddy => {
+                const status = requestStatus[buddy.id] || 'idle';
+                const isAvailable = buddy.status === 'Available';
 
-            return (
-                <Card key={buddy.id} className="flex flex-col">
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <CardTitle>{buddy.name}</CardTitle>
-                        <div className="flex items-center gap-1.5">
-                            <span className={cn("h-2 w-2 rounded-full", isAvailable ? "bg-green-500" : "bg-gray-400")}></span>
-                            <span className="text-xs text-muted-foreground">{buddy.status}</span>
+                return (
+                    <Card key={buddy.id} className="flex flex-col">
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <CardTitle>{buddy.name || 'Anonymous Buddy'}</CardTitle>
+                            <div className="flex items-center gap-1.5">
+                                <span className={cn("h-2 w-2 rounded-full", isAvailable ? "bg-green-500" : "bg-gray-400")}></span>
+                                <span className="text-xs text-muted-foreground">{buddy.status}</span>
+                            </div>
                         </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="flex-1">
-                    <p className="text-sm font-medium mb-2">Specializations:</p>
-                    <div className="flex flex-wrap gap-2">
-                    {buddy.specializations.map(spec => (
-                        <Badge key={spec} variant="secondary">{spec}</Badge>
-                    ))}
-                    </div>
-                </CardContent>
-                <CardFooter>
-                    <Button
-                    className="w-full"
-                    onClick={() => handleSendRequest(buddy)}
-                    disabled={status === 'pending' || !isAvailable}
-                    >
-                    {status === 'idle' && <><Send className="mr-2"/>Send Request</>}
-                    {status === 'pending' && <><Clock className="mr-2"/>Request Pending</>}
-                    </Button>
-                </CardFooter>
-                </Card>
-            );
-            })}
-        </div>
+                    </CardHeader>
+                    <CardContent className="flex-1">
+                        <p className="text-sm font-medium mb-2">Specializations:</p>
+                        <div className="flex flex-wrap gap-2">
+                        {buddy.specializations.map(spec => (
+                            <Badge key={spec} variant="secondary">{spec}</Badge>
+                        ))}
+                        </div>
+                    </CardContent>
+                    <CardFooter>
+                        <Button
+                        className="w-full"
+                        onClick={() => handleSendRequest(buddy)}
+                        disabled={status === 'pending' || !isAvailable}
+                        >
+                        {status === 'idle' && <><Send className="mr-2"/>Send Request</>}
+                        {status === 'pending' && <><Clock className="mr-2"/>Request Pending</>}
+                        </Button>
+                    </CardFooter>
+                    </Card>
+                );
+                })}
+            </div>
+        )}
       </div>
 
     </div>

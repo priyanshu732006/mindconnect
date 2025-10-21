@@ -112,6 +112,7 @@ export type PeerBuddy = {
     name: string;
     specializations: string[];
     status: 'Available' | 'Busy';
+    fullName?: string;
 }
 
 export type ChatMessage = {
