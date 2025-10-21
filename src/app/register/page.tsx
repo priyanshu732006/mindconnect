@@ -109,12 +109,10 @@ export default function RegisterPage() {
   const onSubmit = (values: z.infer<typeof registerSchema>) => {
     startTransition(async () => {
       try {
-        let studentDetails;
-        let counsellorType;
-        let peerBuddyDetails;
+        let details: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any } = {};
 
         if (values.role === UserRole.student) {
-          studentDetails = {
+          details.studentDetails = {
             collegeName: values.collegeName,
             course: values.course,
             year: values.year,
@@ -130,16 +128,16 @@ export default function RegisterPage() {
             }
           };
         } else if (values.role === UserRole.counsellor) {
-          counsellorType = values.counsellorType;
+          details.counsellorType = values.counsellorType;
         } else if (values.role === UserRole['peer-buddy']) {
-          peerBuddyDetails = {
+          details.peerBuddyDetails = {
             collegeName: values.collegeName,
             collegePhone: values.collegePhone,
             specializations: values.specializations,
           };
         }
 
-        await register(values.email, values.password, values.fullName, values.role, { counsellorType, studentDetails, peerBuddyDetails });
+        await register(values.email, values.password, values.fullName, values.role, details);
         
         toast({
             title: t.loginSuccessful,
@@ -526,5 +524,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
-    
