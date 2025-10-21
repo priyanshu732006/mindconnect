@@ -36,7 +36,10 @@ export default function SupportPage() {
 
   useEffect(() => {
     async function fetchPeerBuddies() {
-      if (!user) return; // Don't fetch if user isn't logged in
+      if (!user) { // This guard prevents the query from running before authentication is ready.
+          setIsLoading(false);
+          return;
+      }
 
       setIsLoading(true);
       try {
