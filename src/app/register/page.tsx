@@ -21,6 +21,7 @@ import { UserRole, CounsellorType } from "@/lib/types";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useLocale } from "@/context/locale-provider";
 
 const specializationItems = [
     { id: 'exam-stress', label: 'Exam Stress' },
@@ -77,7 +78,8 @@ export default function RegisterPage() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const router = useRouter();
-  const { register, user } = useAuth();
+  const { register, user, role: authRole, loading } = useAuth();
+  const { t } = useLocale();
 
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
@@ -140,8 +142,8 @@ export default function RegisterPage() {
         await register(values.email, values.password, values.fullName, values.role, { counsellorType, studentDetails, peerBuddyDetails });
         
         toast({
-            title: "Registration Successful",
-            description: "You can now log in with your new account.",
+            title: t.loginSuccessful,
+            description: t.welcomeToDemoDesc,
         });
         router.push("/login");
       } catch(error) {
@@ -162,7 +164,7 @@ export default function RegisterPage() {
         }
         toast({
           variant: "destructive",
-          title: "Registration Failed",
+          title: t.loginFailed,
           description: description,
         });
       }
@@ -170,23 +172,36 @@ export default function RegisterPage() {
   };
 
   useEffect(() => {
-    if (user) {
-      router.push('/');
+    if (!loading && user && authRole) {
+      router.push(`/${authRole}/dashboard`);
     }
-  }, [user, router]);
+  }, [user, authRole, loading, router]);
 
   const watchedRole = form.watch("role");
   const emailLabel = watchedRole === UserRole.student || watchedRole === UserRole['peer-buddy'] ? 'College Email' : 'Email';
   const emailPlaceholder = watchedRole === UserRole.student || watchedRole === UserRole['peer-buddy'] ? 'user@college.edu' : 'user@example.com';
+  
+  const getSpecializationLabel = (id: string) => {
+    const key = id.toLowerCase().replace(' ', '') as keyof typeof t;
+    return t[key] || id;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md my-8">
         <CardHeader className="text-center">
           <Logo className="justify-center mb-2" />
-          <CardTitle>Create an Account</CardTitle>
+          <CardTitle>{t.register}</CardTitle>
           <CardDescription>
-            Join the hub to start your wellness journey.
+            {t.welcomeToDemoDesc}
           </CardDescription>
         </CardHeader>
         <Form {...form}>
@@ -197,7 +212,7 @@ export default function RegisterPage() {
                         name="role"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>I am a...</FormLabel>
+                                <FormLabel>{t.role}</FormLabel>
                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                     <SelectTrigger>
@@ -205,10 +220,10 @@ export default function RegisterPage() {
                                     </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value={UserRole.student}>Student</SelectItem>
-                                        <SelectItem value={UserRole.counsellor}>Counsellor</SelectItem>
-                                        <SelectItem value={UserRole['peer-buddy']}>Peer Buddy</SelectItem>
-                                        <SelectItem value={UserRole.admin}>Admin</SelectItem>
+                                        <SelectItem value={UserRole.student}>{t.student}</SelectItem>
+                                        <SelectItem value={UserRole.counsellor}>{t.counsellor}</SelectItem>
+                                        <SelectItem value={UserRole['peer-buddy']}>{t.peerbuddy}</SelectItem>
+                                        <SelectItem value={UserRole.admin}>{t.admin}</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -220,7 +235,7 @@ export default function RegisterPage() {
                         name="fullName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Full Name</FormLabel>
+                                <FormLabel>{t.name}</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Alex Doe" {...field} />
                                 </FormControl>
@@ -247,7 +262,7 @@ export default function RegisterPage() {
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel>{t.password}</FormLabel>
                                 <FormControl>
                                     <Input type="password" {...field} />
                                 </FormControl>
@@ -259,7 +274,7 @@ export default function RegisterPage() {
                     {watchedRole === UserRole.student && (
                         <>
                             <Separator className="my-6" />
-                            <p className="text-sm font-medium text-muted-foreground">Student Details</p>
+                            <p className="text-sm font-medium text-muted-foreground">{t.student} Details</p>
                              <FormField
                                 control={form.control}
                                 name="personalEmail"
@@ -441,7 +456,7 @@ export default function RegisterPage() {
                                                     />
                                                     </FormControl>
                                                     <FormLabel className="font-normal">
-                                                    {item.label}
+                                                    {getSpecializationLabel(item.label)}
                                                     </FormLabel>
                                                 </FormItem>
                                                 )
@@ -473,7 +488,7 @@ export default function RegisterPage() {
                                         <RadioGroupItem value={CounsellorType['on-campus']} />
                                         </FormControl>
                                         <FormLabel className="font-normal">
-                                        On-Campus Counsellor
+                                        {t.oncampus}
                                         </FormLabel>
                                     </FormItem>
                                     <FormItem className="flex items-center space-x-3 space-y-0">
@@ -481,7 +496,7 @@ export default function RegisterPage() {
                                         <RadioGroupItem value={CounsellorType.external} />
                                         </FormControl>
                                         <FormLabel className="font-normal">
-                                        External Counsellor
+                                        {t.external}
                                         </FormLabel>
                                     </FormItem>
                                     </RadioGroup>
@@ -496,12 +511,12 @@ export default function RegisterPage() {
                 <CardFooter className="flex flex-col gap-4">
                     <Button type="submit" className="w-full" disabled={isPending}>
                         {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Register
+                        {t.register}
                     </Button>
                     <p className="text-xs text-center text-muted-foreground">
-                        Already have an account?{" "}
+                        {t.dontHaveAccount}{" "}
                         <Link href="/login" className="underline hover:text-primary">
-                        Login here
+                        {t.login}
                         </Link>
                     </p>
                 </CardFooter>
@@ -511,3 +526,5 @@ export default function RegisterPage() {
     </div>
   );
 }
+
+    
