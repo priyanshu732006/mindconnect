@@ -34,6 +34,9 @@ import {
 } from 'recharts';
 import { useAuth } from '@/context/auth-provider';
 import { useLocale } from '@/context/locale-provider';
+import { useEffect, useState } from 'react';
+import { getPosts } from '@/lib/db';
+import { Post } from '@/lib/types';
 
 // Placeholder data
 const supportRequestData = [
@@ -90,6 +93,13 @@ const pieChartConfig = {
 export default function PeerBuddyDashboardPage() {
   const { user } = useAuth();
   const { t } = useLocale();
+  const [postCount, setPostCount] = useState(0);
+
+  useEffect(() => {
+    getPosts().then((posts: Post[]) => {
+      setPostCount(posts.length);
+    });
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -137,7 +147,7 @@ export default function PeerBuddyDashboardPage() {
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">1,204</div>
+            <div className="text-2xl font-bold">{postCount}</div>
             <p className="text-xs text-muted-foreground">{t.thisMonth.replace('{value}', '+180')}</p>
           </CardContent>
         </Card>

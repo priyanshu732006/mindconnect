@@ -317,7 +317,10 @@
     "responses": "Réponses",
     "answer": "Réponse",
     "notAnswered": "Non répondu",
-    "reportDisclaimer": "Avis de non-responsabilité : Ce rapport est un outil de dépistage et non un substitut à un diagnostic professionnel. Veuillez consulter un professionnel de la santé pour une évaluation formelle."
+    "reportDisclaimer": "Avis de non-responsabilité : Ce rapport est un outil de dépistage et non un substitut à un diagnostic professionnel. Veuillez consulter un professionnel de la santé pour une évaluation formelle.",
+    "weeklyChallenges": "Défis Hebdomadaires",
+    "weeklyChallengesDesc": "Complétez-les pour des pièces bonus!",
+    "challengeWrite3Entries": "Écrire 3 entrées de journal",
+    "challengeCompleteAssessments": "Terminer toutes les évaluations",
+    "challenge3DayStreak": "Maintenir une séquence de 3 jours"
 }
-
-    

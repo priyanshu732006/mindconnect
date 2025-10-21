@@ -150,7 +150,7 @@
     "waitlisted": "انتظار کی فہرست میں",
     "moveToPendingMeet": "زیر التواء ملاقات میں منتقل کریں",
     "movedToPending": "زیر التواء میں منتقل کیا گیا",
-    "movedToPendingDesc": "{studentName} की अपॉइंटमेंट लंबित शारीरिक मुलाकात में ले जाया गया है।",
+    "movedToPendingDesc": "{studentName} کی अपॉइंटमेंट लंबित शारीरिक मुलाकात में ले जाया गया है।",
     "completedAppointments": "مکمل شدہ اپائنٹمنٹس",
     "completedAppointmentsDesc": "آپ کی ماضی کی اپائنٹمنٹس کی تاریخ۔",
     "completed": "مکمل",
@@ -317,7 +317,10 @@
     "responses": "جوابات",
     "answer": "جواب",
     "notAnswered": "جواب نہیں دیا گیا",
-    "reportDisclaimer": "دستبرداری: یہ رپورٹ ایک اسکریننگ ٹول ہے اور پیشہ ورانہ تشخیص کا متبادل نہیں ہے۔ رسمی تشخیص کے لیے براہ کرم صحت کی دیکھ بھال فراہم کرنے والے سے مشورہ کریں۔"
+    "reportDisclaimer": "دستبرداری: یہ رپورٹ ایک اسکریننگ ٹول ہے اور پیشہ ورانہ تشخیص کا متبادل نہیں ہے۔ رسمی تشخیص کے لیے براہ کرم صحت کی دیکھ بھال فراہم کرنے والے سے مشورہ کریں۔",
+    "weeklyChallenges": "ہفتہ وار چیلنجز",
+    "weeklyChallengesDesc": "بونس سکے کے لیے انہیں مکمل کریں!",
+    "challengeWrite3Entries": "3 جرنل اندراجات لکھیں",
+    "challengeCompleteAssessments": "تمام تشخیصات مکمل کریں",
+    "challenge3DayStreak": "3 دن کا سلسلہ برقرار رکھیں"
 }
-
-    

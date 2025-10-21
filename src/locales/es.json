@@ -317,7 +317,10 @@
     "responses": "Respuestas",
     "answer": "Respuesta",
     "notAnswered": "No respondido",
-    "reportDisclaimer": "Descargo de responsabilidad: Este informe es una herramienta de detección y no un sustituto de un diagnóstico profesional. Por favor, consulte a un proveedor de atención médica para una evaluación formal."
+    "reportDisclaimer": "Descargo de responsabilidad: Este informe es una herramienta de detección y no un sustituto de un diagnóstico profesional. Por favor, consulte a un proveedor de atención médica para una evaluación formal.",
+    "weeklyChallenges": "Desafíos Semanales",
+    "weeklyChallengesDesc": "¡Completa estos para obtener monedas de bonificación!",
+    "challengeWrite3Entries": "Escribe 3 entradas de diario",
+    "challengeCompleteAssessments": "Completa todas las evaluaciones",
+    "challenge3DayStreak": "Mantén una racha de 3 días"
 }
-
-    

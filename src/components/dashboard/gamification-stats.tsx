@@ -8,9 +8,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLocale } from "@/context/locale-provider";
 
 export function GamificationStats() {
     const { coins, streak } = useApp();
+    const { t } = useLocale();
 
     return (
         <TooltipProvider>

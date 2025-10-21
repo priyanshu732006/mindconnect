@@ -317,5 +317,10 @@
     "responses": "Responses",
     "answer": "Answer",
     "notAnswered": "Not Answered",
-    "reportDisclaimer": "Disclaimer: This report is a screening tool and not a substitute for a professional diagnosis. Please consult with a healthcare provider for a formal evaluation."
+    "reportDisclaimer": "Disclaimer: This report is a screening tool and not a substitute for a professional diagnosis. Please consult with a healthcare provider for a formal evaluation.",
+    "weeklyChallenges": "Weekly Challenges",
+    "weeklyChallengesDesc": "Complete these for bonus coins!",
+    "challengeWrite3Entries": "Write 3 journal entries",
+    "challengeCompleteAssessments": "Complete all assessments",
+    "challenge3DayStreak": "Maintain a 3-day streak"
 }

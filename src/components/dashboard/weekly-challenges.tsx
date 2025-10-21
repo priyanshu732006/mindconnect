@@ -4,9 +4,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApp } from "@/context/app-provider";
 import { CheckCircle2, Circle } from "lucide-react";
+import { useLocale } from "@/context/locale-provider";
 
 export function WeeklyChallenges() {
     const { assessmentResults, journalEntries, streak } = useApp();
+    const { t } = useLocale();
 
     const hasCompletedAllAssessments = 
         !!assessmentResults['phq-9'] && 
@@ -17,17 +19,17 @@ export function WeeklyChallenges() {
     const hasThreeDayStreak = streak >= 3;
 
     const challenges = [
-        { text: 'Write 3 journal entries', completed: hasWrittenThreeJournalEntries },
-        { text: 'Complete all assessments', completed: hasCompletedAllAssessments },
-        { text: 'Maintain a 3-day streak', completed: hasThreeDayStreak },
+        { text: t.challengeWrite3Entries || 'Write 3 journal entries', completed: hasWrittenThreeJournalEntries },
+        { text: t.challengeCompleteAssessments || 'Complete all assessments', completed: hasCompletedAllAssessments },
+        { text: t.challenge3DayStreak || 'Maintain a 3-day streak', completed: hasThreeDayStreak },
     ];
 
 
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Weekly Challenges</CardTitle>
-                <CardDescription>Complete these for bonus coins!</CardDescription>
+                <CardTitle>{t.weeklyChallenges}</CardTitle>
+                <CardDescription>{t.weeklyChallengesDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
                 {challenges.map((challenge, index) => (
