@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -40,10 +41,11 @@ export default function SupportPage() {
       setIsLoading(true);
       try {
         const buddiesFromDb = await getPeerBuddiesAction();
-        const buddiesWithStatus = buddiesFromDb.map(buddy => ({
+        const buddiesWithStatus = buddiesFromDb.map((buddy: any) => ({
           ...buddy,
+          name: buddy.fullName, // Ensure name is mapped from fullName
           status: Math.random() > 0.3 ? 'Available' : 'Busy',
-          specializations: (buddy as any).peerBuddyDetails?.specializations || ['General Chat'],
+          specializations: buddy.peerBuddyDetails?.specializations || ['General Chat'],
         }));
         setAvailableBuddies(buddiesWithStatus as PeerBuddy[]);
 
@@ -214,8 +216,9 @@ export default function SupportPage() {
                 })}
             </div>
         ) : (
-             <div className="flex justify-center items-center h-64">
-                <p className="text-muted-foreground">No peer buddies are available at this time.</p>
+             <div className="flex flex-col justify-center items-center h-64 text-center">
+                <p className="text-muted-foreground font-semibold">No peer buddies are available at this time.</p>
+                <p className="text-sm text-muted-foreground mt-2">This could be because no users have registered as a Peer Buddy yet.</p>
             </div>
         )}
       </div>
