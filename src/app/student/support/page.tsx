@@ -41,12 +41,21 @@ export default function SupportPage() {
       setIsLoading(true);
       try {
         const buddiesFromDb = await getPeerBuddiesAction();
-        const buddiesWithStatus = buddiesFromDb.map((buddy: any) => ({
-          ...buddy,
-          name: buddy.fullName, // Ensure name is mapped from fullName
-          status: Math.random() > 0.3 ? 'Available' : 'Busy',
-          specializations: buddy.peerBuddyDetails?.specializations || ['General Chat'],
-        }));
+        
+        const buddiesWithStatus = buddiesFromDb.map((buddy: any) => {
+            // Convert specializations object to array
+            const specializationsArray = buddy.peerBuddyDetails?.specializations 
+                ? Object.values(buddy.peerBuddyDetails.specializations) 
+                : ['General Chat'];
+
+            return {
+                ...buddy,
+                name: buddy.fullName, // Ensure name is mapped from fullName
+                status: Math.random() > 0.3 ? 'Available' : 'Busy',
+                specializations: specializationsArray,
+            }
+        });
+        
         setAvailableBuddies(buddiesWithStatus as PeerBuddy[]);
 
       } catch (error) {
@@ -196,7 +205,7 @@ export default function SupportPage() {
                     <CardContent className="flex-1">
                         <p className="text-sm font-medium mb-2">Specializations:</p>
                         <div className="flex flex-wrap gap-2">
-                        {(buddy.peerBuddyDetails?.specializations || []).map(spec => (
+                        {buddy.specializations.map(spec => (
                             <Badge key={spec} variant="secondary">{spec}</Badge>
                         ))}
                         </div>
