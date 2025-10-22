@@ -19,8 +19,8 @@ import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
 import { useAuth } from '@/context/auth-provider';
-import { getAvailablePeerBuddies } from '@/lib/db';
 import { database } from '@/lib/firebase/client-app';
+import { ref, onValue } from 'firebase/database';
 
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -37,33 +37,42 @@ export default function SupportPage() {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    async function fetchPeerBuddies() {
-      if (!user || loading) return;
-      setIsLoading(true);
-      try {
-        const buddiesFromDb = await getAvailablePeerBuddies(database);
-        
-        const buddiesWithStatus: PeerBuddy[] = buddiesFromDb.map((buddy: any) => ({
-            ...buddy,
-            specializations: buddy.specializations ? Object.values(buddy.specializations) : [],
-        }));
-        
-        setAvailableBuddies(buddiesWithStatus);
-
-      } catch (error) {
-        console.error("Error fetching peer buddies:", error);
-        toast({
-          variant: 'destructive',
-          title: 'Failed to load buddies',
-          description: 'Could not fetch peer buddies. Please try again later.',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+    if (loading || !user) {
+      return;
     }
-    
-    fetchPeerBuddies();
-  }, [toast, user, loading]);
+
+    setIsLoading(true);
+    const peerBuddiesRef = ref(database, 'peerBuddies');
+
+    const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const buddiesFromDb: PeerBuddy[] = Object.entries(data)
+          .map(([id, value]: [string, any]) => ({
+            id,
+            ...value,
+            specializations: value.specializations ? Object.values(value.specializations) : [],
+          }))
+          .filter((buddy: any) => buddy.status === "Available");
+
+        setAvailableBuddies(buddiesFromDb);
+      } else {
+        setAvailableBuddies([]);
+      }
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Firebase read failed: " + error.message);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to load buddies',
+        description: 'Could not fetch peer buddies due to a permission error or network issue.',
+      });
+      setIsLoading(false);
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [user, loading, toast]);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {

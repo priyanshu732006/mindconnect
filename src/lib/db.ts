@@ -37,18 +37,6 @@ export async function addPost(
   return newPost;
 }
 
-export async function getAvailablePeerBuddies(db: Database): Promise<User[]> {
-  const refPath = ref(db, "peerBuddies");
-  const snapshot = await get(refPath);
-
-  if (!snapshot.exists()) return [];
-
-  const data = snapshot.val();
-  return Object.entries(data)
-    .map(([id, value]: [string, any]) => ({ id, ...value } as User))
-    .filter((buddy: any) => buddy.status === "Available");
-}
-
 
 export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
   try {
