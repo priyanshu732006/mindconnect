@@ -19,8 +19,9 @@ import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
 import { useAuth } from '@/context/auth-provider';
-import { database } from '@/lib/firebase/client-app';
+import { database, auth } from '@/lib/firebase/client-app';
 import { ref, onValue } from 'firebase/database';
+import { onAuthStateChanged } from 'firebase/auth';
 
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -34,45 +35,52 @@ export default function SupportPage() {
   const [isChatOpen, setChatOpen] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (loading || !user) {
-      return;
-    }
-
     setIsLoading(true);
-    const peerBuddiesRef = ref(database, 'peerBuddies');
 
-    const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const buddiesFromDb: PeerBuddy[] = Object.entries(data)
-          .map(([id, value]: [string, any]) => ({
-            id,
-            ...value,
-            specializations: value.specializations ? Object.values(value.specializations) : [],
-          }))
-          .filter((buddy: any) => buddy.status === "Available");
+    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const peerBuddiesRef = ref(database, 'peerBuddies');
 
-        setAvailableBuddies(buddiesFromDb);
+        const dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const buddiesFromDb: PeerBuddy[] = Object.entries(data)
+              .map(([id, value]: [string, any]) => ({
+                id,
+                ...value,
+                specializations: value.specializations ? Object.values(value.specializations) : [],
+              }))
+              .filter((buddy: any) => buddy.status === "Available");
+
+            setAvailableBuddies(buddiesFromDb);
+          } else {
+            setAvailableBuddies([]);
+          }
+          setIsLoading(false);
+        }, (error) => {
+          console.error("Firebase read failed: " + error.message);
+          toast({
+            variant: 'destructive',
+            title: 'Failed to load buddies',
+            description: 'Could not fetch peer buddies due to a permission error or network issue.',
+          });
+          setIsLoading(false);
+        });
+        
+        return () => dbUnsubscribe();
+
       } else {
+        // No user is signed in.
+        setIsLoading(false);
         setAvailableBuddies([]);
       }
-      setIsLoading(false);
-    }, (error) => {
-      console.error("Firebase read failed: " + error.message);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to load buddies',
-        description: 'Could not fetch peer buddies due to a permission error or network issue.',
-      });
-      setIsLoading(false);
     });
 
     // Cleanup subscription on unmount
-    return () => unsubscribe();
-  }, [user, loading, toast]);
+    return () => authUnsubscribe();
+  }, [toast]);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
