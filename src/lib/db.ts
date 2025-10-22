@@ -49,6 +49,7 @@ export async function getAvailablePeerBuddies(db: Database): Promise<User[]> {
     .filter((buddy: any) => buddy.status === "Available");
 }
 
+
 export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
   try {
     const db = database;

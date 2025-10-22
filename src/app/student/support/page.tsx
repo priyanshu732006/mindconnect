@@ -46,7 +46,6 @@ export default function SupportPage() {
         const buddiesWithStatus: PeerBuddy[] = buddiesFromDb.map((buddy: any) => ({
             ...buddy,
             specializations: buddy.specializations ? Object.values(buddy.specializations) : [],
-            status: buddy.status || 'Available',
         }));
         
         setAvailableBuddies(buddiesWithStatus);
