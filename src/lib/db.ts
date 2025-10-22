@@ -1,5 +1,5 @@
 
-'use server';
+'use client';
 
 import { initialPosts, allUsers } from './data';
 import type { Post, User, UserRole } from './types';
