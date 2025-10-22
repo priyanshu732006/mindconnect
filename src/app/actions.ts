@@ -10,7 +10,7 @@ import { analyzeFacialExpression, FacialAnalysisOutput } from '@/ai/flows/facial
 import { analyzeVoice, VoiceAnalysisOutput } from '@/ai/flows/voice-analysis';
 import twilio from 'twilio';
 import { moderatePost } from '@/ai/flows/moderate-community-posts';
-import { addPost, getAvailablePeerBuddies } from '@/lib/db';
+import { addPost } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { generateSessionSummary, GenerateSessionSummaryOutput, GenerateSessionSummaryInput } from '@/ai/flows/generate-session-summary';
 
@@ -182,9 +182,4 @@ export async function generateSessionSummaryAction(input: GenerateSessionSummary
         console.error('Error generating session summary:', error);
         return null;
     }
-}
-
-export async function getPeerBuddiesAction(): Promise<User[]> {
-  const buddies = await getAvailablePeerBuddies();
-  return buddies;
 }

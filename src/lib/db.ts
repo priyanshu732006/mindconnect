@@ -3,7 +3,7 @@
 
 import { initialPosts, allUsers } from './data';
 import type { Post, User, UserRole } from './types';
-import { getDatabase, ref, get, query, orderByChild, equalTo } from 'firebase/database';
+import { getDatabase, ref, get, query, orderByChild, equalTo, Database } from 'firebase/database';
 import { database } from '@/lib/firebase/client-app';
 
 // In-memory 'database' for posts
@@ -37,8 +37,7 @@ export async function addPost(
   return newPost;
 }
 
-export async function getAvailablePeerBuddies(): Promise<User[]> {
-  const db = database;
+export async function getAvailablePeerBuddies(db: Database): Promise<User[]> {
   const refPath = ref(db, "peerBuddies");
   const snapshot = await get(refPath);
 

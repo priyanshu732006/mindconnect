@@ -19,7 +19,8 @@ import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
 import { useAuth } from '@/context/auth-provider';
-import { getPeerBuddiesAction } from '@/app/actions';
+import { getAvailablePeerBuddies } from '@/lib/db';
+import { database } from '@/lib/firebase/client-app';
 
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -33,35 +34,37 @@ export default function SupportPage() {
   const [isChatOpen, setChatOpen] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     async function fetchPeerBuddies() {
-      if (!user) return;
+      if (!user || loading) return;
       setIsLoading(true);
       try {
-        const buddiesFromDb = await getPeerBuddiesAction();
+        const buddiesFromDb = await getAvailablePeerBuddies(database);
         
-        const buddiesWithStatus = buddiesFromDb.map((buddy: any) => ({
+        const buddiesWithStatus: PeerBuddy[] = buddiesFromDb.map((buddy: any) => ({
             ...buddy,
-            status: 'Available', // Assuming fetched buddies are available
+            specializations: buddy.specializations ? Object.values(buddy.specializations) : [],
+            status: buddy.status || 'Available',
         }));
         
-        setAvailableBuddies(buddiesWithStatus as PeerBuddy[]);
+        setAvailableBuddies(buddiesWithStatus);
 
       } catch (error) {
         console.error("Error fetching peer buddies:", error);
         toast({
           variant: 'destructive',
           title: 'Failed to load buddies',
-          description: 'Could not fetch peer buddies from the database. Please try again later.',
+          description: 'Could not fetch peer buddies. Please try again later.',
         });
       } finally {
         setIsLoading(false);
       }
     }
+    
     fetchPeerBuddies();
-  }, [toast, user]);
+  }, [toast, user, loading]);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
@@ -145,7 +148,7 @@ export default function SupportPage() {
                 <CardContent className="flex-1">
                   <p className="text-sm font-medium mb-2">Specializations:</p>
                   <div className="flex flex-wrap gap-2">
-                    {buddy.specializations.map(spec => (
+                    {(buddy.specializations as string[]).map((spec: string) => (
                       <Badge key={spec} variant="outline">{spec}</Badge>
                     ))}
                   </div>
@@ -196,7 +199,7 @@ export default function SupportPage() {
                     <CardContent className="flex-1">
                         <p className="text-sm font-medium mb-2">Specializations:</p>
                         <div className="flex flex-wrap gap-2">
-                        {buddy.specializations.map(spec => (
+                        {(buddy.specializations as string[]).map((spec) => (
                             <Badge key={spec} variant="secondary">{spec}</Badge>
                         ))}
                         </div>

@@ -2,7 +2,7 @@
 {
   "rules": {
     "userRoles": {
-      ".read": true,
+      ".read": "auth != null",
       ".indexOn": "role",
       "$uid": {
         ".write": "auth != null && auth.uid == $uid"
@@ -15,7 +15,7 @@
       }
     },
     "peerBuddies": {
-      ".read": true,
+      ".read": "auth != null",
       "$uid": {
         ".write": "auth != null && auth.uid == $uid"
       }
