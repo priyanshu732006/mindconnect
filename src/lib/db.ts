@@ -4,6 +4,7 @@
 import { initialPosts, allUsers } from './data';
 import type { Post, User, UserRole } from './types';
 import { getDatabase, ref, get, query, orderByChild, equalTo } from 'firebase/database';
+import { database } from '@/lib/firebase/client-app';
 
 // In-memory 'database' for posts
 let posts: Post[] = [...initialPosts];
@@ -37,7 +38,7 @@ export async function addPost(
 }
 
 export async function getAvailablePeerBuddies(): Promise<User[]> {
-  const db = getDatabase();
+  const db = database;
   const refPath = ref(db, "peerBuddies");
   const snapshot = await get(refPath);
 
@@ -51,7 +52,7 @@ export async function getAvailablePeerBuddies(): Promise<User[]> {
 
 export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
   try {
-    const db = getDatabase();
+    const db = database;
     const usersRef = ref(db, 'userRoles');
     const roleQuery = query(usersRef, orderByChild('role'), equalTo(role));
 
@@ -60,7 +61,7 @@ export const getUsersByRole = async (role: UserRole): Promise<User[]> => {
       const data = snapshot.val();
       return Object.keys(data).map(id => ({
         id,
-        name: data[id].fullName, // Map fullName to name
+        name: data[id].fullName, // ✅ fix name mapping
         ...data[id],
         // Mocked properties for display
         alias: data[id].fullName || `User ${id.substring(0, 4)}`,
