@@ -18,9 +18,8 @@ import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
-import { useAuth } from '@/context/auth-provider';
-import { database, auth } from '@/lib/firebase/client-app';
-import { ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { auth } from '@/lib/firebase/client-app';
 import { onAuthStateChanged } from 'firebase/auth';
 
 
@@ -41,6 +40,7 @@ export default function SupportPage() {
 
     const authUnsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        const database = getDatabase(); // Correctly get the database instance here
         const peerBuddiesRef = ref(database, 'peerBuddies');
 
         const dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
@@ -69,6 +69,7 @@ export default function SupportPage() {
           setIsLoading(false);
         });
         
+        // Return the database listener cleanup function
         return () => dbUnsubscribe();
 
       } else {
