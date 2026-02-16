@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -54,7 +53,10 @@ export function PeerChatDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg h-[80vh] flex flex-col p-0 gap-0">
+      <DialogContent 
+        className="max-w-lg h-[80vh] flex flex-col p-0 gap-0"
+        aria-describedby={undefined}
+      >
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Chat with {buddy.name}</DialogTitle>
           <DialogDescription>

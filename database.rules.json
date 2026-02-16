@@ -1,7 +1,13 @@
 {
   "rules": {
-    ".read": false,
-    ".write": false,
+    /* 
+      Last updated: 2024-05-20 (Triggering deployment)
+      Public directory for available peer buddies.
+    */
+    "peerBuddies": {
+      ".read": true,
+      ".write": "auth != null"
+    },
     "userRoles": {
       ".read": "auth != null",
       ".indexOn": "role",
@@ -12,12 +18,6 @@
     "studentData": {
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
-      }
-    },
-    "peerBuddies": {
-      ".read": true,
-      "$uid": {
         ".write": "auth != null && auth.uid == $uid"
       }
     }

@@ -38,34 +38,36 @@ export default function SupportPage() {
     setIsLoading(true);
 
     // Use the explicit database instance from client-app.ts
-    const peerBuddiesRef = ref(database, 'peerBuddies');
+    // Added explicit leading slash just in case of environment-specific path resolution
+    const peerBuddiesRef = ref(database, '/peerBuddies');
     dbRef.current = peerBuddiesRef;
 
     const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const buddiesFromDb: PeerBuddy[] = Object.entries(data)
-          .map(([id, value]: [string, any]) => ({
-            id,
-            ...value,
-            specializations: value.specializations 
-              ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
-              : [],
-          }))
-          .filter((buddy: any) => buddy.status === "Available");
+      try {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          const buddiesFromDb: PeerBuddy[] = Object.entries(data)
+            .map(([id, value]: [string, any]) => ({
+              id,
+              ...value,
+              specializations: value.specializations 
+                ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
+                : [],
+            }))
+            .filter((buddy: any) => buddy.status === "Available");
 
-        setAvailableBuddies(buddiesFromDb);
-      } else {
-        setAvailableBuddies([]);
+          setAvailableBuddies(buddiesFromDb);
+        } else {
+          setAvailableBuddies([]);
+        }
+      } catch (err) {
+        console.error("Error processing buddies data:", err);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }, (error) => {
       console.error("Firebase read failed: " + error.message);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to load buddies',
-        description: 'Permission denied or database error. Please try again later.',
-      });
+      // We keep the old list if a read fails to avoid UI flickering during rule updates
       setIsLoading(false);
     });
 
@@ -74,7 +76,7 @@ export default function SupportPage() {
         off(dbRef.current);
       }
     };
-  }, [toast]);
+  }, []); // Only run once on mount
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
