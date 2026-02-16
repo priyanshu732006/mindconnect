@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -37,9 +38,8 @@ export default function SupportPage() {
   useEffect(() => {
     setIsLoading(true);
 
-    // Use the explicit database instance from client-app.ts
-    // Added explicit leading slash just in case of environment-specific path resolution
-    const peerBuddiesRef = ref(database, '/peerBuddies');
+    // Using 'peerBuddies' without leading slash for cleaner path resolution
+    const peerBuddiesRef = ref(database, 'peerBuddies');
     dbRef.current = peerBuddiesRef;
 
     const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
@@ -67,7 +67,7 @@ export default function SupportPage() {
       }
     }, (error) => {
       console.error("Firebase read failed: " + error.message);
-      // We keep the old list if a read fails to avoid UI flickering during rule updates
+      // Fail gracefully to avoid blocking the UI
       setIsLoading(false);
     });
 
@@ -76,7 +76,7 @@ export default function SupportPage() {
         off(dbRef.current);
       }
     };
-  }, []); // Only run once on mount
+  }, []);
 
 
   const handleSendRequest = (buddy: PeerBuddy) => {
@@ -107,7 +107,6 @@ export default function SupportPage() {
 
   const handleOpenChat = (buddy: PeerBuddy) => {
     setSelectedBuddy(buddy);
-    // In a real app, you would fetch existing messages for this buddy
     setMessages([
         {
             id: '1',

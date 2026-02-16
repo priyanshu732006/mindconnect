@@ -1,7 +1,8 @@
+
 {
   "rules": {
     /* 
-      Last updated: 2024-05-20 (Triggering deployment)
+      Last updated: 2024-05-21 (Triggering fresh deployment)
       Public directory for available peer buddies.
     */
     "peerBuddies": {

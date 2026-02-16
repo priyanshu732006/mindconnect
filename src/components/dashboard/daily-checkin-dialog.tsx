@@ -83,7 +83,6 @@ export function DailyCheckinDialog({
   
   const handleClose = (open: boolean) => {
       if (!open && !form.formState.isSubmitted) {
-          // If user closes dialog without submitting, mark as checked in to prevent it from popping up again today
           setCheckinTimestamp();
       }
       setIsOpen(open);
@@ -91,7 +90,7 @@ export function DailyCheckinDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md" aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Your Daily Check-in</DialogTitle>
           <DialogDescription>
