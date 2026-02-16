@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Send, Clock, Loader2 } from 'lucide-react';
+import { MessageSquare, Send, Clock, Loader2, UserPlus } from 'lucide-react';
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -41,10 +41,8 @@ export default function SupportPage() {
   useEffect(() => {
     let dbUnsubscribe: (() => void) | null = null;
 
-    // We use onAuthStateChanged directly to ensure the database listener
-    // is only attached AFTER the Firebase connection has authenticated.
+    // Use onAuthStateChanged to guarantee the database call happens after auth token is available
     const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      // Clean up existing database listener if auth state changes
       if (dbUnsubscribe) {
         dbUnsubscribe();
         dbUnsubscribe = null;
@@ -52,6 +50,7 @@ export default function SupportPage() {
 
       if (currentUser) {
         setIsLoading(true);
+        // Explicitly reading from the root peerBuddies node
         const peerBuddiesRef = ref(database, 'peerBuddies');
         
         dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
@@ -66,7 +65,7 @@ export default function SupportPage() {
                     ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
                     : [],
                 }))
-                .filter((buddy: any) => buddy.status === "Available");
+                .filter((buddy: any) => buddy.status === "Available" && buddy.id !== currentUser.uid);
 
               setAvailableBuddies(buddiesFromDb);
             } else {
@@ -143,7 +142,6 @@ export default function SupportPage() {
         }));
         setMessages(msgList);
       } else {
-        // Initial welcome message if no history
         const welcomeMsg: ChatMessage = {
           id: 'welcome',
           sender: buddy.name,
@@ -186,28 +184,31 @@ export default function SupportPage() {
       )}
 
       {connectedBuddies.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">Your Connected Buddies</h2>
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <h2 className="text-2xl font-bold tracking-tight font-headline mb-4 flex items-center gap-2">
+            <MessageSquare className="text-primary" />
+            Your Connected Buddies
+          </h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {connectedBuddies.map(buddy => (
-              <Card key={buddy.id} className="flex flex-col bg-primary/5 border-primary/20">
+              <Card key={buddy.id} className="flex flex-col bg-primary/5 border-primary/20 hover:shadow-md transition-shadow">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle>{buddy.name}</CardTitle>
-                    <Badge variant="secondary" className="bg-green-100 text-green-800">Connected</Badge>
+                    <CardTitle className="text-lg">{buddy.name}</CardTitle>
+                    <Badge variant="secondary" className="bg-green-100 text-green-800 border-green-200">Connected</Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1">
-                  <p className="text-sm font-medium mb-2">Specializations:</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Specializations</p>
+                  <div className="flex flex-wrap gap-1.5">
                     {(buddy.specializations as string[]).map((spec: string) => (
-                      <Badge key={spec} variant="outline">{spec}</Badge>
+                      <Badge key={spec} variant="outline" className="text-[10px] py-0">{spec}</Badge>
                     ))}
                   </div>
                 </CardContent>
                 <CardFooter>
                   <Button className="w-full" onClick={() => handleOpenChat(buddy)}>
-                    <MessageSquare className="mr-2" /> Chat Now
+                    <MessageSquare className="mr-2 h-4 w-4" /> Chat Now
                   </Button>
                 </CardFooter>
               </Card>
@@ -217,7 +218,7 @@ export default function SupportPage() {
       )}
       
       <div>
-         <header>
+         <header className="mb-6">
             <h1 className="text-3xl font-bold tracking-tight font-headline">
             Find a Peer Buddy
             </h1>
@@ -228,42 +229,44 @@ export default function SupportPage() {
         </header>
 
         {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex flex-col justify-center items-center h-64 gap-4">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <p className="text-muted-foreground animate-pulse">Searching for available buddies...</p>
             </div>
         ) : availableAndPendingBuddies.length > 0 ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-6">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {availableAndPendingBuddies.map(buddy => {
                 const status = requestStatus[buddy.id] || 'idle';
                 const isAvailable = buddy.status === 'Available';
 
                 return (
-                    <Card key={buddy.id} className="flex flex-col">
+                    <Card key={buddy.id} className="flex flex-col hover:border-primary/50 transition-colors">
                     <CardHeader>
                         <div className="flex items-center justify-between">
-                            <CardTitle>{buddy.name || 'Anonymous Buddy'}</CardTitle>
+                            <CardTitle className="text-lg">{buddy.name || 'Anonymous Buddy'}</CardTitle>
                             <div className="flex items-center gap-1.5">
                                 <span className={cn("h-2 w-2 rounded-full", isAvailable ? "bg-green-500" : "bg-gray-400")}></span>
-                                <span className="text-xs text-muted-foreground">{buddy.status}</span>
+                                <span className="text-[10px] font-medium text-muted-foreground uppercase">{buddy.status}</span>
                             </div>
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1">
-                        <p className="text-sm font-medium mb-2">Specializations:</p>
-                        <div className="flex flex-wrap gap-2">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Specializations</p>
+                        <div className="flex flex-wrap gap-1.5">
                         {(buddy.specializations as string[]).map((spec) => (
-                            <Badge key={spec} variant="secondary">{spec}</Badge>
+                            <Badge key={spec} variant="secondary" className="text-[10px] py-0">{spec}</Badge>
                         ))}
                         </div>
                     </CardContent>
                     <CardFooter>
                         <Button
+                        variant={status === 'pending' ? 'outline' : 'default'}
                         className="w-full"
                         onClick={() => handleSendRequest(buddy)}
                         disabled={status === 'pending' || !isAvailable}
                         >
-                        {status === 'idle' && <><Send className="mr-2"/>Send Request</>}
-                        {status === 'pending' && <><Clock className="mr-2"/>Request Pending</>}
+                        {status === 'idle' && <><UserPlus className="mr-2 h-4 w-4"/>Send Request</>}
+                        {status === 'pending' && <><Clock className="mr-2 h-4 w-4"/>Request Pending</>}
                         </Button>
                     </CardFooter>
                     </Card>
@@ -271,9 +274,12 @@ export default function SupportPage() {
                 })}
             </div>
         ) : (
-             <div className="flex flex-col justify-center items-center h-64 text-center">
+             <div className="flex flex-col justify-center items-center h-64 text-center border-2 border-dashed rounded-xl bg-muted/30">
+                <div className="bg-muted p-4 rounded-full mb-4">
+                    <Clock className="h-8 w-8 text-muted-foreground" />
+                </div>
                 <p className="text-muted-foreground font-semibold">No peer buddies are available at this time.</p>
-                <p className="text-sm text-muted-foreground mt-2">This could be because no users have registered as a Peer Buddy yet or they are all currently busy.</p>
+                <p className="text-sm text-muted-foreground mt-2 max-w-sm px-4">This directory updates in real-time. Please check back shortly or explore our AI companion.</p>
             </div>
         )}
       </div>

@@ -90,7 +90,7 @@ export function DailyCheckinDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-md" aria-describedby={undefined}>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Your Daily Check-in</DialogTitle>
           <DialogDescription>

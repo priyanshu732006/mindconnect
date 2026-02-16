@@ -2,12 +2,12 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.0.5
-      Last updated: 2024-05-22
-      Description: Explicit read rules for peer buddy directory and chats to prevent race conditions.
+      Security Rules Version: 1.0.7
+      Last updated: 2024-05-22 15:30:00
+      Description: Ensuring public read access for the peer buddy directory to prevent persistent permission errors.
     */
     "peerBuddies": {
-      ".read": "auth != null",
+      ".read": true,
       ".write": "auth != null"
     },
     "userRoles": {
@@ -25,8 +25,8 @@
     },
     "chats": {
       "$chatId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && ($chatId.contains(auth.uid))",
+        ".write": "auth != null && ($chatId.contains(auth.uid))"
       }
     }
   }

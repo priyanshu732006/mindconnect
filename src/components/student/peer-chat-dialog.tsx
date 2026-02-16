@@ -56,12 +56,11 @@ export function PeerChatDialog({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent 
         className="max-w-lg h-[80vh] flex flex-col p-0 gap-0"
-        aria-describedby={undefined}
       >
         <DialogHeader className="p-4 border-b">
           <DialogTitle>Chat with {buddy.name}</DialogTitle>
           <DialogDescription>
-            This is a private and confidential chat.
+            This is a private and confidential chat with your peer buddy.
           </DialogDescription>
         </DialogHeader>
         
