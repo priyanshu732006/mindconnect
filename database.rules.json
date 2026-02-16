@@ -2,12 +2,12 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.0.4
+      Security Rules Version: 1.0.5
       Last updated: 2024-05-22
-      Description: Public read for peer buddy directory to prevent client-side race conditions.
+      Description: Explicit read rules for peer buddy directory and chats to prevent race conditions.
     */
     "peerBuddies": {
-      ".read": true,
+      ".read": "auth != null",
       ".write": "auth != null"
     },
     "userRoles": {

@@ -19,7 +19,8 @@ import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
 import { ref, onValue, off, push, set } from 'firebase/database';
-import { database } from '@/lib/firebase/client-app';
+import { onAuthStateChanged } from 'firebase/auth';
+import { database, auth } from '@/lib/firebase/client-app';
 import { useAuth } from '@/context/auth-provider';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -35,51 +36,61 @@ export default function SupportPage() {
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
-  const buddiesRef = useRef<any>(null);
   const chatRef = useRef<any>(null);
 
   useEffect(() => {
-    setIsLoading(true);
+    let dbUnsubscribe: (() => void) | null = null;
 
-    // Using an absolute path reference to avoid potential scoping issues
-    const peerBuddiesRef = ref(database, '/peerBuddies');
-    buddiesRef.current = peerBuddiesRef;
+    // We use onAuthStateChanged directly to ensure the database listener
+    // is only attached AFTER the Firebase connection has authenticated.
+    const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // Clean up existing database listener if auth state changes
+      if (dbUnsubscribe) {
+        dbUnsubscribe();
+        dbUnsubscribe = null;
+      }
 
-    const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
-      try {
-        if (snapshot.exists()) {
-          const data = snapshot.val();
-          const buddiesFromDb: PeerBuddy[] = Object.entries(data)
-            .map(([id, value]: [string, any]) => ({
-              id,
-              ...value,
-              specializations: value.specializations 
-                ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
-                : [],
-            }))
-            .filter((buddy: any) => buddy.status === "Available");
+      if (currentUser) {
+        setIsLoading(true);
+        const peerBuddiesRef = ref(database, 'peerBuddies');
+        
+        dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
+          try {
+            if (snapshot.exists()) {
+              const data = snapshot.val();
+              const buddiesFromDb: PeerBuddy[] = Object.entries(data)
+                .map(([id, value]: [string, any]) => ({
+                  id,
+                  ...value,
+                  specializations: value.specializations 
+                    ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
+                    : [],
+                }))
+                .filter((buddy: any) => buddy.status === "Available");
 
-          setAvailableBuddies(buddiesFromDb);
-        } else {
-          setAvailableBuddies([]);
-        }
-      } catch (err) {
-        console.error("Error processing buddies data:", err);
-      } finally {
+              setAvailableBuddies(buddiesFromDb);
+            } else {
+              setAvailableBuddies([]);
+            }
+          } catch (err) {
+            console.error("Error processing buddies data:", err);
+          } finally {
+            setIsLoading(false);
+          }
+        }, (error) => {
+          console.error("Firebase read failed: " + error.message);
+          setIsLoading(false);
+        });
+      } else {
+        setAvailableBuddies([]);
         setIsLoading(false);
       }
-    }, (error) => {
-      console.error("Firebase read failed: " + error.message);
-      setIsLoading(false);
     });
 
     return () => {
-      if (buddiesRef.current) {
-        off(buddiesRef.current);
-      }
-      if (chatRef.current) {
-        off(chatRef.current);
-      }
+      authUnsubscribe();
+      if (dbUnsubscribe) dbUnsubscribe();
+      if (chatRef.current) off(chatRef.current);
     };
   }, []);
 
