@@ -17,9 +17,8 @@ import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
-import { getDatabase, ref, onValue, off } from 'firebase/database';
-import { auth } from '@/lib/firebase/client-app';
-import { onAuthStateChanged } from 'firebase/auth';
+import { ref, onValue, off } from 'firebase/database';
+import { database } from '@/lib/firebase/client-app';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
@@ -38,9 +37,7 @@ export default function SupportPage() {
   useEffect(() => {
     setIsLoading(true);
 
-    // We use onAuthStateChanged to ensure we only try to load data once we know if a user is there.
-    // However, since we set peerBuddies read rule to 'true', even unauthenticated users can read it.
-    const database = getDatabase();
+    // Use the explicit database instance from client-app.ts
     const peerBuddiesRef = ref(database, 'peerBuddies');
     dbRef.current = peerBuddiesRef;
 
@@ -51,7 +48,6 @@ export default function SupportPage() {
           .map(([id, value]: [string, any]) => ({
             id,
             ...value,
-            // Handle specializations being stored as an object or array
             specializations: value.specializations 
               ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
               : [],

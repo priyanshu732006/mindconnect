@@ -1,5 +1,7 @@
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "userRoles": {
       ".read": "auth != null",
       ".indexOn": "role",
