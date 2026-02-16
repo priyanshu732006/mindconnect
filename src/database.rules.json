@@ -2,7 +2,7 @@
 {
   "rules": {
     /* 
-      Last updated: 2024-05-21 (Triggering fresh deployment)
+      Last updated: 2024-05-21 (Adding chat persistence)
       Public directory for available peer buddies.
     */
     "peerBuddies": {
@@ -20,6 +20,15 @@
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    /* 
+      Secure chat paths. Chat IDs are usually formatted as studentUid_buddyUid.
+    */
+    "chats": {
+      "$chatId": {
+        ".read": "auth != null",
+        ".write": "auth != null"
       }
     }
   }

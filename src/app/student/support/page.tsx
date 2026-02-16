@@ -18,14 +18,16 @@ import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
-import { ref, onValue, off } from 'firebase/database';
+import { ref, onValue, off, push, set } from 'firebase/database';
 import { database } from '@/lib/firebase/client-app';
+import { useAuth } from '@/context/auth-provider';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
 export default function SupportPage() {
   const { t } = useLocale();
   const { toast } = useToast();
+  const { user } = useAuth();
   const [availableBuddies, setAvailableBuddies] = useState<PeerBuddy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [requestStatus, setRequestStatus] = useState<Record<string, RequestStatus>>({});
@@ -33,14 +35,14 @@ export default function SupportPage() {
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   
-  const dbRef = useRef<any>(null);
+  const buddiesRef = useRef<any>(null);
+  const chatRef = useRef<any>(null);
 
   useEffect(() => {
     setIsLoading(true);
 
-    // Using 'peerBuddies' without leading slash for cleaner path resolution
     const peerBuddiesRef = ref(database, 'peerBuddies');
-    dbRef.current = peerBuddiesRef;
+    buddiesRef.current = peerBuddiesRef;
 
     const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
       try {
@@ -67,13 +69,15 @@ export default function SupportPage() {
       }
     }, (error) => {
       console.error("Firebase read failed: " + error.message);
-      // Fail gracefully to avoid blocking the UI
       setIsLoading(false);
     });
 
     return () => {
-      if (dbRef.current) {
-        off(dbRef.current);
+      if (buddiesRef.current) {
+        off(buddiesRef.current);
+      }
+      if (chatRef.current) {
+        off(chatRef.current);
       }
     };
   }, []);
@@ -102,31 +106,56 @@ export default function SupportPage() {
         title: 'Request Accepted!',
         description: `${buddy.name} has accepted your request. You can now start a chat.`,
       });
-    }, 3000);
+    }, 2000);
   };
 
   const handleOpenChat = (buddy: PeerBuddy) => {
+    if (!user) return;
+    
     setSelectedBuddy(buddy);
-    setMessages([
-        {
-            id: '1',
-            sender: buddy.name,
-            text: `Hi! I'm ${buddy.name}. Thanks for connecting. How can I help you today?`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }
-    ]);
     setChatOpen(true);
+
+    // Setup real-time chat listener
+    const chatId = [user.uid, buddy.id].sort().join('_');
+    const messagesRef = ref(database, `chats/${chatId}/messages`);
+    
+    if (chatRef.current) off(chatRef.current);
+    chatRef.current = messagesRef;
+
+    onValue(messagesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const msgList: ChatMessage[] = Object.entries(data).map(([id, val]: [string, any]) => ({
+          id,
+          ...val
+        }));
+        setMessages(msgList);
+      } else {
+        // Initial welcome message if no history
+        const welcomeMsg: ChatMessage = {
+          id: 'welcome',
+          sender: buddy.name,
+          text: `Hi! I'm ${buddy.name}. Thanks for connecting. How can I help you today?`,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        setMessages([welcomeMsg]);
+      }
+    });
   };
   
   const handleSendMessage = (text: string) => {
-      if(!selectedBuddy) return;
-      const newMessage: ChatMessage = {
-          id: Date.now().toString(),
+      if(!selectedBuddy || !user) return;
+      
+      const chatId = [user.uid, selectedBuddy.id].sort().join('_');
+      const messagesRef = ref(database, `chats/${chatId}/messages`);
+      const newMessageRef = push(messagesRef);
+      
+      set(newMessageRef, {
           sender: 'You',
           text,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      }
-      setMessages(prev => [...prev, newMessage]);
+          senderUid: user.uid
+      });
   }
 
   const connectedBuddies = availableBuddies.filter(buddy => requestStatus[buddy.id] === 'connected');
