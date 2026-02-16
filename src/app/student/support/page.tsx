@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -12,16 +11,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, Clock, Loader2 } from 'lucide-react';
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
-import type { PeerBuddy, ChatMessage, UserRole } from '@/lib/types';
+import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue, off } from 'firebase/database';
 import { auth } from '@/lib/firebase/client-app';
 import { onAuthStateChanged } from 'firebase/auth';
-
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
@@ -34,53 +32,52 @@ export default function SupportPage() {
   const [isChatOpen, setChatOpen] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  
+  const dbRef = useRef<any>(null);
 
   useEffect(() => {
     setIsLoading(true);
 
-    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const database = getDatabase(); // Correctly get the database instance here
-        const peerBuddiesRef = ref(database, 'peerBuddies');
+    // We use onAuthStateChanged to ensure we only try to load data once we know if a user is there.
+    // However, since we set peerBuddies read rule to 'true', even unauthenticated users can read it.
+    const database = getDatabase();
+    const peerBuddiesRef = ref(database, 'peerBuddies');
+    dbRef.current = peerBuddiesRef;
 
-        const dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const data = snapshot.val();
-            const buddiesFromDb: PeerBuddy[] = Object.entries(data)
-              .map(([id, value]: [string, any]) => ({
-                id,
-                ...value,
-                specializations: value.specializations ? Object.values(value.specializations) : [],
-              }))
-              .filter((buddy: any) => buddy.status === "Available");
+    const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const buddiesFromDb: PeerBuddy[] = Object.entries(data)
+          .map(([id, value]: [string, any]) => ({
+            id,
+            ...value,
+            // Handle specializations being stored as an object or array
+            specializations: value.specializations 
+              ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
+              : [],
+          }))
+          .filter((buddy: any) => buddy.status === "Available");
 
-            setAvailableBuddies(buddiesFromDb);
-          } else {
-            setAvailableBuddies([]);
-          }
-          setIsLoading(false);
-        }, (error) => {
-          console.error("Firebase read failed: " + error.message);
-          toast({
-            variant: 'destructive',
-            title: 'Failed to load buddies',
-            description: 'Could not fetch peer buddies due to a permission error or network issue.',
-          });
-          setIsLoading(false);
-        });
-        
-        // Return the database listener cleanup function
-        return () => dbUnsubscribe();
-
+        setAvailableBuddies(buddiesFromDb);
       } else {
-        // No user is signed in.
-        setIsLoading(false);
         setAvailableBuddies([]);
       }
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Firebase read failed: " + error.message);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to load buddies',
+        description: 'Permission denied or database error. Please try again later.',
+      });
+      setIsLoading(false);
     });
 
-    // Cleanup subscription on unmount
-    return () => authUnsubscribe();
+    return () => {
+      if (dbRef.current) {
+        off(dbRef.current);
+      }
+    };
   }, [toast]);
 
 
@@ -238,7 +235,7 @@ export default function SupportPage() {
         ) : (
              <div className="flex flex-col justify-center items-center h-64 text-center">
                 <p className="text-muted-foreground font-semibold">No peer buddies are available at this time.</p>
-                <p className="text-sm text-muted-foreground mt-2">This could be because no users have registered as a Peer Buddy yet.</p>
+                <p className="text-sm text-muted-foreground mt-2">This could be because no users have registered as a Peer Buddy yet or they are all currently busy.</p>
             </div>
         )}
       </div>

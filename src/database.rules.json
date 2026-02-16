@@ -1,4 +1,3 @@
-
 {
   "rules": {
     "userRoles": {
@@ -15,7 +14,7 @@
       }
     },
     "peerBuddies": {
-      ".read": "auth != null",
+      ".read": true,
       "$uid": {
         ".write": "auth != null && auth.uid == $uid"
       }
