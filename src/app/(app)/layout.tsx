@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/context/auth-provider';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/app-provider';
@@ -89,6 +89,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="flex flex-col">
               <VisuallyHidden>
                 <SheetTitle>{t.mainNav}</SheetTitle>
+                <SheetDescription>Main navigation menu for current user role.</SheetDescription>
               </VisuallyHidden>
               <Logo />
               <NavLinks

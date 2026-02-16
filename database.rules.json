@@ -2,8 +2,9 @@
 {
   "rules": {
     /* 
-      Last updated: 2024-05-21 (Adding chat persistence)
-      Public directory for available peer buddies.
+      Security Rules Version: 1.0.4
+      Last updated: 2024-05-22
+      Description: Public read for peer buddy directory to prevent client-side race conditions.
     */
     "peerBuddies": {
       ".read": true,
@@ -22,9 +23,6 @@
         ".write": "auth != null && auth.uid == $uid"
       }
     },
-    /* 
-      Secure chat paths. Chat IDs are usually formatted as studentUid_buddyUid.
-    */
     "chats": {
       "$chatId": {
         ".read": "auth != null",

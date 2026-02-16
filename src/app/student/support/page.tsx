@@ -41,7 +41,8 @@ export default function SupportPage() {
   useEffect(() => {
     setIsLoading(true);
 
-    const peerBuddiesRef = ref(database, 'peerBuddies');
+    // Using an absolute path reference to avoid potential scoping issues
+    const peerBuddiesRef = ref(database, '/peerBuddies');
     buddiesRef.current = peerBuddiesRef;
 
     const unsubscribe = onValue(peerBuddiesRef, (snapshot) => {
