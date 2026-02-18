@@ -86,7 +86,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <span className="sr-only">{t.toggleNav}</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent side="left" className="flex flex-col" aria-describedby={undefined}>
               <VisuallyHidden>
                 <SheetTitle>{t.mainNav}</SheetTitle>
                 <SheetDescription>Main navigation menu for current user role.</SheetDescription>

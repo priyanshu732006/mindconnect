@@ -43,6 +43,7 @@ export default function SupportPage() {
 
     // Use onAuthStateChanged to guarantee the database call happens after auth token is available
     const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // Clean up previous database listener if any
       if (dbUnsubscribe) {
         dbUnsubscribe();
         dbUnsubscribe = null;
