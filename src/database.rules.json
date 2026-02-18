@@ -1,12 +1,12 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.1.1
-      Last updated: 2024-05-24 10:00:00
-      Description: Explicitly allowing public read for peerBuddies to resolve persistent permission errors.
+      Security Rules Version: 1.1.3
+      Last updated: 2024-05-24 11:30:00
+      Fix: Explicitly allowing authenticated read for the collections to resolve listing errors.
     */
     "peerBuddies": {
-      ".read": true,
+      ".read": "auth != null",
       ".write": "auth != null"
     },
     "userRoles": {
@@ -23,6 +23,7 @@
       }
     },
     "chats": {
+      ".read": "auth != null",
       "$chatId": {
         ".read": "auth != null && ($chatId.contains(auth.uid))",
         ".write": "auth != null && ($chatId.contains(auth.uid))"

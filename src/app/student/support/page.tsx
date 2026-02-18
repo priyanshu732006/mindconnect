@@ -17,9 +17,9 @@ import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/locale-provider';
-import { ref, onValue, off, push, set } from 'firebase/database';
-import { onAuthStateChanged } from 'firebase/auth';
-import { database, auth } from '@/lib/firebase/client-app';
+import { getDatabase, ref, onValue, off, push, set } from 'firebase/database';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { app } from '@/lib/firebase/client-app';
 import { useAuth } from '@/context/auth-provider';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
@@ -38,20 +38,29 @@ export default function SupportPage() {
   const chatRef = useRef<any>(null);
 
   useEffect(() => {
+    const auth = getAuth(app);
+    const database = getDatabase(app);
     let dbUnsubscribe: (() => void) | null = null;
 
     const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      // Clear existing listeners
       if (dbUnsubscribe) {
         dbUnsubscribe();
         dbUnsubscribe = null;
       }
 
+      if (!currentUser) {
+        setIsLoading(false);
+        setAvailableBuddies([]);
+        return;
+      }
+
       setIsLoading(true);
       
-      // Using absolute path 'peerBuddies' to ensure rule matching
+      // Use absolute path to ensure rule matching
       const peerBuddiesRef = ref(database, 'peerBuddies');
       
-      dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
+      onValue(peerBuddiesRef, (snapshot) => {
         try {
           if (snapshot.exists()) {
             const data = snapshot.val();
@@ -63,7 +72,7 @@ export default function SupportPage() {
                   ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
                   : [],
               }))
-              .filter((buddy: any) => buddy.status === "Available" && (!currentUser || buddy.id !== currentUser.uid));
+              .filter((buddy: any) => buddy.status === "Available" && buddy.id !== currentUser.uid);
 
             setAvailableBuddies(buddiesFromDb);
           } else {
@@ -120,6 +129,7 @@ export default function SupportPage() {
     setSelectedBuddy(buddy);
     setChatOpen(true);
 
+    const database = getDatabase(app);
     // Setup real-time chat listener
     const chatId = [user.uid, buddy.id].sort().join('_');
     const messagesRef = ref(database, `chats/${chatId}/messages`);
@@ -150,6 +160,7 @@ export default function SupportPage() {
   const handleSendMessage = (text: string) => {
       if(!selectedBuddy || !user) return;
       
+      const database = getDatabase(app);
       const chatId = [user.uid, selectedBuddy.id].sort().join('_');
       const messagesRef = ref(database, `chats/${chatId}/messages`);
       const newMessageRef = push(messagesRef);
