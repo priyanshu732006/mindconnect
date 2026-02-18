@@ -1,15 +1,23 @@
 {
   "rules": {
     "userRoles": {
+      ".read": "root.child('userRoles').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
       }
     },
     "studentData": {
+      ".read": "root.child('userRoles').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "peerBuddies": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
       }
     },
     "conversations": {

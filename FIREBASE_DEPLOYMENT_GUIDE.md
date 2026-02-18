@@ -19,15 +19,23 @@ The updated Firebase rules in `database.rules.json` are currently only in your c
 {
   "rules": {
     "userRoles": {
+      ".read": "root.child('userRoles').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
       }
     },
     "studentData": {
+      ".read": "root.child('userRoles').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "peerBuddies": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
       }
     },
     "conversations": {
@@ -85,39 +93,48 @@ The updated Firebase rules in `database.rules.json` are currently only in your c
 
 ## 🔍 What These Rules Do:
 
-### 1. **userRoles** (existing)
-- Users can only read/write their own role data
+### 1. **userRoles** (updated)
+- **Admin access**: Admins can read all user roles (list-level access)
+- **Individual access**: All authenticated users can read any user role
+- **Write access**: Users can only write their own role
 
-### 2. **studentData** (existing)
-- Students can only access their own data
+### 2. **studentData** (updated)
+- **Admin access**: Admins can read all student data (list-level access)
+- **Individual access**: Students can only read their own data
+- **Write access**: Students can only write their own data
 
-### 3. **conversations** (NEW - for peer messaging)
+### 3. **peerBuddies** (NEW)
+- **Read access**: Peer buddies can only read their own data
+- **Write access**: Peer buddies can only write their own data
+
+### 4. **conversations** (for peer messaging)
 - Only conversation participants (student or peer buddy) can read the conversation
 - Only participants can write to the conversation
 - Indexed on `studentId` and `peerBuddyId` for fast queries
 
-### 4. **messages** (NEW - for peer messaging)
+### 5. **messages** (for peer messaging)
 - Only conversation participants can read messages
 - Only conversation participants can send messages
 - Validates message structure (must have: sender, senderId, text, timestamp, conversationId, createdAt)
 
 ## ⚠️ Security Note:
 
-Without deploying these rules, the messaging feature might:
+Without deploying these rules, the application might:
 - ❌ Not work at all (if default rules deny access)
-- ❌ Allow unauthorized access to messages
+- ❌ Allow unauthorized access to data
 - ❌ Have poor query performance (no indexes)
 
 ## ✅ After Deployment:
 
-1. **Test the feature**: 
-   - Student sends a message
-   - Peer buddy receives it
+1. **Test the features**: 
+   - Admin can view all user roles and student data
+   - Peer buddies have their own data section
+   - Student-peer buddy messaging works
    - Messages persist on refresh
 
 2. **Verify in Firebase Console**:
    - Go to Realtime Database → Data
-   - Check `/conversations` and `/messages` paths
+   - Check `/userRoles`, `/studentData`, `/peerBuddies`, `/conversations`, and `/messages` paths
    - Verify data is being written
 
 3. **Monitor for errors**:
@@ -133,6 +150,7 @@ Without deploying these rules, the messaging feature might:
 **Error: "PERMISSION_DENIED"**
 - User not authenticated
 - Check authentication is working
+- Verify user has correct role for admin operations
 
 **No data showing up**
 - Check Firebase Console → Data tab
@@ -147,4 +165,4 @@ Without deploying these rules, the messaging feature might:
 
 **Fastest way**: Copy rules from `database.rules.json` → Paste in Firebase Console → Click Publish
 
-**The messaging feature will NOT work properly without these rules deployed!**
+**The application features will NOT work properly without these rules deployed!**
