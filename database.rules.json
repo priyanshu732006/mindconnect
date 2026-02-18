@@ -2,10 +2,9 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.1.7
-      Last updated: 2024-05-24 16:30:00
-      Fix: Explicitly allow authenticated read at the parent level for peerBuddies to support directory listing.
-      Security: Restricting write access to the specific user's node.
+      Security Rules Version: 1.1.8
+      Last updated: 2024-05-24 17:00:00
+      Fix: Force redeploy to ensure root-level read access for directories is recognized.
     */
     "peerBuddies": {
       ".read": "auth != null",

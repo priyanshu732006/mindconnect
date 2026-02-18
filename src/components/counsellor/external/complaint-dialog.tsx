@@ -56,7 +56,7 @@ export function ComplaintDialog({ isOpen, setIsOpen, appointment }: ComplaintDia
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle>File a Complaint</DialogTitle>
                     <DialogDescription>

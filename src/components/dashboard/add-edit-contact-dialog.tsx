@@ -72,7 +72,7 @@ export function AddEditContactDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>{contact ? 'Edit' : 'Add'} Trusted Contact</DialogTitle>
           <DialogDescription>
