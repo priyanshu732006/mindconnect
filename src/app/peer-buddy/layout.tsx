@@ -1,3 +1,4 @@
+
 'use client';
 
 import AuthGuard from "@/components/auth-guard";
@@ -23,7 +24,6 @@ import { cn } from '@/lib/utils';
 import { useApp } from '@/context/app-provider';
 import { VisuallyHidden } from '@/components/ui/visually-hidden';
 import { Badge } from '@/components/ui/badge';
-import AppLayout from "../(app)/layout";
 
 function PeerBuddyLayoutContent({
   children,

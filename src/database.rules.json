@@ -2,9 +2,9 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.1.9
-      Last updated: 2024-05-24 18:00:00
-      Fix: Forced redeploy to ensure authenticated root read for directories.
+      Security Rules Version: 1.2.0
+      Last updated: 2024-05-24 19:00:00
+      Fix: Explicitly allow authenticated root read for peer directory and chats to prevent permission_denied.
     */
     "peerBuddies": {
       ".read": "auth != null",
