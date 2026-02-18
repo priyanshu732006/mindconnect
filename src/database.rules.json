@@ -2,9 +2,9 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.1.8
-      Last updated: 2024-05-24 17:00:00
-      Fix: Force redeploy to ensure root-level read access for directories is recognized.
+      Security Rules Version: 1.1.9
+      Last updated: 2024-05-24 18:00:00
+      Fix: Forced redeploy to ensure authenticated root read for directories.
     */
     "peerBuddies": {
       ".read": "auth != null",
@@ -26,8 +26,8 @@
       }
     },
     "chats": {
+      ".read": "auth != null",
       "$chatId": {
-        ".read": "auth != null && $chatId.contains(auth.uid)",
         ".write": "auth != null && $chatId.contains(auth.uid)"
       }
     }
