@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -42,9 +43,7 @@ export default function SupportPage() {
     const database = getDatabase(app);
     let dbUnsubscribe: (() => void) | undefined;
 
-    // Use onAuthStateChanged to ensure we have a valid token before initializing the DB listener
     const authUnsubscribe = onAuthStateChanged(auth, (authUser) => {
-      // Clear previous listener if auth state changes
       if (dbUnsubscribe) dbUnsubscribe();
 
       if (authUser) {
@@ -81,7 +80,6 @@ export default function SupportPage() {
 
         dbUnsubscribe = unsubscribe;
       } else {
-        // Not logged in
         setAvailableBuddies([]);
         setIsLoading(false);
       }
@@ -111,7 +109,6 @@ export default function SupportPage() {
       description: `Your request to connect with ${buddy.name} has been sent.`,
     });
 
-    // Simulate auto-acceptance for demonstration purposes
     setTimeout(() => {
       setRequestStatus(prev => ({ ...prev, [buddy.id]: 'connected' }));
       toast({
@@ -128,7 +125,6 @@ export default function SupportPage() {
     setChatOpen(true);
 
     const database = getDatabase(app);
-    // Setup real-time chat listener
     const chatId = [user.uid, buddy.id].sort().join('_');
     const messagesRef = ref(database, `chats/${chatId}/messages`);
     

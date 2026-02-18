@@ -40,7 +40,6 @@ export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }
     const { t } = useLocale();
 
     useEffect(() => {
-        // Reset action when dialog opens for a new issue
         if(isOpen) {
             setAction('');
         }
