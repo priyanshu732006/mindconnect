@@ -1,14 +1,16 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.1.4
-      Last updated: 2024-05-24 12:00:00
-      Fix: Public read for peerBuddies directory to resolve persistent listing errors.
-      Security: Restricting chat access to participants only.
+      Security Rules Version: 1.1.5
+      Last updated: 2024-05-24 14:30:00
+      Fix: Explicitly allow authenticated read at the parent level for peerBuddies to support directory listing.
+      Security: Restricting write access to the specific user's node.
     */
     "peerBuddies": {
-      ".read": "true",
-      ".write": "auth != null"
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid == $uid"
+      }
     },
     "userRoles": {
       ".read": "auth != null",
