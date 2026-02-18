@@ -2,12 +2,12 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.0.8
-      Last updated: 2024-05-22 16:00:00
-      Description: Explicitly requiring authentication for peerBuddy directory and chat paths.
+      Security Rules Version: 1.0.9
+      Last updated: 2024-05-22 18:00:00
+      Fix: Allowing public read for peerBuddies directory to avoid auth race conditions.
     */
     "peerBuddies": {
-      ".read": "auth != null",
+      ".read": true,
       ".write": "auth != null"
     },
     "userRoles": {

@@ -69,7 +69,7 @@ export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-[425px]" aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle>{t.resolveIssue}</DialogTitle>
                     <DialogDescription>
@@ -98,5 +98,3 @@ export function ResolveIssueDialog({ isOpen, setIsOpen, issue, onIssueResolved }
         </Dialog>
     )
 }
-
-    

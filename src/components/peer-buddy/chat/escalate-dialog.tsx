@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -72,7 +71,7 @@ export function EscalateDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle>Escalate to Crisis Team</DialogTitle>
           <DialogDescription>

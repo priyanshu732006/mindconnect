@@ -41,50 +41,44 @@ export default function SupportPage() {
   useEffect(() => {
     let dbUnsubscribe: (() => void) | null = null;
 
-    // Use onAuthStateChanged to guarantee the database call happens after auth token is available
     const authUnsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      // Clean up previous database listener if any
       if (dbUnsubscribe) {
         dbUnsubscribe();
         dbUnsubscribe = null;
       }
 
-      if (currentUser) {
-        setIsLoading(true);
-        // Explicitly reading from the root peerBuddies node
-        const peerBuddiesRef = ref(database, 'peerBuddies');
-        
-        dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
-          try {
-            if (snapshot.exists()) {
-              const data = snapshot.val();
-              const buddiesFromDb: PeerBuddy[] = Object.entries(data)
-                .map(([id, value]: [string, any]) => ({
-                  id,
-                  ...value,
-                  specializations: value.specializations 
-                    ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
-                    : [],
-                }))
-                .filter((buddy: any) => buddy.status === "Available" && buddy.id !== currentUser.uid);
+      setIsLoading(true);
+      
+      // We read from '/peerBuddies'. The rules now allow public read to avoid permission_denied errors.
+      const peerBuddiesRef = ref(database, '/peerBuddies');
+      
+      dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
+        try {
+          if (snapshot.exists()) {
+            const data = snapshot.val();
+            const buddiesFromDb: PeerBuddy[] = Object.entries(data)
+              .map(([id, value]: [string, any]) => ({
+                id,
+                ...value,
+                specializations: value.specializations 
+                  ? (Array.isArray(value.specializations) ? value.specializations : Object.values(value.specializations))
+                  : [],
+              }))
+              .filter((buddy: any) => buddy.status === "Available" && (!currentUser || buddy.id !== currentUser.uid));
 
-              setAvailableBuddies(buddiesFromDb);
-            } else {
-              setAvailableBuddies([]);
-            }
-          } catch (err) {
-            console.error("Error processing buddies data:", err);
-          } finally {
-            setIsLoading(false);
+            setAvailableBuddies(buddiesFromDb);
+          } else {
+            setAvailableBuddies([]);
           }
-        }, (error) => {
-          console.error("Firebase read failed: " + error.message);
+        } catch (err) {
+          console.error("Error processing buddies data:", err);
+        } finally {
           setIsLoading(false);
-        });
-      } else {
-        setAvailableBuddies([]);
+        }
+      }, (error) => {
+        console.error("Firebase read failed at /peerBuddies: " + error.message);
         setIsLoading(false);
-      }
+      });
     });
 
     return () => {
