@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import AuthGuard from "@/components/auth-guard";
@@ -90,7 +88,7 @@ function PeerBuddyLayoutContent({
                 <span className="sr-only">Toggle navigation menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="flex flex-col">
+            <SheetContent side="left" className="flex flex-col" aria-describedby={undefined}>
               <VisuallyHidden>
                 <SheetTitle>Main Navigation</SheetTitle>
               </VisuallyHidden>

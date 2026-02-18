@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -49,8 +48,8 @@ export default function SupportPage() {
 
       setIsLoading(true);
       
-      // We read from '/peerBuddies'. The rules now allow public read to avoid permission_denied errors.
-      const peerBuddiesRef = ref(database, '/peerBuddies');
+      // Using absolute path 'peerBuddies' to ensure rule matching
+      const peerBuddiesRef = ref(database, 'peerBuddies');
       
       dbUnsubscribe = onValue(peerBuddiesRef, (snapshot) => {
         try {

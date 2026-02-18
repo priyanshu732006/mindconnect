@@ -1,10 +1,9 @@
-
 {
   "rules": {
     /* 
-      Security Rules Version: 1.0.9
-      Last updated: 2024-05-22 18:00:00
-      Fix: Allowing public read for peerBuddies directory to avoid auth race conditions.
+      Security Rules Version: 1.1.1
+      Last updated: 2024-05-24 10:00:00
+      Description: Explicitly allowing public read for peerBuddies to resolve persistent permission errors.
     */
     "peerBuddies": {
       ".read": true,

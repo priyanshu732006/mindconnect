@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -67,7 +66,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <span className="sr-only">Toggle navigation menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left">
+          <SheetContent side="left" aria-describedby={undefined}>
             <VisuallyHidden>
               <SheetTitle>Admin Navigation</SheetTitle>
             </VisuallyHidden>
