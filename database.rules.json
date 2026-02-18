@@ -11,6 +11,22 @@
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid"
       }
+    },
+    "conversations": {
+      "$conversationId": {
+        ".read": "auth != null && (data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
+        ".indexOn": ["studentId", "peerBuddyId"]
+      }
+    },
+    "messages": {
+      "$conversationId": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['sender', 'senderId', 'text', 'timestamp', 'conversationId', 'createdAt'])"
+        }
+      }
     }
   }
 }

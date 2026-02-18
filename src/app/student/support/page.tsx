@@ -17,6 +17,15 @@ import { MessageSquare, Send, Check, Clock, UserPlus } from 'lucide-react';
 import { PeerChatDialog } from '@/components/student/peer-chat-dialog';
 import type { PeerBuddy, ChatMessage } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/context/auth-provider';
+import {
+  createConversationRequest,
+  subscribeToMessages,
+  sendMessage,
+  subscribeToStudentConversations,
+  type FirebaseConversation,
+  type FirebaseMessage,
+} from '@/lib/firebase/peer-messaging';
 
 // Extended placeholder data to include status and ID
 const availableBuddiesData: PeerBuddy[] = [
@@ -32,12 +41,63 @@ type RequestStatus = 'idle' | 'pending' | 'connected';
 
 export default function SupportPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [requestStatus, setRequestStatus] = useState<Record<string, RequestStatus>>({});
   const [isChatOpen, setChatOpen] = useState(false);
   const [selectedBuddy, setSelectedBuddy] = useState<PeerBuddy | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [conversations, setConversations] = useState<(FirebaseConversation & { id: string })[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
 
-  const handleSendRequest = (buddy: PeerBuddy) => {
+  // Subscribe to student's conversations
+  useEffect(() => {
+    if (!user) return;
+
+    const unsubscribe = subscribeToStudentConversations(user.uid, (updatedConversations) => {
+      setConversations(updatedConversations);
+      
+      // Update request status based on conversations
+      const statusMap: Record<string, RequestStatus> = {};
+      updatedConversations.forEach((conv) => {
+        if (conv.status === 'pending') {
+          statusMap[conv.peerBuddyId] = 'pending';
+        } else if (conv.status === 'accepted' || conv.status === 'active') {
+          statusMap[conv.peerBuddyId] = 'connected';
+        }
+      });
+      setRequestStatus(statusMap);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  // Subscribe to messages for active conversation
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    const unsubscribe = subscribeToMessages(activeConversationId, (firebaseMessages) => {
+      const chatMessages: ChatMessage[] = firebaseMessages.map((msg) => ({
+        id: msg.id,
+        sender: msg.senderId === user?.uid ? 'You' : msg.sender,
+        text: msg.text,
+        timestamp: msg.timestamp,
+      }));
+      setMessages(chatMessages);
+    });
+
+    return () => unsubscribe();
+  }, [activeConversationId, user]);
+
+  const handleSendRequest = async (buddy: PeerBuddy) => {
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Authentication Required',
+        description: 'Please log in to send a request.',
+      });
+      return;
+    }
+
     if (buddy.status !== 'Available') {
       toast({
         variant: 'destructive',
@@ -47,49 +107,63 @@ export default function SupportPage() {
       return;
     }
 
-    setRequestStatus(prev => ({ ...prev, [buddy.id]: 'pending' }));
-    toast({
-      title: 'Request Sent!',
-      description: `Your request to connect with ${buddy.name} has been sent.`,
-    });
+    try {
+      setRequestStatus(prev => ({ ...prev, [buddy.id]: 'pending' }));
+      
+      const conversationId = await createConversationRequest(
+        user.uid,
+        user.displayName || 'Anonymous Student',
+        buddy.id,
+        buddy.name
+      );
 
-    // Simulate auto-acceptance for "Buddy 02" for demonstration purposes
-    if (buddy.id === 'buddy_02') {
-      setTimeout(() => {
-        setRequestStatus(prev => ({ ...prev, [buddy.id]: 'connected' }));
-        toast({
-          title: 'Request Accepted!',
-          description: `${buddy.name} has accepted your request. You can now start a chat.`,
-        });
-      }, 3000);
+      toast({
+        title: 'Request Sent!',
+        description: `Your request to connect with ${buddy.name} has been sent.`,
+      });
+    } catch (error) {
+      console.error('Error sending request:', error);
+      setRequestStatus(prev => ({ ...prev, [buddy.id]: 'idle' }));
+      toast({
+        variant: 'destructive',
+        title: 'Request Failed',
+        description: 'Failed to send request. Please try again.',
+      });
     }
   };
 
   const handleOpenChat = (buddy: PeerBuddy) => {
-    setSelectedBuddy(buddy);
-    // In a real app, you would fetch existing messages for this buddy
-    // For now, we'll start with a welcome message
-    setMessages([
-        {
-            id: '1',
-            sender: buddy.name,
-            text: `Hi! I'm ${buddy.name}. Thanks for connecting. How can I help you today?`,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }
-    ]);
-    setChatOpen(true);
+    // Find the conversation for this buddy
+    const conversation = conversations.find(
+      (conv) => conv.peerBuddyId === buddy.id
+    );
+
+    if (conversation) {
+      setSelectedBuddy(buddy);
+      setActiveConversationId(conversation.id);
+      setChatOpen(true);
+    }
   };
   
-  const handleSendMessage = (text: string) => {
-      if(!selectedBuddy) return;
-      const newMessage: ChatMessage = {
-          id: Date.now().toString(),
-          sender: 'You',
-          text,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      }
-      setMessages(prev => [...prev, newMessage]);
-  }
+  const handleSendMessage = async (text: string) => {
+    if (!selectedBuddy || !user || !activeConversationId) return;
+
+    try {
+      await sendMessage(
+        activeConversationId,
+        user.uid,
+        user.displayName || 'Anonymous Student',
+        text
+      );
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Message Failed',
+        description: 'Failed to send message. Please try again.',
+      });
+    }
+  };
 
 
   const connectedBuddies = availableBuddiesData.filter(buddy => requestStatus[buddy.id] === 'connected');
