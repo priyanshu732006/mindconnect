@@ -55,6 +55,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const snapshot = await get(userRoleRef);
           if (snapshot.exists()) {
             const userData = snapshot.val();
+            
+            // Ensure displayName is synced with fullName from database
+            if (userData.fullName && user.displayName !== userData.fullName) {
+              await updateProfile(user, { displayName: userData.fullName });
+              // Reload user to get updated profile
+              await user.reload();
+            }
+            
             setUser(user);
             setRole(userData.role);
             sessionStorage.setItem('userRole', userData.role);
@@ -171,6 +179,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     await signOut(auth);
                     throw new Error(`Login failed. This account is registered as an ${dbCounsellorType?.replace('-', ' ')} counsellor, not an ${loginCounsellorType?.replace('-', ' ')} one.`);
                 }
+            }
+            
+            // Ensure displayName is synced with fullName from database
+            if (userData.fullName && loggedInUser.displayName !== userData.fullName) {
+              await updateProfile(loggedInUser, { displayName: userData.fullName });
             }
             
             // Manually set state and session storage here to ensure it's available immediately for redirection

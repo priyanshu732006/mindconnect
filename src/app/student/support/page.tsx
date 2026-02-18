@@ -110,9 +110,12 @@ export default function SupportPage() {
     try {
       setRequestStatus(prev => ({ ...prev, [buddy.id]: 'pending' }));
       
+      // Get the student name - prefer displayName, fallback to email username, then 'Student'
+      const studentName = user.displayName || user.email?.split('@')[0] || 'Student';
+      
       const conversationId = await createConversationRequest(
         user.uid,
-        user.displayName || 'Anonymous Student',
+        studentName,
         buddy.id,
         buddy.name
       );
@@ -149,10 +152,13 @@ export default function SupportPage() {
     if (!selectedBuddy || !user || !activeConversationId) return;
 
     try {
+      // Get the student name - prefer displayName, fallback to email username, then 'Student'
+      const studentName = user.displayName || user.email?.split('@')[0] || 'Student';
+      
       await sendMessage(
         activeConversationId,
         user.uid,
-        user.displayName || 'Anonymous Student',
+        studentName,
         text
       );
     } catch (error) {
