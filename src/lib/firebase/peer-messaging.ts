@@ -10,8 +10,7 @@ import {
   orderByChild, 
   equalTo,
   update,
-  serverTimestamp,
-  off
+  serverTimestamp
 } from 'firebase/database';
 
 // Type definitions for Firebase conversation and message data
@@ -158,8 +157,8 @@ export function subscribeToMessages(
     callback(messages);
   });
 
-  // Return unsubscribe function
-  return () => off(messagesRef, 'value', unsubscribe);
+  // Return unsubscribe function directly
+  return unsubscribe;
 }
 
 /**
@@ -272,7 +271,7 @@ export function subscribeToStudentConversations(
     callback(conversations);
   });
 
-  return () => off(conversationsRef, 'value', unsubscribe);
+  return unsubscribe;
 }
 
 /**
@@ -309,5 +308,5 @@ export function subscribeToPeerBuddyConversations(
     callback(conversations);
   });
 
-  return () => off(conversationsRef, 'value', unsubscribe);
+  return unsubscribe;
 }
