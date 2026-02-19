@@ -139,10 +139,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (error) {
         console.error("Error fetching student data:", error);
+        
+        // Provide more specific error messages
+        let errorMessage = 'Could not load your saved data. Please try refreshing.';
+        if (error instanceof Error) {
+          if (error.message.includes('permission') || error.message.includes('PERMISSION_DENIED')) {
+            errorMessage = 'Permission denied. Please ensure Firebase rules are deployed correctly.';
+          } else if (error.message.includes('network')) {
+            errorMessage = 'Network error. Please check your internet connection.';
+          }
+        }
+        
         toast({
           variant: 'destructive',
           title: 'Data Load Error',
-          description: 'Could not load your saved data. Please try refreshing.'
+          description: errorMessage
         });
       } finally {
         isDataLoaded.current = true;

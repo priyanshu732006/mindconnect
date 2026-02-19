@@ -1,15 +1,38 @@
 {
   "rules": {
     "userRoles": {
+      ".read": "root.child('userRoles').child(auth.uid).child('role').val() === 'admin'",
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
       }
     },
     "studentData": {
       "$uid": {
-        ".read": "auth != null && auth.uid == $uid",
-        ".write": "auth != null && auth.uid == $uid"
+        ".read": "$uid === auth.uid || root.child('userRoles').child(auth.uid).child('role').val() === 'admin'",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "peerBuddies": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "conversations": {
+      "$conversationId": {
+        ".read": "auth != null && (data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
+        ".indexOn": ["studentId", "peerBuddyId"]
+      }
+    },
+    "messages": {
+      "$conversationId": {
+        ".read": "auth != null && (root.child('conversations').child($conversationId).child('studentId').val() == auth.uid || root.child('conversations').child($conversationId).child('peerBuddyId').val() == auth.uid)",
+        ".write": "auth != null && (root.child('conversations').child($conversationId).child('studentId').val() == auth.uid || root.child('conversations').child($conversationId).child('peerBuddyId').val() == auth.uid)",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['sender', 'senderId', 'text', 'timestamp', 'conversationId', 'createdAt'])"
+        }
       }
     }
   }
