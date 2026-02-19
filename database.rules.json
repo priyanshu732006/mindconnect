@@ -2,8 +2,8 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.5.0
-      Last updated: 2024-05-25 10:00:00
+      Security Rules Version: 1.6.0
+      Last updated: 2024-05-25 11:00:00
       Fix: Explicitly allow authenticated read at parent level for peerBuddies, conversations, and chats to enable listing.
     */
     "userRoles": {

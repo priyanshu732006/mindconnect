@@ -44,7 +44,10 @@ export default function SupportPage() {
     let dbUnsubscribe: (() => void) | undefined;
 
     const authUnsubscribe = onAuthStateChanged(auth, (authUser) => {
-      if (dbUnsubscribe) dbUnsubscribe();
+      if (dbUnsubscribe) {
+        dbUnsubscribe();
+        dbUnsubscribe = undefined;
+      }
 
       if (authUser) {
         const peerBuddiesRef = ref(database, 'peerBuddies');
@@ -78,7 +81,7 @@ export default function SupportPage() {
           setIsLoading(false);
         });
 
-        dbUnsubscribe = unsubscribe;
+        dbUnsubscribe = () => off(peerBuddiesRef, 'value', unsubscribe);
       } else {
         setAvailableBuddies([]);
         setIsLoading(false);
@@ -88,7 +91,10 @@ export default function SupportPage() {
     return () => {
       authUnsubscribe();
       if (dbUnsubscribe) dbUnsubscribe();
-      if (chatRef.current) off(chatRef.current);
+      if (chatRef.current) {
+        off(chatRef.current);
+        chatRef.current = null;
+      }
     };
   }, []);
 
