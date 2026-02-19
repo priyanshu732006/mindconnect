@@ -26,16 +26,10 @@ import {
   type FirebaseConversation,
   type FirebaseMessage,
 } from '@/lib/firebase/peer-messaging';
-
-// Extended placeholder data to include status and ID
-const availableBuddiesData: PeerBuddy[] = [
-  { id: 'buddy_01', name: 'Buddy 01', specializations: ['Exam Stress', 'Anxiety'], status: 'Available' },
-  { id: 'buddy_02', name: 'Buddy 02', specializations: ['Homesickness', 'Relationships'], status: 'Available' },
-  { id: 'buddy_03', name: 'Buddy 03', specializations: ['Social Anxiety', 'Motivation'], status: 'Busy' },
-  { id: 'buddy_04', name: 'Buddy 04', specializations: ['Depression', 'Coping Skills'], status: 'Available' },
-  { id: 'buddy_05', name: 'Buddy 05', specializations: ['Time Management', 'Study Pressure'], status: 'Busy' },
-  { id: 'buddy_06', name: 'Buddy 06', specializations: ['Career Doubts', 'General Chat'], status: 'Available' },
-];
+import {
+  subscribeToPeerBuddies,
+  type PeerBuddy as DiscoveryPeerBuddy,
+} from '@/lib/firebase/peer-discovery';
 
 type RequestStatus = 'idle' | 'pending' | 'connected';
 
@@ -48,6 +42,26 @@ export default function SupportPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [conversations, setConversations] = useState<(FirebaseConversation & { id: string })[]>([]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [availableBuddies, setAvailableBuddies] = useState<PeerBuddy[]>([]);
+  const [isLoadingBuddies, setIsLoadingBuddies] = useState(true);
+
+  // Subscribe to available peer buddies
+  useEffect(() => {
+    setIsLoadingBuddies(true);
+    const unsubscribe = subscribeToPeerBuddies((discoveryBuddies) => {
+      // Convert discovery peer buddies to UI PeerBuddy type
+      const uiBuddies: PeerBuddy[] = discoveryBuddies.map((buddy) => ({
+        id: buddy.uid,
+        name: buddy.fullName,
+        specializations: buddy.specializations || ['General Support'],
+        status: buddy.status || 'Available',
+      }));
+      setAvailableBuddies(uiBuddies);
+      setIsLoadingBuddies(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Subscribe to student's conversations
   useEffect(() => {
@@ -172,8 +186,8 @@ export default function SupportPage() {
   };
 
 
-  const connectedBuddies = availableBuddiesData.filter(buddy => requestStatus[buddy.id] === 'connected');
-  const availableAndPendingBuddies = availableBuddiesData.filter(buddy => requestStatus[buddy.id] !== 'connected');
+  const connectedBuddies = availableBuddies.filter(buddy => requestStatus[buddy.id] === 'connected');
+  const availableAndPendingBuddies = availableBuddies.filter(buddy => requestStatus[buddy.id] !== 'connected');
 
   return (
     <div className="space-y-8">
@@ -187,8 +201,22 @@ export default function SupportPage() {
           />
       )}
 
+      {/* Loading State */}
+      {isLoadingBuddies && (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Loading peer buddies...</p>
+        </div>
+      )}
+
+      {/* No Buddies Available */}
+      {!isLoadingBuddies && availableBuddies.length === 0 && (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">No peer buddies available at the moment. Please check back later.</p>
+        </div>
+      )}
+
       {/* Connected Buddies Section */}
-      {connectedBuddies.length > 0 && (
+      {!isLoadingBuddies && connectedBuddies.length > 0 && (
         <div>
           <h2 className="text-2xl font-bold tracking-tight font-headline mb-4">Your Connected Buddies</h2>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -220,6 +248,7 @@ export default function SupportPage() {
       )}
       
       {/* Available Buddies Section */}
+      {!isLoadingBuddies && availableAndPendingBuddies.length > 0 && (
       <div>
          <header>
             <h1 className="text-3xl font-bold tracking-tight font-headline">
@@ -270,6 +299,7 @@ export default function SupportPage() {
             })}
         </div>
       </div>
+      )}
 
     </div>
   );
