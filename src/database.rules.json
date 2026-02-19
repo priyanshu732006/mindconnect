@@ -2,16 +2,10 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.4.0
-      Last updated: 2024-05-24 21:00:00
-      Fix: Explicitly allow authenticated read at root of peerBuddies and chats to enable listing.
+      Security Rules Version: 1.5.0
+      Last updated: 2024-05-25 10:00:00
+      Fix: Explicitly allow authenticated read at parent level for peerBuddies, conversations, and chats to enable listing.
     */
-    "peerBuddies": {
-      ".read": "auth != null",
-      "$uid": {
-        ".write": "auth != null && auth.uid == $uid"
-      }
-    },
     "userRoles": {
       ".read": "auth != null",
       ".indexOn": "role",
@@ -23,6 +17,29 @@
       "$uid": {
         ".read": "auth != null && auth.uid == $uid",
         ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "peerBuddies": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid == $uid"
+      }
+    },
+    "conversations": {
+      ".read": "auth != null",
+      "$conversationId": {
+        ".read": "auth != null && (data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
+        ".write": "auth != null && (!data.exists() || data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
+        ".indexOn": ["studentId", "peerBuddyId"]
+      }
+    },
+    "messages": {
+      "$conversationId": {
+        ".read": "auth != null && (root.child('conversations').child($conversationId).child('studentId').val() == auth.uid || root.child('conversations').child($conversationId).child('peerBuddyId').val() == auth.uid)",
+        ".write": "auth != null && (root.child('conversations').child($conversationId).child('studentId').val() == auth.uid || root.child('conversations').child($conversationId).child('peerBuddyId').val() == auth.uid)",
+        "$messageId": {
+          ".validate": "newData.hasChildren(['sender', 'senderId', 'text', 'timestamp', 'conversationId', 'createdAt'])"
+        }
       }
     },
     "chats": {
