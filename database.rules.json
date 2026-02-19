@@ -2,8 +2,8 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.9.0
-      Last updated: 2024-05-25 15:00:00
+      Security Rules Version: 1.10.0
+      Last updated: 2024-05-25 16:00:00
       Fix: Explicitly allow authenticated read at parent level for peerBuddies, conversations, and chats to enable directory listing and real-time sync.
     */
     "userRoles": {
