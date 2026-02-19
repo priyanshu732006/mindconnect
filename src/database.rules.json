@@ -2,8 +2,8 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.3.0
-      Last updated: 2024-05-24 20:30:00
+      Security Rules Version: 1.4.0
+      Last updated: 2024-05-24 21:00:00
       Fix: Explicitly allow authenticated read at root of peerBuddies and chats to enable listing.
     */
     "peerBuddies": {
