@@ -23,10 +23,12 @@
       }
     },
     "chats": {
-      ".read": "auth != null",
       "$chatId": {
         ".read": "auth != null && $chatId.contains(auth.uid)",
-        ".write": "auth != null && $chatId.contains(auth.uid)"
+        ".write": "auth != null && $chatId.contains(auth.uid)",
+        "messages": {
+          ".indexOn": "timestamp"
+        }
       }
     }
   }

@@ -119,7 +119,7 @@ export function TrustedContacts() {
                         </AlertDialogTrigger>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                    <AlertDialogContent>
+                    <AlertDialogContent aria-describedby={undefined}>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                         <AlertDialogDescription>
