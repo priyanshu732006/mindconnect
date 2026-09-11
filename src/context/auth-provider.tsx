@@ -76,23 +76,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             }
 
           } else {
-             // User exists in Auth but not in DB (edge case)
-            console.warn("User exists in Auth but not in DB");
             setUser(user);
             setRole(null);
-            sessionStorage.removeItem('userRole');
           }
         } catch (error) {
           console.error("Failed to fetch user role:", error);
-          setUser(user); // Keep user logged in but without role
+          setUser(user);
           setRole(null);
-          setCounsellorType(null);
-          setStudentDetails(null);
         } finally {
           setLoading(false);
         }
       } else {
-        // No user is signed in
         setUser(null);
         setRole(null);
         setCounsellorType(null);
@@ -108,114 +102,117 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = async (email: string, password: string, fullName: string, role: UserRole, details?: { counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any }) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    if (user) {
-      await updateProfile(user, {
-        displayName: fullName,
-      });
-
-      const db = getDatabase();
-      const userRoleRef = ref(db, `userRoles/${user.uid}`);
-      const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any } = { 
-        role, 
-        fullName
-      };
-      
-      if (role === UserRole.counsellor && details?.counsellorType) {
-        userData.counsellorType = details.counsellorType;
-      }
-
-      if(role === UserRole.student && details?.studentDetails) {
-        userData.studentDetails = details.studentDetails;
-        // Create initial empty record for the student in studentData path
-        const studentDataRef = ref(db, `studentData/${user.uid}`);
-        await set(studentDataRef, {
-            messages: [],
-            assessmentResults: {"phq-9": null, "gad-7": null, "ghq-12": null},
-            dailyCheckinData: null,
-            coins: 15,
-            streak: 0,
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      if (user) {
+        await updateProfile(user, {
+          displayName: fullName,
         });
-      }
-      
-      if(role === UserRole['peer-buddy'] && details?.peerBuddyDetails) {
-        userData.peerBuddyDetails = details.peerBuddyDetails;
 
-        // Add buddy entry to peerBuddies path for easy public listing
-        const buddyRef = ref(db, `peerBuddies/${user.uid}`);
-        await set(buddyRef, {
-          name: fullName,
-          email,
-          status: 'Available', // default when registered
-          specializations: details.peerBuddyDetails.specializations || ['General Chat'],
-        });
+        const db = getDatabase();
+        const userRoleRef = ref(db, `userRoles/${user.uid}`);
+        const userData: { role: UserRole, fullName: string, counsellorType?: CounsellorType, studentDetails?: any, peerBuddyDetails?: any } = { 
+          role, 
+          fullName
+        };
+        
+        if (role === UserRole.counsellor && details?.counsellorType) {
+          userData.counsellorType = details.counsellorType;
+        }
+
+        if(role === UserRole.student && details?.studentDetails) {
+          userData.studentDetails = details.studentDetails;
+          const studentDataRef = ref(db, `studentData/${user.uid}`);
+          await set(studentDataRef, {
+              messages: [],
+              assessmentResults: {"phq-9": null, "gad-7": null, "ghq-12": null},
+              dailyCheckinData: null,
+              coins: 15,
+              streak: 0,
+          });
+        }
+        
+        if(role === UserRole['peer-buddy'] && details?.peerBuddyDetails) {
+          userData.peerBuddyDetails = details.peerBuddyDetails;
+          const buddyRef = ref(db, `peerBuddies/${user.uid}`);
+          await set(buddyRef, {
+            name: fullName,
+            email,
+            status: 'Available',
+            specializations: details.peerBuddyDetails.specializations || ['General Chat'],
+          });
+        }
+        
+        await set(userRoleRef, userData);
       }
-      
-      await set(userRoleRef, userData);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      throw error;
     }
   };
 
   const login = async (email: string, password: string, loginRole: UserRole, loginCounsellorType?: CounsellorType) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const loggedInUser = userCredential.user;
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const loggedInUser = userCredential.user;
 
-    if (loggedInUser) {
-        const db = getDatabase();
-        const userRoleRef = ref(db, `userRoles/${loggedInUser.uid}`);
-        const snapshot = await get(userRoleRef);
+      if (loggedInUser) {
+          const db = getDatabase();
+          const userRoleRef = ref(db, `userRoles/${loggedInUser.uid}`);
+          const snapshot = await get(userRoleRef);
 
-        if (snapshot.exists()) {
-            const userData = snapshot.val();
-            const dbRole = userData.role as UserRole;
-            const dbCounsellorType = (userData.counsellorType as CounsellorType) || null;
-            
-            if(dbRole !== loginRole) {
-                await signOut(auth);
-                throw new Error(`Login failed. This account is registered as a ${dbRole.replace('-', ' ')}, not a ${loginRole.replace('-', ' ')}.`);
-            }
+          if (snapshot.exists()) {
+              const userData = snapshot.val();
+              const dbRole = userData.role as UserRole;
+              const dbCounsellorType = (userData.counsellorType as CounsellorType) || null;
+              
+              if(dbRole !== loginRole) {
+                  await signOut(auth);
+                  throw new Error(`Login failed. This account is registered as a ${dbRole}, not a ${loginRole}.`);
+              }
 
-            if (loginRole === UserRole.counsellor) {
-                if (dbCounsellorType !== loginCounsellorType) {
-                    await signOut(auth);
-                    throw new Error(`Login failed. This account is registered as an ${dbCounsellorType?.replace('-', ' ')} counsellor, not an ${loginCounsellorType?.replace('-', ' ')} one.`);
-                }
-            }
-            
-            // Manually set state and session storage here to ensure it's available immediately for redirection
-            setRole(dbRole);
-            sessionStorage.setItem('userRole', dbRole);
-            
-            setCounsellorType(dbCounsellorType);
-            if(dbCounsellorType) {
-              sessionStorage.setItem('counsellorType', dbCounsellorType);
-            } else {
-              sessionStorage.removeItem('counsellorType');
-            }
+              if (loginRole === UserRole.counsellor) {
+                  if (dbCounsellorType !== loginCounsellorType) {
+                      await signOut(auth);
+                      throw new Error(`Login failed. This account is registered as an ${dbCounsellorType} counsellor, not an ${loginCounsellorType} one.`);
+                  }
+              }
+              
+              setRole(dbRole);
+              sessionStorage.setItem('userRole', dbRole);
+              
+              setCounsellorType(dbCounsellorType);
+              if(dbCounsellorType) {
+                sessionStorage.setItem('counsellorType', dbCounsellorType);
+              }
 
-            if (userData.studentDetails) {
-                setStudentDetails(userData.studentDetails);
-                sessionStorage.setItem('studentDetails', JSON.stringify(userData.studentDetails));
-            } else {
-                setStudentDetails(null);
-                sessionStorage.removeItem('studentDetails');
-            }
+              if (userData.studentDetails) {
+                  setStudentDetails(userData.studentDetails);
+                  sessionStorage.setItem('studentDetails', JSON.stringify(userData.studentDetails));
+              }
 
-
-            // onAuthStateChanged will also fire, but this makes the data available instantly.
-            return { role: dbRole, counsellorType: dbCounsellorType };
-        } else {
-            await signOut(auth);
-            throw new Error("Login failed. User role not found in the database. Please register first.");
-        }
+              return { role: dbRole, counsellorType: dbCounsellorType };
+          } else {
+              await signOut(auth);
+              throw new Error("Login failed. User profile not found in database. Please contact support.");
+          }
+      }
+      throw new Error("Login failed. Please check your credentials.");
+    } catch (error: any) {
+      console.error("Firebase Login Error:", error);
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+          throw new Error("Invalid email or password. Please try again.");
+      } else if (error.code === 'auth/operation-not-allowed') {
+          throw new Error("Email/Password sign-in is not enabled in the Firebase Console.");
+      } else {
+          throw new Error(error.message || "An unexpected error occurred during login.");
+      }
     }
-    // This part should not be reached in a successful login
-    throw new Error("Login failed. Please check your credentials.");
   }
 
   const logout = async () => {
     await signOut(auth);
-    // onAuthStateChanged will clear user/role state and sessionStorage will be cleared in that handler.
   }
 
   const value = {
