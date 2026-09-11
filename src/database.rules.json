@@ -22,26 +22,6 @@
         ".write": "auth != null && auth.uid == $uid"
       }
     },
-    "conversations": {
-      ".read": "auth != null",
-      "$conversationId": {
-        ".read": "auth != null && (data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
-        ".write": "auth != null && (!data.exists() || data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
-        ".indexOn": [
-          "studentId",
-          "peerBuddyId"
-        ]
-      }
-    },
-    "messages": {
-      "$conversationId": {
-        ".read": "auth != null && (root.child('conversations').child($conversationId).child('studentId').val() == auth.uid || root.child('conversations').child($conversationId).child('peerBuddyId').val() == auth.uid)",
-        ".write": "auth != null && (root.child('conversations').child($conversationId).child('studentId').val() == auth.uid || root.child('conversations').child($conversationId).child('peerBuddyId').val() == auth.uid)",
-        "$messageId": {
-          ".validate": "newData.hasChildren(['sender', 'senderId', 'text', 'timestamp', 'conversationId', 'createdAt'])"
-        }
-      }
-    },
     "chats": {
       ".read": "auth != null",
       "$chatId": {
