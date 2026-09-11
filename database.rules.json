@@ -2,14 +2,15 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.10.0
-      Last updated: 2024-05-25 16:00:00
-      Fix: Explicitly allow authenticated read at parent level for peerBuddies, conversations, and chats to enable directory listing and real-time sync.
+      Security Rules Version: 1.10.3
+      Last updated: 2024-05-25 21:00:00
+      Fix: Explicitly allow authenticated read at parent level for peerBuddies, userRoles (discovery), and chats to resolve permission errors.
     */
     "userRoles": {
       ".read": "auth != null",
       ".indexOn": "role",
       "$uid": {
+        ".read": "auth != null",
         ".write": "auth != null && auth.uid == $uid"
       }
     },
@@ -22,6 +23,7 @@
     "peerBuddies": {
       ".read": "auth != null",
       "$uid": {
+        ".read": "auth != null",
         ".write": "auth != null && auth.uid == $uid"
       }
     },
@@ -45,6 +47,7 @@
     "chats": {
       ".read": "auth != null",
       "$chatId": {
+        ".read": "auth != null && $chatId.contains(auth.uid)",
         ".write": "auth != null && $chatId.contains(auth.uid)"
       }
     }

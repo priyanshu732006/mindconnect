@@ -8,11 +8,10 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Bot, Send, User } from 'lucide-react';
+import { AlertTriangle, Bot, Send, User, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { analyzeChatRisk } from '@/ai/flows/analyze-chat-risk';
-import { Loader2 } from 'lucide-react';
 import { EscalateDialog } from './escalate-dialog';
 
 type ChatWindowProps = {
@@ -85,11 +84,11 @@ export function ChatWindow({
             <Badge variant={riskBadgeVariant[conversation.risk] || 'secondary'}>{conversation.risk}</Badge>
             <div className="ml-auto flex items-center gap-2">
             <Button variant="outline" size="sm" onClick={handleAnalyzeRisk} disabled={isAnalyzing}>
-                {isAnalyzing ? <Loader2 className="mr-2 animate-spin"/> : <Bot />}
+                {isAnalyzing ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <Bot className="mr-2 h-4 w-4" />}
                 Analyze Risk
             </Button>
             <Button variant="destructive" size="sm" onClick={() => setEscalateOpen(true)}>
-                <AlertTriangle />
+                <AlertTriangle className="mr-2 h-4 w-4" />
                 Escalate
             </Button>
             </div>
@@ -118,8 +117,8 @@ export function ChatWindow({
                 >
                 {message.sender !== 'me' && (
                     <Avatar className="h-8 w-8">
-                    <AvatarImage src={message.sender.avatar} />
-                    <AvatarFallback>{message.sender.alias.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={(message.sender as any).avatar} />
+                    <AvatarFallback>{(message.sender as any).alias.charAt(0)}</AvatarFallback>
                     </Avatar>
                 )}
                 <div className="max-w-md rounded-lg bg-card px-4 py-2 shadow-sm">
@@ -147,7 +146,7 @@ export function ChatWindow({
                 autoComplete="off"
             />
             <Button type="submit">
-                <Send />
+                <Send className="h-4 w-4" />
             </Button>
             </form>
             <p className="mt-2 text-xs text-muted-foreground">

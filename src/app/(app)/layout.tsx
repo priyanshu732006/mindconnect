@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useMemo } from 'react';
-import { LogOut, Menu, Bell } from 'lucide-react';
+import React from 'react';
+import { Menu, Bell, LogOut } from 'lucide-react';
 
 import Logo from '@/components/logo';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -73,7 +73,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <header className="sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm md:px-6">
-        {/* Left Section */}
         <div className="flex items-center gap-4">
           <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
@@ -101,14 +100,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Logo />
         </div>
 
-        {/* Center Section - Navigation */}
         <div className="hidden flex-1 justify-center md:flex">
           <div className="mx-auto">
             <NavLinks />
           </div>
         </div>
 
-        {/* Right Section - User Menu */}
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
           <Button variant="ghost" size="icon" className="relative">

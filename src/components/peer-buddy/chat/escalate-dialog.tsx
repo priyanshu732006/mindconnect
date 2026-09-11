@@ -104,7 +104,7 @@ export function EscalateDialog({
             onClick={handleSubmit}
             disabled={isSending}
           >
-            {isSending && <Loader2 className="mr-2 animate-spin" />}
+            {isSending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Send Urgent Alert
           </Button>
         </DialogFooter>
