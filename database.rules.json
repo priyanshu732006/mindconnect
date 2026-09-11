@@ -2,9 +2,10 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.10.3
-      Last updated: 2024-05-25 21:00:00
-      Fix: Explicitly allow authenticated read at parent level for peerBuddies, userRoles (discovery), and chats to resolve permission errors.
+      Security Rules Version: 1.10.5
+      Last updated: 2024-05-25 22:30:00
+      Fix: Explicitly allow authenticated read at parent level for peerBuddies, userRoles (discovery), and chats.
+      This allows listing available buddies and finding active conversations while maintaining node-level security.
     */
     "userRoles": {
       ".read": "auth != null",
