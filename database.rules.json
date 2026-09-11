@@ -1,10 +1,9 @@
 {
   "rules": {
     /* 
-      Security Rules Version: 1.10.7
-      Last updated: 2024-05-26 10:00:00
-      Fix: Definitive fix for permission_denied at parent level. 
-      Allows authenticated users to read the root of /peerBuddies, /userRoles, and /chats.
+      Security Rules Version: 1.10.8
+      Fix: Allows authenticated users to read root of /peerBuddies for discovery.
+      Ensures participant-only access for conversations and messages.
     */
     "userRoles": {
       ".read": "auth != null",
