@@ -18,7 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import { useApp } from '@/context/app-provider';
 import { VisuallyHidden } from '@/components/ui/visually-hidden';
@@ -90,6 +90,7 @@ function PeerBuddyLayoutContent({
             <SheetContent side="left" className="flex flex-col" aria-describedby={undefined}>
               <VisuallyHidden>
                 <SheetTitle>Main Navigation</SheetTitle>
+                <SheetDescription>Peer buddy navigation menu.</SheetDescription>
               </VisuallyHidden>
               <Logo />
               <NavLinks

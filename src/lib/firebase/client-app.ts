@@ -4,13 +4,13 @@ import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
-  "projectId": "studio-6588365639-fa5e2",
-  "appId": "1:721521930140:web:3000c0d1e8eb1799956259",
-  "storageBucket": "studio-6588365639-fa5e2.firebasestorage.app",
-  "apiKey": "AIzaSyDjTXaJcQU7uak1yh818P-biRjc6-0SDl4",
-  "authDomain": "studio-6588365639-fa5e2.firebaseapp.com",
-  "messagingSenderId": "721521930140",
-  "databaseURL": "https://studio-6588365639-fa5e2-default-rtdb.asia-southeast1.firebasedatabase.app"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
