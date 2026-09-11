@@ -21,7 +21,7 @@ import { UserRole } from '@/lib/types';
 import { adminNavItems } from '@/lib/admin-nav';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { VisuallyHidden } from '@/components/ui/visually-hidden';
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
@@ -70,6 +70,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <SheetContent side="left" aria-describedby={undefined}>
             <VisuallyHidden>
               <SheetTitle>Admin Navigation</SheetTitle>
+              <SheetDescription>Navigation links for admin management.</SheetDescription>
             </VisuallyHidden>
             <nav className="grid gap-6 text-lg font-medium">
               <Link
