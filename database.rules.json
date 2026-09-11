@@ -1,4 +1,3 @@
-
 {
   "rules": {
     "userRoles": {
@@ -27,7 +26,10 @@
       "$conversationId": {
         ".read": "auth != null && (data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
         ".write": "auth != null && (!data.exists() || data.child('studentId').val() == auth.uid || data.child('peerBuddyId').val() == auth.uid)",
-        ".indexOn": ["studentId", "peerBuddyId"]
+        ".indexOn": [
+          "studentId",
+          "peerBuddyId"
+        ]
       }
     },
     "messages": {
