@@ -32,7 +32,7 @@ export function ChatWindow({
 }: ChatWindowProps) {
   const [input, setInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisResult, setAnalysisResult] = useState<RiskAnalysisResult | null>(null);
+  const [analysisResult, setAnalysisResult] = setAnalysisResult = useState<RiskAnalysisResult | null>(null);
   const [isEscalateOpen, setEscalateOpen] = useState(false);
   const { toast } = useToast();
 
