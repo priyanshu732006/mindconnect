@@ -1,9 +1,10 @@
+
 {
   "rules": {
     /* 
-      Security Rules Version: 1.10.6
-      Last updated: 2024-05-25 23:00:00
-      Fix: Explicitly allow authenticated read at parent level for peerBuddies, userRoles, and chats.
+      Security Rules Version: 1.11.0
+      Fix: Allows authenticated users to read parent directories for discovery features.
+      Ensures participant-only access for private conversations and messages.
     */
     "userRoles": {
       ".read": "auth != null",
