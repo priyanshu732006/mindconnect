@@ -88,6 +88,10 @@ export default function LoginPage() {
         let description = t.loginErrorUnexpected;
         if (error instanceof FirebaseError) {
             switch(error.code) {
+                case 'auth/api-key-not-valid':
+                case 'auth/invalid-api-key':
+                    description = "API Key configuration is invalid. Please check your environment variables.";
+                    break;
                 case 'auth/user-not-found':
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':

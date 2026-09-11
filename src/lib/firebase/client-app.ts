@@ -13,6 +13,15 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
+// Log a warning in development if environment variables are missing
+if (process.env.NODE_ENV === 'development') {
+    Object.entries(firebaseConfig).forEach(([key, value]) => {
+        if (!value) {
+            console.warn(`Firebase config warning: ${key} is missing from environment variables.`);
+        }
+    });
+}
+
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
