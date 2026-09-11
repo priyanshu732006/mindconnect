@@ -1,9 +1,10 @@
+
 {
   "rules": {
     /* 
-      Security Rules Version: 1.10.9
-      Fix: Allows authenticated users to read root of /peerBuddies for discovery.
-      Ensures participant-only access for conversations and messages.
+      Security Rules Version: 1.11.0
+      Fix: Allows authenticated users to read parent directories for discovery features.
+      Ensures participant-only access for private conversations and messages.
     */
     "userRoles": {
       ".read": "auth != null",
