@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTransition, useEffect, useState } from "react";
-import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe, Home, ShieldCheck } from "lucide-react";
+import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-provider";
 import { useRouter } from "next/navigation";
@@ -18,7 +19,6 @@ import { FirebaseError } from "firebase/app";
 import { UserRole, CounsellorType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/context/app-provider";
-import { Separator } from "@/components/ui/separator";
 import { useLocale } from "@/context/locale-provider";
 
 const loginSchema = z.object({
@@ -63,40 +63,6 @@ export default function LoginPage() {
     setCounsellorTypeSelection(null);
   }
 
-  // --- BYPASS LOGIN HANDLER ---
-  const handleBypassLogin = async (role: UserRole, type?: CounsellorType) => {
-    startTransition(async () => {
-        try {
-            // Use mock credentials for bypass
-            const email = `${role}${type ? `-${type}` : ''}@demo.local`;
-            const password = 'password123';
-            
-            // In a real app, this would use a specific dev token or bypass logic
-            // For this prototype, we'll try to login with these, but if it fails,
-            // we will simulate the session state if in dev/demo mode.
-            try {
-                const result = await login(email, password, role, type);
-                setNavItemsByRole(result.role, result.counsellorType);
-                router.push(`/${role}${result.counsellorType === 'external' ? '/external' : ''}/dashboard`);
-            } catch (e) {
-                // If account doesn't exist, we'll just redirect for prototype purposes
-                console.warn("Bypass account not found, performing client-side redirect for prototype.");
-                sessionStorage.setItem('userRole', role);
-                if(type) sessionStorage.setItem('counsellorType', type);
-                setNavItemsByRole(role, type || null);
-                router.push(`/${role}${type === 'external' ? '/external' : ''}/dashboard`);
-            }
-
-            toast({
-                title: "Bypass Login Active",
-                description: `Accessed as ${role} ${type || ''}`,
-            });
-        } catch (error) {
-            console.error("Bypass failed", error);
-        }
-    });
-  }
-
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
     startTransition(async () => {
       try {
@@ -129,9 +95,6 @@ export default function LoginPage() {
                 case 'auth/wrong-password':
                 case 'auth/invalid-credential':
                     description = t.loginErrorInvalid;
-                    break;
-                case 'auth/custom-error':
-                    description = (error as any).customData?._tokenResponse?.error?.message || error.message;
                     break;
                 default:
                     description = `${t.loginError}: ${error.message}`
@@ -174,7 +137,6 @@ export default function LoginPage() {
   }
 
   const showCounsellorTypeSelection = selectedRole === UserRole.counsellor && !counsellorTypeSelection;
-  const showLoginForm = selectedRole && (!showCounsellorTypeSelection);
   
   if (loading || (user && !isPending && authRole)) {
     return (
@@ -222,28 +184,6 @@ export default function LoginPage() {
                             </Button>
                         )
                     })}
-                </CardContent>
-                
-                <Separator className="px-6" />
-                
-                <CardContent className="space-y-4">
-                    <p className="text-sm font-semibold flex items-center gap-2 text-primary">
-                        <ShieldCheck className="w-4 h-4" /> Quick Access (Demo Bypass)
-                    </p>
-                    <div className="grid grid-cols-2 gap-2">
-                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole.student)}>
-                            Bypass Student
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole.admin)}>
-                            Bypass Admin
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole.counsellor, CounsellorType['on-campus'])}>
-                            Bypass Counselor
-                        </Button>
-                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole['peer-buddy'])}>
-                            Bypass Peer Buddy
-                        </Button>
-                    </div>
                 </CardContent>
             </div>
         ) : showCounsellorTypeSelection ? (
