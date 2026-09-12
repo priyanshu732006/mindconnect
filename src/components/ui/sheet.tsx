@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -125,7 +126,8 @@ const SheetDescription = React.forwardRef<
     {...props}
   />
 ))
-SheetDescription.displayName = "SheetDescription"
+SheetDescription.displayName =
+  SheetPrimitive.Description.displayName
 
 export {
   Sheet,
