@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useTransition, useEffect, useState } from "react";
-import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe, Home } from "lucide-react";
+import { Loader2, ArrowLeft, User, Briefcase, Users, UserCog, Building, Globe, Home, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/context/auth-provider";
 import { useRouter } from "next/navigation";
@@ -62,6 +61,40 @@ export default function LoginPage() {
   const handleBackToRoleSelection = () => {
     form.reset();
     setCounsellorTypeSelection(null);
+  }
+
+  // --- BYPASS LOGIN HANDLER ---
+  const handleBypassLogin = async (role: UserRole, type?: CounsellorType) => {
+    startTransition(async () => {
+        try {
+            // Use mock credentials for bypass
+            const email = `${role}${type ? `-${type}` : ''}@demo.local`;
+            const password = 'password123';
+            
+            // In a real app, this would use a specific dev token or bypass logic
+            // For this prototype, we'll try to login with these, but if it fails,
+            // we will simulate the session state if in dev/demo mode.
+            try {
+                const result = await login(email, password, role, type);
+                setNavItemsByRole(result.role, result.counsellorType);
+                router.push(`/${role}${result.counsellorType === 'external' ? '/external' : ''}/dashboard`);
+            } catch (e) {
+                // If account doesn't exist, we'll just redirect for prototype purposes
+                console.warn("Bypass account not found, performing client-side redirect for prototype.");
+                sessionStorage.setItem('userRole', role);
+                if(type) sessionStorage.setItem('counsellorType', type);
+                setNavItemsByRole(role, type || null);
+                router.push(`/${role}${type === 'external' ? '/external' : ''}/dashboard`);
+            }
+
+            toast({
+                title: "Bypass Login Active",
+                description: `Accessed as ${role} ${type || ''}`,
+            });
+        } catch (error) {
+            console.error("Bypass failed", error);
+        }
+    });
   }
 
   const onSubmit = (values: z.infer<typeof loginSchema>) => {
@@ -152,18 +185,18 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center p-4 bg-muted/30">
+      <Card className="w-full max-w-sm shadow-xl">
         <CardHeader className="text-center">
           <Logo className="justify-center mb-2" />
           <CardTitle>{t.loginToYourAccount}</CardTitle>
            {!selectedRole ? (
                 <CardDescription>
-                    {t.selectRoleToContinue}
+                    Select your role to continue
                 </CardDescription>
            ) : showCounsellorTypeSelection ? (
                 <CardDescription>
-                    {t.selectCounselorType}
+                    Choose counselor type
                 </CardDescription>
            ) : (
                 <CardDescription>
@@ -173,29 +206,53 @@ export default function LoginPage() {
         </CardHeader>
 
         {!selectedRole ? (
-            <CardContent className="grid grid-cols-2 gap-4">
-                {Object.values(UserRole).map(role => {
-                    const RoleIcon = roleConfig[role].icon;
-                    return (
-                        <Button 
-                            key={role}
-                            variant="outline" 
-                            className="flex flex-col h-24"
-                            onClick={() => handleRoleSelect(role)}
-                        >
-                            <RoleIcon className="w-8 h-8 mb-2" />
-                            <span className="capitalize">{roleConfig[role].label}</span>
+            <div className="space-y-6">
+                <CardContent className="grid grid-cols-2 gap-4">
+                    {Object.values(UserRole).map(role => {
+                        const RoleIcon = roleConfig[role].icon;
+                        return (
+                            <Button 
+                                key={role}
+                                variant="outline" 
+                                className="flex flex-col h-24 hover:border-primary hover:bg-primary/5 transition-all"
+                                onClick={() => handleRoleSelect(role)}
+                            >
+                                <RoleIcon className="w-8 h-8 mb-2" />
+                                <span className="capitalize">{roleConfig[role].label}</span>
+                            </Button>
+                        )
+                    })}
+                </CardContent>
+                
+                <Separator className="px-6" />
+                
+                <CardContent className="space-y-4">
+                    <p className="text-sm font-semibold flex items-center gap-2 text-primary">
+                        <ShieldCheck className="w-4 h-4" /> Quick Access (Demo Bypass)
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole.student)}>
+                            Bypass Student
                         </Button>
-                    )
-                })}
-            </CardContent>
+                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole.admin)}>
+                            Bypass Admin
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole.counsellor, CounsellorType['on-campus'])}>
+                            Bypass Counselor
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleBypassLogin(UserRole['peer-buddy'])}>
+                            Bypass Peer Buddy
+                        </Button>
+                    </div>
+                </CardContent>
+            </div>
         ) : showCounsellorTypeSelection ? (
              <CardContent className="grid grid-cols-2 gap-4">
-                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect(CounsellorType['on-campus'])}>
+                 <Button variant="outline" className="flex flex-col h-24 hover:border-primary" onClick={() => handleCounsellorTypeSelect(CounsellorType['on-campus'])}>
                     <Building className="w-8 h-8 mb-2" />
                     <span>{t.oncampus}</span>
                  </Button>
-                 <Button variant="outline" className="flex flex-col h-24" onClick={() => handleCounsellorTypeSelect(CounsellorType.external)}>
+                 <Button variant="outline" className="flex flex-col h-24 hover:border-primary" onClick={() => handleCounsellorTypeSelect(CounsellorType.external)}>
                     <Globe className="w-8 h-8 mb-2" />
                     <span>{t.external}</span>
                 </Button>
